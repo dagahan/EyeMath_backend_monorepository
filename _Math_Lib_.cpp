@@ -244,39 +244,35 @@ Fraction multiply(const Fraction A, const Fraction B) {
 }
 
 
-Fraction powerby(const Fraction base, const Fraction exponent) {
-    Fraction base_ = base;
-    Fraction exponent_ = exponent;
-    base_.toImproper();
-    exponent_.toImproper();
+Fraction powerby(Fraction base, Fraction exponent) {
+    //FIXME: Функция powerby работает только с целыми числами:/
 
-    mpf_class base_f(base_.getNumerator());
-    Fraction base_f_("0", mpf_to_string(base_f), "1");
-    mpf_class exponent_f(exponent_.getNumerator());
+    //1. Перевожу base и exponent в неправильные дроби соответственно (если есть целая часть - она прибавляется к дробному значению полностью).
+    base.toImproper();
+    exponent.toImproper();
 
+    //2. Достаю числитель из экспоненты и перевожу его в mpf_class для дальнейших вычислений.
+    mpf_class exponent_f(exponent.getNumerator());
+
+    //3. Проверяю на тривиальные случаи:
     if (exponent_f == 0) return Fraction("0", "1", "1");
-    if (exponent_f == 1) return Fraction("0", base_.getNumerator(), "1");
+    if (exponent_f == 1) return base;
+    if (exponent_f == -1) return Fraction("0", "1", base.getNumerator());
 
-    Fraction C("0", "1", "1");
+    //4. Обьявляю "технические" переменные для хранения промежуточных результатов.
+    Fraction C = base;
     mpf_class count = module(exponent_f);
 
-    // Заменили линейный for на бинарное возведение в степень:
-    Fraction current = base_f_;
-    while (count > 0) {
-        // если count нечётно
-        if (fmod(count.get_d(), 2.0) != 0.0) {
-            C = multiply(C, current);
-        }
-        current = multiply(current, current);
-        // shift right: count = floor(count / 2)
-        count = floor(count / 2.0);
+    //5. A^B = (A * A) B раз.
+    Fraction current = base;
+    for (mpf_class i = 1; i < count; i++) {
+        C = multiply(C, base);
     }
 
+    //6. Проверяю на отрицательную степень, если да, то возвращаю дробь 1/C.
     if (exponent_f > 0) {
         return Fraction("0", mpf_to_string(module(string_to_mpf(C.getNumerator()))), "1");
-    } else {
-        return Fraction("0", "1", mpf_to_string(module(string_to_mpf(C.getNumerator()))));
-    }
+    } return Fraction("0", "1", mpf_to_string(module(string_to_mpf(C.getNumerator()))));
 }
 
 
@@ -474,14 +470,14 @@ int main() {
 
     //cout << "π is: " << π << endl;
 
-    Fraction A("0", "210.205", "4");
-    Fraction B("0", "-1542.512", "4");
+    Fraction A("0", "210.205", "1");
+    Fraction B("0", "-1542.512", "1");
 
     //B.reduce();
 
     //cout << "210.205 is: " << A.getLaTeX() << endl;
     //cout << "210.205 multiply by -1542.512 is: " << multiply(A, B).getLaTeX() << endl;
-    cout << "5 powered by -4 is: " << powerby(single_fraction("-5"), single_fraction("5")).getLaTeX() << endl;
+    cout << "5 powered by -4 is: " << powerby(single_fraction("5"), single_fraction("-4")).getLaTeX() << endl;
 
     //vector<mpf_class> massive = { mpf_class("18.0"), mpf_class("6.0") , mpf_class("12.0")};
     //cout << "GCD of massive: " << gcd_many(massive) << endl;
@@ -489,8 +485,8 @@ int main() {
     //cout << "Quadratic equation: " << quadratic_equation(single_fraction("2"), single_fraction("-1"), single_fraction("-5")).getLaTeX() << endl;
 
 
-    //string latex = R"(sum_{i=1}^N i = \frac{n(n+1)}{2})";
-    //LaTeXtoPNG(latex, "formula.png");
+    string latex = R"(sum_{i=1}^N i = \frac{n(n+1)}{2})";
+    LaTeXtoPNG(latex, "formula.png");
 
 
 
