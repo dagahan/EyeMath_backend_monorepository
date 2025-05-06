@@ -1,8 +1,8 @@
 /******************************************************************************
- *                              _Math_Lib_.cpp                               *
+ *                              _Math_Lib_.h                                 *
  *                                                                            *
  *  Project: EyeMath                                                         *
- *  File: _Math_Lib_.cpp                                                      *
+ *  File: _Math_Lib_.h                                                        *
  *  Author: Usov Nikita                                                      *
  *  Created: April 23, 2025                                                  *
  *  Last Modified: May 05, 2025                                              *
@@ -26,6 +26,8 @@
 #include <sstream>
 #include <fstream>
 #include <typeinfo>
+#include <algorithm>
+#include <regex>
 
 // new libs for DeepSeek http requests and JSON parsing
 #include <C:\Users\dagahan\Desktop\MathLib\libraries\curl\include\curl\curl.h>
@@ -40,10 +42,8 @@ namespace fs = std::filesystem;
 
 
 namespace MathLib {
-    constexpr int __PRECISION__ = 1000;
-    constexpr int __DEFAULT__PREC__ = 4096;
-    
-
+    constexpr int __PRECISION__ = 32;
+    constexpr int __DEFAULT__PREC__ = 48;
     class Fraction; // Forward declaration of the Fraction class.
 
     string mpf_to_string(const mpf_class num, int precision = __PRECISION__) {
@@ -58,6 +58,29 @@ namespace MathLib {
         mpf_class result;
         std::istringstream iss(str);
         iss >> result;
+        return result;
+    }
+
+    // getLaTeX() function using this to erase nulls.
+    string removeTrailingZeros(const string& number) {
+        //1. Проверяю, не пустая ли строка.
+        if (number.empty()) return "0";
+        string result = number;
+
+        //2. Ищу, где находится точка.
+        size_t dotPos = result.find('.');
+        
+        if (dotPos != string::npos) {
+            // Удаление нулей после точки
+            size_t lastNonZero = result.find_last_not_of('0');
+            if (lastNonZero != string::npos && lastNonZero >= dotPos) {
+                result.erase(lastNonZero + 1);
+            }
+            // Удаление точки, если она осталась последней
+            if (result.back() == '.') result.pop_back();
+        }
+        // Обработка "-0" и пустой строки
+        if (result == "-0" || result.empty()) result = "0";
         return result;
     }
 
@@ -80,14 +103,15 @@ namespace MathLib {
         }
     }
 
-    // FIXME: тупо не работает.
-    // Версия для mpf_class — приближённый НОД (осторожно!)
     mpf_class gcd_for_two(mpf_class a, mpf_class b) {
-        a, b = module(a), module(b);
+        a = module(a);
+        b = module(b);
         while (b != 0) {
-            b = fmod(a.get_d(), b.get_d());
+            mpf_class temp = b;
+            b = a - b * floor(a / b);
+            a = temp;
         }
-        return b;
+        return a;
     }
 
     template <typename T>
@@ -101,7 +125,6 @@ namespace MathLib {
         }
         return result;
     }
-
 
 
     class Fraction {
@@ -135,20 +158,32 @@ namespace MathLib {
             }
         
             string getLaTeX() const {
-                if (module(string_to_mpf(denominator)) == 1) {
-                    mpf_class total = string_to_mpf(whole) + string_to_mpf(numerator);
-                    return mpf_to_string(total);
+                //1. Очищаю лишние нули у числителя, знаменателя, целой части.
+                string clean_whole = removeTrailingZeros(whole);
+                string clean_num = removeTrailingZeros(numerator);
+                string clean_denom = removeTrailingZeros(denominator);
+
+                // cout << "DEBUG: clean_whole=" << clean_whole 
+                // << ", clean_num=" << clean_num 
+                // << ", clean_denom=" << clean_denom << endl;
+                
+                //2. Если, дробь - целое число (знаменатель 1), то выводится сумма "дробной" целой части + целая часть.
+                if (clean_denom == "1") {
+                    mpf_class total = string_to_mpf(clean_whole) + string_to_mpf(clean_num);
+                    string total_str = removeTrailingZeros(mpf_to_string(total));
+                    return total_str;
                 }
-            
-                if (whole != "0") {
-                    return whole + "\\frac{" + numerator + "}{" + denominator + "}";
+
+                //3. Собираю LaTeX строчку на return.
+                string latex;
+                if (clean_whole != "0" && clean_whole != "") {
+                    latex = clean_whole + "\\frac{" + clean_num + "}{" + clean_denom + "}";
+                } else {
+                    latex = "\\frac{" + clean_num + "}{" + clean_denom + "}";
                 }
-                return "\\frac{" + numerator + "}{" + denominator + "}";
+                return latex;
             }
 
-
-            // FIXME: Исправить reduce(), тут блять происходит бесконечное вычисление.
-            // Функция сокращения дроби
             void reduce() { 
                 mpf_class num(numerator);
                 mpf_class denom(denominator);
@@ -163,7 +198,6 @@ namespace MathLib {
                 denominator = mpf_to_string(denom);
             }
 
-
             void extractWholePart() {
                 mpf_class num(numerator);
                 mpf_class denom(denominator);
@@ -175,7 +209,6 @@ namespace MathLib {
                 numerator = mpf_to_string(rem);               // Остаток (числитель)
             }
             
-
             void toImproper() {
                 mpf_class w(whole);
                 mpf_class num(numerator);
@@ -186,16 +219,9 @@ namespace MathLib {
                 whole = "0";
             }
         };
-
         Fraction single_fraction(const std::string numerator) {
         return Fraction("0", numerator, "1");
     }
-
-
-
-    
-
-
 
 
     mpf_class multiply_mpf(const mpf_class A, const mpf_class B) {
@@ -234,42 +260,34 @@ namespace MathLib {
         return C;
     }
 
-    Fraction multiply(const Fraction A, const Fraction B) {
+    Fraction multiply(Fraction A, Fraction B) {
         //1. Перевожу A и B в неправильные дроби соответственно (если есть целая часть - она прибавляется к дробному значению полностью).
-        Fraction A_ = A;
-        Fraction B_ = B;
-        A_.toImproper();
-        B_.toImproper();
+        A.toImproper(), B.toImproper();
 
         //2. Решение тривиальных случаев.
-        if (A_.getNumerator() == "1" && A_.getDenominator() == "1") return B_;
-        if (B_.getNumerator() == "1" && B_.getDenominator() == "1") return A_;
-        if (A_.getNumerator() == "-1" && A_.getDenominator() == "1")
-            return Fraction("0", "-" + B_.getNumerator(), B_.getDenominator());
-        if (B_.getNumerator() == "-1" && B_.getDenominator() == "1")
-            return Fraction("0", "-" + A_.getNumerator(), A_.getDenominator());
+        if (A.getNumerator() == "1" && A.getDenominator() == "1") return B;
+        if (B.getNumerator() == "1" && B.getDenominator() == "1") return A;
+        if (A.getNumerator() == "-1" && A.getDenominator() == "1")
+            return Fraction("0", "-" + B.getNumerator(), B.getDenominator());
+        if (B.getNumerator() == "-1" && B.getDenominator() == "1")
+            return Fraction("0", "-" + A.getNumerator(), A.getDenominator());
 
-        //3. Привожу знаменатели A и B к общему.
-        if (A_.getDenominator() != B_.getDenominator()) {
-            mpf_class denomA(A_.getDenominator()), denomB(B_.getDenominator());
-            mpf_class commonDenom = multiply_mpf(denomA, denomB);
+        //3. Умножаю числитель A на B, знаменатель A на B, используя функцию для умножения mpf_class.
+        mpf_class numC = multiply_mpf(string_to_mpf(A.getNumerator()), string_to_mpf(B.getNumerator()));
+        mpf_class denomC = multiply_mpf(string_to_mpf(A.getDenominator()), string_to_mpf(B.getDenominator()));
 
-            A_ = Fraction("0", mpf_to_string(multiply_mpf(string_to_mpf(A_.getNumerator()), denomB)), mpf_to_string(commonDenom));
-            B_ = Fraction("0", mpf_to_string(multiply_mpf(string_to_mpf(B_.getNumerator()), denomA)), mpf_to_string(commonDenom));
-        }
-        //4. Умножаю числители, используя функцию для умножения mpf_class
-        mpf_class _C = multiply_mpf(string_to_mpf(A_.getNumerator()), string_to_mpf(B_.getNumerator()));
-        //5. Собираю Fraction.
-        return Fraction("0", mpf_to_string(_C), A_.getDenominator());
+        //4. Собираю Fraction.
+        Fraction C = Fraction("0", mpf_to_string(numC), mpf_to_string(denomC));
+        //5. Сокращаю дробь, выделяю целую часть.
+        C.reduce();
+        C.extractWholePart();
+        return C;
     }
-
 
     Fraction power(Fraction base, Fraction exponent) {
         //FIXME: Функция power работает только с целыми числами:/
-
         //1. Перевожу base и exponent в неправильные дроби соответственно (если есть целая часть - она прибавляется к дробному значению полностью).
-        base.toImproper();
-        exponent.toImproper();
+        base.toImproper(), exponent.toImproper();
 
         //2. Достаю числитель из экспоненты и перевожу его в mpf_class для дальнейших вычислений.
         mpf_class exponent_f(exponent.getNumerator());
@@ -296,20 +314,17 @@ namespace MathLib {
     }
 
 
+
+
+
+
     // TODO: max(), min(), round(), ceil(), floor(), trunc(), isgreater(), isgreaterequal(),  isless(), islessequal(), islessgreater(), iszero(), ispositive(), isnegative(), INFINITY 
-
-
-
 
     // TODO: Mathpix.com подключить распознавание в LaTeX.
 
     // TODO: Перевести все функции на Fraction class.
     // TODO: Побитовое сложение и вычитание.
     // TODO: Корень из числа, иррациональная степень.
-
-
-
-
 
 
 
@@ -328,13 +343,6 @@ namespace MathLib {
         Fraction D = Discriminant(A, B, C);
         return D;
     }
-
-
-
-
-
-
-
 
     bool LaTeXtoPNG(const std::string& latexCode, const std::string& outputFileName, int dpi = 800) {
         namespace fs = std::filesystem;
@@ -425,10 +433,8 @@ namespace MathLib {
                 // Игнорируем ошибки удаления
             }
         }
-
         return true;
     }
-
 
     bool LaTeXtoPNG_LAGACY(const string& latexCode, const string& outputFileName, int dpi = 800) {
         //FIXME: Функция работает через консоль, а значит, нужно, чтобы в системе был установлен LaTeX (MikTeX).
@@ -472,10 +478,144 @@ namespace MathLib {
 
 
     bool PNGtoLaTeX(const string& pngFileName, const string& outputFileName) {
-
-
         return true;\
     }
+
+
+    vector<string> tokenize_latex(const string& latex) {
+        vector<string> tokens;
+        regex re(R"(\\frac\{(-?\d+\.?\d*)\}\{(-?\d+\.?\d*)\}|(-?\d+\.?\d*)|([+\-*/]))");
+        smatch match;
+        string s = latex;
+    
+        while (regex_search(s, match, re)) {
+            if (match[1].matched) { // Дробь
+                string num = match[1].str();
+                string den = match[2].str();
+                tokens.push_back("frac{" + num + "}{" + den + "}");
+            } else if (match[3].matched) { // Число
+                tokens.push_back(match[3].str());
+            } else if (match[4].matched) { // Оператор
+                tokens.push_back(match[4].str());
+            }
+            s = match.suffix().str();
+        }
+    
+        return tokens;
+    }
+    
+    Fraction parse_fraction(const string& token) {
+        if (token.find("frac{") == 0) {
+            size_t num_start = 5;
+            size_t num_end = token.find('}', num_start);
+            string numerator = token.substr(num_start, num_end - num_start);
+            size_t den_start = num_end + 2;
+            size_t den_end = token.find('}', den_start);
+            string denominator = token.substr(den_start, den_end - den_start);
+            return Fraction("0", numerator, denominator);
+        } else {
+            return single_fraction(token);
+        }
+    }
+    
+    Fraction add(const Fraction A, const Fraction B) {
+        Fraction a = A, b = B;
+        a.toImproper(), b.toImproper();
+    
+        mpf_class denomA = string_to_mpf(a.getDenominator());
+        mpf_class denomB = string_to_mpf(b.getDenominator());
+        mpf_class commonDenom = denomA * denomB;
+    
+        mpf_class numA = string_to_mpf(a.getNumerator()) * denomB;
+        mpf_class numB = string_to_mpf(b.getNumerator()) * denomA;
+    
+        mpf_class totalNum = numA + numB;
+    
+        Fraction result("0", mpf_to_string(totalNum), mpf_to_string(commonDenom));
+        result.reduce();
+        result.extractWholePart();
+        return result;
+    }
+    
+    Fraction subtract(const Fraction A, const Fraction B) {
+        Fraction a = A, b = B;
+        a.toImproper(), b.toImproper();
+    
+        mpf_class denomA = string_to_mpf(a.getDenominator());
+        mpf_class denomB = string_to_mpf(b.getDenominator());
+        mpf_class commonDenom = denomA * denomB;
+    
+        mpf_class numA = string_to_mpf(a.getNumerator()) * denomB;
+        mpf_class numB = string_to_mpf(b.getNumerator()) * denomA;
+    
+        mpf_class totalNum = numA - numB;
+    
+        Fraction result("0", mpf_to_string(totalNum), mpf_to_string(commonDenom));
+        result.reduce();
+        result.extractWholePart();
+        return result;
+    }
+    
+    Fraction divide(const Fraction A, const Fraction B) {
+        Fraction reciprocal_B("0", B.getDenominator(), B.getNumerator());
+        return multiply(A, reciprocal_B);
+    }
+    
+    Fraction calculate_latex(const string& latex) {
+        vector<string> tokens = tokenize_latex(latex);
+        vector<Fraction> values;
+        vector<char> ops;
+    
+        for (const auto& token : tokens) {
+            if (token.size() == 1 && string("+-*/").find(token) != string::npos) {
+                ops.push_back(token[0]);
+            } else {
+                values.push_back(parse_fraction(token));
+            }
+        }
+    
+        // Обработка умножения и деления
+        for (size_t i = 0; i < ops.size();) {
+            if (ops[i] == '*' || ops[i] == '/') {
+                Fraction a = values[i];
+                Fraction b = values[i + 1];
+                Fraction res = (ops[i] == '*') ? multiply(a, b) : divide(a, b);
+                
+                values.erase(values.begin() + i, values.begin() + i + 2);
+                values.insert(values.begin() + i, res);
+                ops.erase(ops.begin() + i);
+            } else {
+                ++i;
+            }
+        }
+    
+        // Обработка сложения и вычитания
+        for (size_t i = 0; i < ops.size();) {
+            Fraction a = values[i];
+            Fraction b = values[i + 1];
+            Fraction res = (ops[i] == '+') ? add(a, b) : subtract(a, b);
+            
+            values.erase(values.begin() + i, values.begin() + i + 2);
+            values.insert(values.begin() + i, res);
+            ops.erase(ops.begin() + i);
+        }
+    
+        return values.empty() ? Fraction("0", "0", "1") : values[0];
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 void MATH_LIB_INIT_() {
