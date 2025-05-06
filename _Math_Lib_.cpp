@@ -25,6 +25,7 @@
 #include <string>
 #include <sstream>
 #include <fstream>
+#include <typeinfo>
 
 // new libs for DeepSeek http requests and JSON parsing
 #include <C:\Users\dagahan\Desktop\MathLib\libraries\curl\include\curl\curl.h>
@@ -41,35 +42,9 @@ namespace fs = std::filesystem;
 namespace MathLib {
     constexpr int __PRECISION__ = 1000;
     constexpr int __DEFAULT__PREC__ = 4096;
+    
 
-
-    template <typename T>
-    T module(const T A) {
-        //условие ? если_истина : если_ложь;
-        return (A < 0) ? -A : A;
-    }
-
-    template <typename T>
-    T gcd_many(const std::vector<T> values) {
-        if (values.empty()) return 0;
-
-        T result = values[0];
-        for (size_t i = 1; i < values.size(); ++i) {
-            result = gcd_for_two(result, values[i]);
-            if (result == 0) break;
-        }
-        return result;
-    }
-
-    // Версия для mpf_class — приближённый НОД (осторожно!)
-    mpf_class gcd_for_two(mpf_class a, mpf_class b) {
-        a, b = module(a), module(b);
-        while (b != 0) {
-            b = fmod(a.get_d(), b.get_d());
-        }
-        return b;
-    }
-
+    class Fraction; // Forward declaration of the Fraction class.
 
     string mpf_to_string(const mpf_class num, int precision = __PRECISION__) {
         std::ostringstream oss;
@@ -85,6 +60,48 @@ namespace MathLib {
         iss >> result;
         return result;
     }
+
+    template <typename T>
+    T module(const T A) {
+        if constexpr (!std::is_same_v<T, Fraction>) {
+            if constexpr (std::is_same_v<T, string>) {
+                mpf_class B = string_to_mpf(A);
+                return (B < 0) ? mpf_to_string(-B) : A;
+            }
+            else {
+                //условие ? если_истина : если_ложь;
+                return (A < 0) ? -A : A;
+            }
+        }
+        else{
+            return Fraction(mpf_to_string(module(string_to_mpf(A.getWhole()))),
+            mpf_to_string(module(string_to_mpf(A.getNumerator()))),
+            mpf_to_string(module(string_to_mpf(A.getDenominator()))));
+        }
+    }
+
+    // FIXME: тупо не работает.
+    // Версия для mpf_class — приближённый НОД (осторожно!)
+    mpf_class gcd_for_two(mpf_class a, mpf_class b) {
+        a, b = module(a), module(b);
+        while (b != 0) {
+            b = fmod(a.get_d(), b.get_d());
+        }
+        return b;
+    }
+
+    template <typename T>
+    T gcd_many(const std::vector<T> values) {
+        if (values.empty()) return 0;
+
+        T result = values[0];
+        for (size_t i = 1; i < values.size(); ++i) {
+            result = gcd_for_two(result, values[i]);
+            if (result == 0) break;
+        }
+        return result;
+    }
+
 
 
     class Fraction {
@@ -107,29 +124,25 @@ namespace MathLib {
                 //extractWholePart();
             }
 
-            string getWhole() const {
-                return numerator;
-            }
-        
-            string getNumerator() const {
-                return numerator;
-            }
-        
-            string getDenominator() const {
-                return denominator;
+            string getWhole() const { return whole; }
+            string getNumerator() const { return numerator; }
+            string getDenominator() const { return denominator; }
+
+            bool isPositive() const {
+                if (string_to_mpf(numerator) >= 0 && string_to_mpf(denominator) >= 0 && string_to_mpf(whole) >= 0) {
+                    return  true;
+                } return false;
             }
         
             string getLaTeX() const {
-                if (denominator == "1") {
-                    mpf_class total(whole);
-                    total += mpf_class(numerator);
+                if (module(string_to_mpf(denominator)) == 1) {
+                    mpf_class total = string_to_mpf(whole) + string_to_mpf(numerator);
                     return mpf_to_string(total);
                 }
             
                 if (whole != "0") {
                     return whole + "\\frac{" + numerator + "}{" + denominator + "}";
                 }
-
                 return "\\frac{" + numerator + "}{" + denominator + "}";
             }
 
@@ -174,10 +187,13 @@ namespace MathLib {
             }
         };
 
-
         Fraction single_fraction(const std::string numerator) {
         return Fraction("0", numerator, "1");
     }
+
+
+
+    
 
 
 
@@ -275,10 +291,9 @@ namespace MathLib {
 
         //6. Проверяю на отрицательную степень, если да, то возвращаю дробь 1/C.
         if (exponent_f > 0) {
-            return Fraction("0", mpf_to_string(module(string_to_mpf(C.getNumerator()))), "1");
-        } return Fraction("0", "1", mpf_to_string(module(string_to_mpf(C.getNumerator()))));
+            return Fraction("0", module(C.getNumerator()), "1");
+        } return Fraction("0", "1", module(C.getNumerator()));
     }
-
 
 
 
@@ -472,6 +487,7 @@ namespace MathLib {
 
 int main() {
     namespace Mal = MathLib;
+    using namespace Mal;
     mpf_set_default_prec(Mal::__DEFAULT__PREC__);
 
 
@@ -486,12 +502,12 @@ int main() {
 
     //B.reduce();
 
-    //cout << "210.205 is: " << A.getLaTeX() << endl;
+    //cout << Mal::module(B).getLaTeX() << endl;
     //cout << "210.205 multiply by -1542.512 is: " << multiply(A, B).getLaTeX() << endl;
-    cout << "5 powered by -4 is: " << Mal::powerby(Mal::single_fraction("5"), Mal::single_fraction("-4")).getLaTeX() << endl;
+    //cout << "5 powered by -4 is: " << Mal::powerby(Mal::single_fraction("5"), Mal::single_fraction("-4")).getLaTeX() << endl;
 
-    //vector<mpf_class> massive = { mpf_class("18.0"), mpf_class("6.0") , mpf_class("12.0")};
-    //cout << "GCD of massive: " << gcd_many(massive) << endl;
+    vector<mpf_class> massive = { mpf_class("18.0"), mpf_class("6.0") , mpf_class("12.0")};
+    cout << "GCD of massive: " << Mal::gcd_many(massive) << endl;
 
     //cout << "Quadratic equation: " << quadratic_equation(single_fraction("2"), single_fraction("-1"), single_fraction("-5")).getLaTeX() << endl;
 
