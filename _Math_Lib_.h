@@ -9,7 +9,7 @@
  *                                                                            *
  *  Description:                                                             *
  *  This is the Mathimatician Library with many of functions for EyeMath     *
- *  Project. Here's some funtions how multiply, powerby, Generate LaTeX and  *
+ *  Project. Here's some funtions how multiply, power, Generate LaTeX and  *
  *  simpy recognize LaTeX code from PNG image.                               * 
  *                                                                            *
  ******************************************************************************/
@@ -264,8 +264,8 @@ namespace MathLib {
     }
 
 
-    Fraction powerby(Fraction base, Fraction exponent) {
-        //FIXME: Функция powerby работает только с целыми числами:/
+    Fraction power(Fraction base, Fraction exponent) {
+        //FIXME: Функция power работает только с целыми числами:/
 
         //1. Перевожу base и exponent в неправильные дроби соответственно (если есть целая часть - она прибавляется к дробному значению полностью).
         base.toImproper();
@@ -296,6 +296,8 @@ namespace MathLib {
     }
 
 
+    // TODO: max(), min(), round(), ceil(), floor(), trunc(), isgreater(), isgreaterequal(),  isless(), islessequal(), islessgreater(), iszero(), ispositive(), isnegative(), INFINITY 
+
 
 
 
@@ -317,7 +319,7 @@ namespace MathLib {
 
     Fraction Discriminant(Fraction A, Fraction B, Fraction C) {
         Fraction four = single_fraction("4");
-        Fraction B_squared = powerby(B, single_fraction("2")); // B^2
+        Fraction B_squared = power(B, single_fraction("2")); // B^2
         Fraction fourAC = multiply(multiply(four, A), C);      // 4AC
         return single_fraction(mpf_to_string(string_to_mpf(B_squared.getNumerator()) - string_to_mpf(fourAC.getNumerator())));
     }
@@ -476,46 +478,8 @@ namespace MathLib {
     }
 }
 
-
-
-
-
-
-
-
-
-
-int main() {
-    namespace Mal = MathLib;
-    using namespace Mal;
-    mpf_set_default_prec(Mal::__DEFAULT__PREC__);
-
-
-    const mpf_class π("3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117068");
-    const mpf_class e("2.718281828459045235360287471352662497757247093699959574966967627724076630353547594571382178525166427");
-    const mpf_class φ("1.618033988749894848204586834365638117720309179805762862135448622705260462818902449707207204189391137");
-
-    //cout << "π is: " << π << endl;
-
-    Mal::Fraction A("0", "210.205", "1");
-    Mal::Fraction B("0", "-1542.512", "1");
-
-    //B.reduce();
-
-    //cout << Mal::module(B).getLaTeX() << endl;
-    //cout << "210.205 multiply by -1542.512 is: " << multiply(A, B).getLaTeX() << endl;
-    //cout << "5 powered by -4 is: " << Mal::powerby(Mal::single_fraction("5"), Mal::single_fraction("-4")).getLaTeX() << endl;
-
-    vector<mpf_class> massive = { mpf_class("18.0"), mpf_class("6.0") , mpf_class("12.0")};
-    cout << "GCD of massive: " << Mal::gcd_many(massive) << endl;
-
-    //cout << "Quadratic equation: " << quadratic_equation(single_fraction("2"), single_fraction("-1"), single_fraction("-5")).getLaTeX() << endl;
-
-
-    string latex = R"(sum_{i=1}^N i = \frac{n(n+1)}{2})";
-    Mal::LaTeXtoPNG(latex, "formula.png");
-
-
-
-    return 0;
+void MATH_LIB_INIT_() {
+    mpf_set_default_prec(MathLib::__DEFAULT__PREC__);
+    cout << std::setprecision(MathLib::__PRECISION__);
+    SetConsoleOutputCP(CP_UTF8);
 }
