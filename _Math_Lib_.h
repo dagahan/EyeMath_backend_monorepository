@@ -524,7 +524,7 @@ namespace MathLib {
     
         mpf_class denomA = string_to_mpf(a.getDenominator());
         mpf_class denomB = string_to_mpf(b.getDenominator());
-        mpf_class commonDenom = denomA * denomB;
+        mpf_class commonDenom = multiply_mpf(denomA, denomB);
     
         mpf_class numA = string_to_mpf(a.getNumerator()) * denomB;
         mpf_class numB = string_to_mpf(b.getNumerator()) * denomA;
@@ -543,7 +543,7 @@ namespace MathLib {
     
         mpf_class denomA = string_to_mpf(a.getDenominator());
         mpf_class denomB = string_to_mpf(b.getDenominator());
-        mpf_class commonDenom = denomA * denomB;
+        mpf_class commonDenom = multiply_mpf(denomA, denomB);
     
         mpf_class numA = string_to_mpf(a.getNumerator()) * denomB;
         mpf_class numB = string_to_mpf(b.getNumerator()) * denomA;
@@ -602,20 +602,6 @@ namespace MathLib {
     
         return values.empty() ? Fraction("0", "0", "1") : values[0];
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 void MATH_LIB_INIT_() {
