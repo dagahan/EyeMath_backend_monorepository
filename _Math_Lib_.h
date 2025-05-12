@@ -28,6 +28,7 @@
 #include <typeinfo>
 #include <algorithm>
 #include <regex>
+#include <cctype>
 
 // new libs for DeepSeek http requests and JSON parsing
 #include <C:\Users\dagahan\Desktop\MathLib\libraries\curl\include\curl\curl.h>
@@ -59,6 +60,11 @@ namespace MathLib {
         std::istringstream iss(str);
         iss >> result;
         return result;
+    }
+
+    string removeSpaces(string s) {
+        s.erase(remove(s.begin(), s.end(), ' '), s.end());
+        return s;
     }
 
     // getLaTeX() function using this to erase nulls.
@@ -127,198 +133,10 @@ namespace MathLib {
     }
 
 
-    class Fraction {
-        private:
-            //whole part
-            string whole;
-            //fractional part
-            string numerator; //числитель
-            string denominator; //знаменатель
-        public:
-            Fraction(string _whole, string _num, string _denom) {
-                mpf_class denom_f(_denom);
-                if (denom_f == 0) {
-                    throw invalid_argument("Denominator cannot be zero.");
-                }
-                whole = _whole;
-                numerator = _num;
-                denominator = _denom;
-                //reduce();
-                //extractWholePart();
-            }
-
-            string getWhole() const { return whole; }
-            string getNumerator() const { return numerator; }
-            string getDenominator() const { return denominator; }
-
-            bool isPositive() const {
-                if (string_to_mpf(numerator) >= 0 && string_to_mpf(denominator) >= 0 && string_to_mpf(whole) >= 0) {
-                    return  true;
-                } return false;
-            }
-        
-            string getLaTeX() const {
-                //1. Очищаю лишние нули у числителя, знаменателя, целой части.
-                string clean_whole = removeTrailingZeros(whole);
-                string clean_num = removeTrailingZeros(numerator);
-                string clean_denom = removeTrailingZeros(denominator);
-
-                // cout << "DEBUG: clean_whole=" << clean_whole 
-                // << ", clean_num=" << clean_num 
-                // << ", clean_denom=" << clean_denom << endl;
-                
-                //2. Если, дробь - целое число (знаменатель 1), то выводится сумма "дробной" целой части + целая часть.
-                if (clean_denom == "1") {
-                    mpf_class total = string_to_mpf(clean_whole) + string_to_mpf(clean_num);
-                    string total_str = removeTrailingZeros(mpf_to_string(total));
-                    return total_str;
-                }
-
-                //3. Собираю LaTeX строчку на return.
-                string latex;
-                if (clean_whole != "0" && clean_whole != "") {
-                    latex = clean_whole + "\\frac{" + clean_num + "}{" + clean_denom + "}";
-                } else {
-                    latex = "\\frac{" + clean_num + "}{" + clean_denom + "}";
-                }
-                return latex;
-            }
-
-            void reduce() { 
-                mpf_class num(numerator);
-                mpf_class denom(denominator);
-
-                mpf_class gcd = gcd_for_two(num, denom);
-                if (gcd != 0) {
-                    num /= gcd;
-                    denom /= gcd;
-                }
-
-                numerator = mpf_to_string(num);
-                denominator = mpf_to_string(denom);
-            }
-
-            void extractWholePart() {
-                mpf_class num(numerator);
-                mpf_class denom(denominator);
-            
-                mpf_class w = floor(num / denom);             // Берём целую часть (округлённую вниз)
-                mpf_class rem = num - w * denom;              // Остаток — это новая дробная часть
-            
-                whole = mpf_to_string(w);                     // Целую часть в строку
-                numerator = mpf_to_string(rem);               // Остаток (числитель)
-            }
-            
-            void toImproper() {
-                mpf_class w(whole);
-                mpf_class num(numerator);
-                mpf_class denom(denominator);
-            
-                mpf_class new_num = w * denom + num;
-                numerator = mpf_to_string(new_num); 
-                whole = "0";
-            }
-        };
-        Fraction single_fraction(const std::string numerator) {
-        return Fraction("0", numerator, "1");
-    }
-
-
-    mpf_class multiply_mpf(const mpf_class A, const mpf_class B) {
-        //1. Решение тривиальных случаев.
-        if (A == 0 || B == 0) return 0;
-        if (A == 1 || B == 1) return (A == 1 ? B : A);
-        if (A == -1 || B == -1) return (A == -1 ? -B : -A);
-
-        //2. Вытаскиваю мантиссу и экспоненту у A и B.
-        mp_exp_t expA, expB;
-        string mantissaA = module(A).get_str(expA, 10);
-        string mantissaB = module(B).get_str(expB, 10);
-
-        //3. Считаю сумму символов A и B после запятой.
-        mpz_class mA(mantissaA), mB(mantissaB), mantissaC = 0;
-        int totalFrac = ((int)mantissaA.size() - expA) + ((int)mantissaB.size() - expB);
-
-        //4. Складываю мантиссу A саму с собой мантисса B раз.
-        for (mpz_class i = 0; i < mB; ++i){
-            mantissaC += mA;
-        }
-        
-        //5. Получаю строку результата-мантиссы и дозаполняю нулями в конце, если нужно, поскольку GMPxx хавает нули int на конце при конвертировании.
-        string stringC = mantissaC.get_str();
-        if ((int)stringC.size() <= totalFrac)
-            stringC.insert(0, totalFrac + 1 - stringC.size(), '0');
-
-        //6. Вставляю точку, отсчитав справа налево totalFrac символов.
-        stringC.insert(stringC.size() - totalFrac, ".");
-
-        //7. Собираю обратно mpf_class и устанавливаю знак.
-        mpf_class C(stringC);
-        if ((A < 0 && B > 0) || (A > 0 && B < 0)) {
-            C = -C;
-        }
-        return C;
-    }
-
-    Fraction multiply(Fraction A, Fraction B) {
-        //1. Перевожу A и B в неправильные дроби соответственно (если есть целая часть - она прибавляется к дробному значению полностью).
-        A.toImproper(), B.toImproper();
-
-        //2. Решение тривиальных случаев.
-        if (A.getNumerator() == "1" && A.getDenominator() == "1") return B;
-        if (B.getNumerator() == "1" && B.getDenominator() == "1") return A;
-        if (A.getNumerator() == "-1" && A.getDenominator() == "1")
-            return Fraction("0", "-" + B.getNumerator(), B.getDenominator());
-        if (B.getNumerator() == "-1" && B.getDenominator() == "1")
-            return Fraction("0", "-" + A.getNumerator(), A.getDenominator());
-
-        //3. Умножаю числитель A на B, знаменатель A на B, используя функцию для умножения mpf_class.
-        mpf_class numC = multiply_mpf(string_to_mpf(A.getNumerator()), string_to_mpf(B.getNumerator()));
-        mpf_class denomC = multiply_mpf(string_to_mpf(A.getDenominator()), string_to_mpf(B.getDenominator()));
-
-        //4. Собираю Fraction.
-        Fraction C = Fraction("0", mpf_to_string(numC), mpf_to_string(denomC));
-        //5. Сокращаю дробь, выделяю целую часть.
-        C.reduce();
-        C.extractWholePart();
-        return C;
-    }
-
-    Fraction power(Fraction base, Fraction exponent) {
-        //FIXME: Функция power работает только с целыми числами:/
-        //1. Перевожу base и exponent в неправильные дроби соответственно (если есть целая часть - она прибавляется к дробному значению полностью).
-        base.toImproper(), exponent.toImproper();
-
-        //2. Достаю числитель из экспоненты и перевожу его в mpf_class для дальнейших вычислений.
-        mpf_class exponent_f(exponent.getNumerator());
-
-        //3. Проверяю на тривиальные случаи:
-        if (exponent_f == 0) return Fraction("0", "1", "1");
-        if (exponent_f == 1) return base;
-        if (exponent_f == -1) return Fraction("0", "1", base.getNumerator());
-
-        //4. Обьявляю "технические" переменные для хранения промежуточных результатов.
-        Fraction C = base;
-        mpf_class count = module(exponent_f);
-
-        //5. A^B = (A * A) B раз.
-        Fraction current = base;
-        for (mpf_class i = 1; i < count; i++) {
-            C = multiply(C, base);
-        }
-
-        //6. Проверяю на отрицательную степень, если да, то возвращаю дробь 1/C.
-        if (exponent_f > 0) {
-            return Fraction("0", module(C.getNumerator()), "1");
-        } return Fraction("0", "1", module(C.getNumerator()));
-    }
 
 
 
 
-
-
-    // TODO: max(), min(), round(), ceil(), floor(), trunc(), isgreater(), isgreaterequal(),  isless(), islessequal(), islessgreater(), iszero(), ispositive(), isnegative(), INFINITY 
 
     // TODO: Mathpix.com подключить распознавание в LaTeX.
 
@@ -328,21 +146,6 @@ namespace MathLib {
 
 
 
-
-
-
-
-    Fraction Discriminant(Fraction A, Fraction B, Fraction C) {
-        Fraction four = single_fraction("4");
-        Fraction B_squared = power(B, single_fraction("2")); // B^2
-        Fraction fourAC = multiply(multiply(four, A), C);      // 4AC
-        return single_fraction(mpf_to_string(string_to_mpf(B_squared.getNumerator()) - string_to_mpf(fourAC.getNumerator())));
-    }
-
-    Fraction quadratic_equation(Fraction A, Fraction B, Fraction C) {
-        Fraction D = Discriminant(A, B, C);
-        return D;
-    }
 
     bool LaTeXtoPNG(const std::string& latexCode, const std::string& outputFileName, int dpi = 800) {
         namespace fs = std::filesystem;
@@ -437,11 +240,6 @@ namespace MathLib {
     }
 
     bool LaTeXtoPNG_LAGACY(const string& latexCode, const string& outputFileName, int dpi = 800) {
-        //FIXME: Функция работает через консоль, а значит, нужно, чтобы в системе был установлен LaTeX (MikTeX).
-        //Во-вторых, нужно, чтобы в системе был установлен dvipng (обычно он идёт в комплекте с LaTeX дистрибутивами).
-        //В-третьих, картинка, что рендерит функция на выходе получается с ОЧЕНЬ МАЛЕНЬКИМИ рамками, буквально
-        //в притык, значит, в самом интерфейсе EyeMath нужно будет делать искуственные увеличенные рамки для каждого вывода подобной картинки.
-
         const string output_dir = "renderLaTeX\\" + outputFileName;
         const string temp_dir = "temp_files\\";
         const string texFile = temp_dir + "temp.tex";
@@ -476,132 +274,162 @@ namespace MathLib {
         return true;
     }
 
-
     bool PNGtoLaTeX(const string& pngFileName, const string& outputFileName) {
         return true;\
     }
+    
 
 
-    vector<string> tokenize_latex(const string& latex) {
-        vector<string> tokens;
-        regex re(R"(\\frac\{(-?\d+\.?\d*)\}\{(-?\d+\.?\d*)\}|(-?\d+\.?\d*)|([+\-*/]))");
+
+
+
+
+
+
+
+
+
+
+    /// Разбивает строку s по разделителю delim
+    static vector<string> split(const string& s, char delim) {
+        vector<string> parts;
+        std::string cur;
+        for (char c : s) {
+            if (c == delim) {
+                parts.push_back(cur);
+                cur.clear();
+            } else {
+                cur.push_back(c);
+            }
+        }
+        parts.push_back(cur);
+        return parts;
+    }
+
+    /// Вычисляет значение одночлена, который может быть целым числом
+    /// или дробью вида "(num/den)"
+    static double parseTerm(const std::string& term) {
+        // Если термин обёрнут в скобки и содержит '/', считаем дробь
+        if (term.size() >= 5 && term.front() == '(' && term.back() == ')' && term.find('/') != std::string::npos) {
+            // вырезаем "num/den"
+            std::string frac = term.substr(1, term.size() - 2);
+            auto parts = split(frac, '/');
+            if (parts.size() == 2) {
+                double num = std::stod(parts[0]);
+                double den = std::stod(parts[1]);
+                return num / den;
+            }
+        }
+        // Иначе просто целое (или вещественное) число
+        return stod(term);
+    }
+
+
+
+    static std::string formatDouble(const std::string& numStr) {
+        double d = std::stod(numStr);
+        std::ostringstream oss;
+        oss << std::fixed << std::setprecision(__PRECISION__) << d;
+        return oss.str();
+    }
+
+    /// Экранирует backslash и кавычки, чтобы можем вставить в C-строковый литерал
+    static std::string escapeForCString(const std::string& s) {
+        std::string out;
+        out.reserve(s.size()*2);
+        for (char c : s) {
+            if (c == '\\')      out += "\\\\";
+            else if (c == '\"') out += "\\\"";
+            else                out += c;
+        }
+        return out;
+    }
+
+
+
+    string normalizeFraction(const string& latex_expr) {
+        static const regex frac_re(R"(\\frac\{(-?\d+)\}\{(-?\d+)\})");
+    
+        string result = "";
+    
+        auto searchStart = latex_expr.cbegin();
         smatch match;
-        string s = latex;
     
-        while (regex_search(s, match, re)) {
-            if (match[1].matched) { // Дробь
-                string num = match[1].str();
-                string den = match[2].str();
-                tokens.push_back("frac{" + num + "}{" + den + "}");
-            } else if (match[3].matched) { // Число
-                tokens.push_back(match[3].str());
-            } else if (match[4].matched) { // Оператор
-                tokens.push_back(match[4].str());
-            }
-            s = match.suffix().str();
+        while (regex_search(searchStart, latex_expr.cend(), match, frac_re)) {
+            // копируем всё до найденной фракции
+            result.append(searchStart, match.prefix().second);
+    
+            // форматируем числитель и знаменатель как double
+            string num = formatDouble(match[1].str());
+            string den = formatDouble(match[2].str());
+    
+            // добавляем строку вида "(num.den/den.den)"
+            result += "(" + num + "/" + den + ")";
+    
+            // двигаем указатель за текущую фракцию
+            searchStart = match.suffix().first;
         }
     
-        return tokens;
-    }
-    
-    Fraction parse_fraction(const string& token) {
-        if (token.find("frac{") == 0) {
-            size_t num_start = 5;
-            size_t num_end = token.find('}', num_start);
-            string numerator = token.substr(num_start, num_end - num_start);
-            size_t den_start = num_end + 2;
-            size_t den_end = token.find('}', den_start);
-            string denominator = token.substr(den_start, den_end - den_start);
-            return Fraction("0", numerator, denominator);
-        } else {
-            return single_fraction(token);
-        }
-    }
-    
-    Fraction add(const Fraction A, const Fraction B) {
-        Fraction a = A, b = B;
-        a.toImproper(), b.toImproper();
-    
-        mpf_class denomA = string_to_mpf(a.getDenominator());
-        mpf_class denomB = string_to_mpf(b.getDenominator());
-        mpf_class commonDenom = multiply_mpf(denomA, denomB);
-    
-        mpf_class numA = string_to_mpf(a.getNumerator()) * denomB;
-        mpf_class numB = string_to_mpf(b.getNumerator()) * denomA;
-    
-        mpf_class totalNum = numA + numB;
-    
-        Fraction result("0", mpf_to_string(totalNum), mpf_to_string(commonDenom));
-        result.reduce();
-        result.extractWholePart();
+        // добавляем хвост после последней фракции
+        result.append(searchStart, latex_expr.cend());
         return result;
     }
-    
-    Fraction subtract(const Fraction A, const Fraction B) {
-        Fraction a = A, b = B;
-        a.toImproper(), b.toImproper();
-    
-        mpf_class denomA = string_to_mpf(a.getDenominator());
-        mpf_class denomB = string_to_mpf(b.getDenominator());
-        mpf_class commonDenom = multiply_mpf(denomA, denomB);
-    
-        mpf_class numA = string_to_mpf(a.getNumerator()) * denomB;
-        mpf_class numB = string_to_mpf(b.getNumerator()) * denomA;
-    
-        mpf_class totalNum = numA - numB;
-    
-        Fraction result("0", mpf_to_string(totalNum), mpf_to_string(commonDenom));
-        result.reduce();
-        result.extractWholePart();
+
+
+
+
+
+    string eval(const string& expression) {
+        //Функция принимает строку с выражением, затем компилирует и запускает временный C++ файл, который вычисляет это выражение и возвращает результат.
+        // 1. Подготовим выражение-литерал
+        string lit = escapeForCString(expression);
+
+        // 2. Сгенерируем исходник
+        std::string program =
+            "#include <iostream>\n"
+            "#include <C:\\Users\\dagahan\\Desktop\\MathLib\\libraries\\GMP\\include\\gmpxx.h>\n"
+            "int main(){\n"
+            "    std::cout << (" + lit + ") << std::endl;\n"
+            "    return 0;\n"
+            "}\n";
+
+        // 3. Запишем файл
+        const char* src = "temp_files\\temp_eval.cpp";
+        std::ofstream out(src);
+        out << program;
+        out.close();
+
+        // 4. Скомпилируем
+        int ccode = std::system("g++ -std=c++17 -O2 temp_files\\temp_eval.cpp -o temp_files\\temp_eval.exe 2> temp_files\\compile_errors.txt");
+        if (ccode != 0) {
+            std::ifstream err("temp_files\\compile_errors.txt");
+            std::stringstream ss;
+            ss << err.rdbuf();
+            return "Compilation Error:\n" + ss.str();
+        }
+
+        // 5. Запустим и прочитаем результат
+        std::system("temp_files\\temp_eval.exe > temp_files\\output.txt");
+        std::ifstream in("temp_files\\output.txt");
+        std::string result;
+        std::getline(in, result);
+
+        // 6. Почистим временные файлы
+        std::remove("temp_files\\temp_eval.cpp");
+        std::remove("temp_files\\temp_eval.exe");
+        std::remove("temp_files\\output.txt");
+        std::remove("temp_files\\compile_errors.txt");
+
         return result;
     }
+
+
+
     
-    Fraction divide(const Fraction A, const Fraction B) {
-        Fraction reciprocal_B("0", B.getDenominator(), B.getNumerator());
-        return multiply(A, reciprocal_B);
-    }
+
+
+
     
-    Fraction calculate_latex(const string& latex) {
-        vector<string> tokens = tokenize_latex(latex);
-        vector<Fraction> values;
-        vector<char> ops;
-    
-        for (const auto& token : tokens) {
-            if (token.size() == 1 && string("+-*/").find(token) != string::npos) {
-                ops.push_back(token[0]);
-            } else {
-                values.push_back(parse_fraction(token));
-            }
-        }
-    
-        // Обработка умножения и деления
-        for (size_t i = 0; i < ops.size();) {
-            if (ops[i] == '*' || ops[i] == '/') {
-                Fraction a = values[i];
-                Fraction b = values[i + 1];
-                Fraction res = (ops[i] == '*') ? multiply(a, b) : divide(a, b);
-                
-                values.erase(values.begin() + i, values.begin() + i + 2);
-                values.insert(values.begin() + i, res);
-                ops.erase(ops.begin() + i);
-            } else {
-                ++i;
-            }
-        }
-    
-        // Обработка сложения и вычитания
-        for (size_t i = 0; i < ops.size();) {
-            Fraction a = values[i];
-            Fraction b = values[i + 1];
-            Fraction res = (ops[i] == '+') ? add(a, b) : subtract(a, b);
-            
-            values.erase(values.begin() + i, values.begin() + i + 2);
-            values.insert(values.begin() + i, res);
-            ops.erase(ops.begin() + i);
-        }
-    
-        return values.empty() ? Fraction("0", "0", "1") : values[0];
-    }
 }
 
 void MATH_LIB_INIT_() {
