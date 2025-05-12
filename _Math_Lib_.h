@@ -325,14 +325,6 @@ namespace MathLib {
     }
 
 
-
-    static std::string formatDouble(const std::string& numStr) {
-        double d = std::stod(numStr);
-        std::ostringstream oss;
-        oss << std::fixed << std::setprecision(__PRECISION__) << d;
-        return oss.str();
-    }
-
     /// Экранирует backslash и кавычки, чтобы можем вставить в C-строковый литерал
     static std::string escapeForCString(const std::string& s) {
         std::string out;
@@ -348,10 +340,9 @@ namespace MathLib {
 
 
     string normalizeFraction(const string& latex_expr) {
+        // Функция принимает строку с LaTeX выражением и заменяет все фракции вида \frac{num}{den} на (num.0/den.0).
         static const regex frac_re(R"(\\frac\{(-?\d+)\}\{(-?\d+)\})");
-    
         string result = "";
-    
         auto searchStart = latex_expr.cbegin();
         smatch match;
     
@@ -359,9 +350,9 @@ namespace MathLib {
             // копируем всё до найденной фракции
             result.append(searchStart, match.prefix().second);
     
-            // форматируем числитель и знаменатель как double
-            string num = formatDouble(match[1].str());
-            string den = formatDouble(match[2].str());
+            // форматируем числитель и знаменатель как mpf_class.
+            string num = mpf_to_string(string_to_mpf(match[1].str()));
+            string den = mpf_to_string(string_to_mpf(match[2].str()));
     
             // добавляем строку вида "(num.den/den.den)"
             result += "(" + num + "/" + den + ")";
@@ -378,58 +369,87 @@ namespace MathLib {
 
 
 
-
     string eval(const string& expression) {
         //Функция принимает строку с выражением, затем компилирует и запускает временный C++ файл, который вычисляет это выражение и возвращает результат.
-        // 1. Подготовим выражение-литерал
+        fs::path currentDir = fs::current_path();
+        fs::path temp_dir = currentDir / "temp_files";
+        fs::create_directories(temp_dir);
+        fs::path src = temp_dir / "temp_eval.cpp";
+        fs::path err = temp_dir / "compile_errors.txt";
+        fs::path output = temp_dir / "output.txt";
+        fs::path exe = temp_dir / "temp_eval.exe";
+
+        
+        //1. Подготовлю выражение-литерал
         string lit = escapeForCString(expression);
 
-        // 2. Сгенерируем исходник
-        std::string program =
+        //Берём lit, делаем замену: каждую последовательность цифр с точкой превращаем в mpf_class("…")
+        static const std::regex num_re(R"((\d+\.\d+))");
+        string expr_with_mpf = std::regex_replace(
+            lit,
+            num_re,
+            std::string(R"(mpf_class("$1"))")
+        );
+
+        //2. Создам c++ код, что далее компилируется и возвращает результат выражения.
+        string program =
             "#include <iostream>\n"
+            "#include <string>\n"
+            "#include <iomanip>\n"
+            "#include <sstream>\n"
             "#include <C:\\Users\\dagahan\\Desktop\\MathLib\\libraries\\GMP\\include\\gmpxx.h>\n"
+            "std::string mpf_to_string(const mpf_class num, int precision = 32) {\n"
+            "    std::ostringstream oss;\n"
+            "    oss << std::fixed\n"
+            "       << std::setprecision(48)\n"
+            "       << num;\n"
+            "    return oss.str();\n"
+            "}\n"
             "int main(){\n"
-            "    std::cout << (" + lit + ") << std::endl;\n"
+            "    mpf_set_default_prec(48);\n"
+            "    mpf_class result = " + expr_with_mpf + ";\n"
+            "    std::cout << mpf_to_string(result) << std::endl;\n"
             "    return 0;\n"
             "}\n";
+            {
+                std::ofstream ofs(src, std::ios::trunc);
+                if (!ofs) return "Error: cannot open temp source file for writing";
+                ofs << program;
+                // при выходе из этого блока ofs будет закрыт
+            }
 
-        // 3. Запишем файл
-        const char* src = "temp_files\\temp_eval.cpp";
-        std::ofstream out(src);
-        out << program;
-        out.close();
-
-        // 4. Скомпилируем
-        int ccode = std::system("g++ -std=c++17 -O2 temp_files\\temp_eval.cpp -o temp_files\\temp_eval.exe 2> temp_files\\compile_errors.txt");
+        //4. Компилирую файл c++ в исполняемый файл.
+        string compile_cmd = "g++ -std=c++17 -O2 \"" + src.string() +
+            "\" -o \"" + exe.string() +
+            "\" -lgmpxx -lgmp 2> \"" + err.string() + "\"";
+        int ccode = system(compile_cmd.c_str());
         if (ccode != 0) {
-            std::ifstream err("temp_files\\compile_errors.txt");
-            std::stringstream ss;
-            ss << err.rdbuf();
+            ifstream iferr(err);
+            stringstream ss;
+            ss << iferr.rdbuf();
+
+            // Удаляем временные файлы
+            std::remove(src.string().c_str());
+            std::remove(err.string().c_str());
             return "Compilation Error:\n" + ss.str();
         }
 
-        // 5. Запустим и прочитаем результат
-        std::system("temp_files\\temp_eval.exe > temp_files\\output.txt");
-        std::ifstream in("temp_files\\output.txt");
-        std::string result;
-        std::getline(in, result);
+        //5. Запуск и захват вывода
+        string run_cmd = exe.string() + " > " + output.string();
+        system(run_cmd.c_str());
+        string result;
+        ifstream ifout(output);
+        getline(ifout, result);
 
-        // 6. Почистим временные файлы
-        std::remove("temp_files\\temp_eval.cpp");
-        std::remove("temp_files\\temp_eval.exe");
-        std::remove("temp_files\\output.txt");
-        std::remove("temp_files\\compile_errors.txt");
-
+        //6. Удаляю все временные файлы и возвращаю результат.
+        for (auto &p : {src, err, output, exe}) {
+            if (fs::exists(p)) {
+                try { fs::remove(p); }
+                catch (...) {}
+            }
+        }
         return result;
     }
-
-
-
-    
-
-
-
-    
 }
 
 void MATH_LIB_INIT_() {
