@@ -5,7 +5,7 @@ using namespace MathLib;
 using namespace std;
 
 
-int main( int argc, char *argv[] ) {
+int main() {
     using namespace MathLib;
     MATH_LIB_INIT_();
 
@@ -18,12 +18,8 @@ int main( int argc, char *argv[] ) {
     //LaTeXtoPNG(latex, "formula.png");
 
     string latex_expr = "(\\frac{12345}{67890} + \\frac{98765}{43210} * \\frac{5555}{6666} - \\frac{1000}{7} + 139.112234243253453495903405439583489) * 2";
-    string expression = normalizeFraction(latex_expr);
-    for ( int i = 1; i < argc; i++ )
-    {
-       expression = expression + argv[i];
-    }
-    cout << "Expression [ " << expression << " ] = " << eval(expression) << endl;
+    cout << solveLaTeX(latex_expr) << endl;
+    
 
     //string latex_expr = "2 + \\frac{-1}{625}";
     //string expr2 = "\\5 * \\10";

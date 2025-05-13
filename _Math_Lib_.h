@@ -45,6 +45,7 @@ namespace fs = std::filesystem;
 namespace MathLib {
     constexpr int __PRECISION__ = 32;
     constexpr int __DEFAULT__PREC__ = 48;
+    fs::path __CURRENT__DIR__ = fs::current_path();
     class Fraction; // Forward declaration of the Fraction class.
 
     string mpf_to_string(const mpf_class num, int precision = __PRECISION__) {
@@ -140,20 +141,14 @@ namespace MathLib {
 
     // TODO: Mathpix.com подключить распознавание в LaTeX.
 
-    // TODO: Перевести все функции на Fraction class.
-    // TODO: Побитовое сложение и вычитание.
-    // TODO: Корень из числа, иррациональная степень.
-
-
 
 
     bool LaTeXtoPNG(const std::string& latexCode, const std::string& outputFileName, int dpi = 800) {
         namespace fs = std::filesystem;
 
         // 1. Определяем пути
-        fs::path currentDir = fs::current_path();
-        fs::path output_dir = currentDir / "renderLaTeX" / outputFileName;
-        fs::path temp_dir = currentDir / "temp_files";
+        fs::path output_dir = __CURRENT__DIR__ / "renderLaTeX" / outputFileName;
+        fs::path temp_dir = __CURRENT__DIR__ / "temp_files";
         fs::path texFile = temp_dir / "temp.tex";
         fs::path dviFile = temp_dir / "temp.dvi";
         fs::path logFile = temp_dir / "temp.log";
@@ -161,11 +156,11 @@ namespace MathLib {
 
         // 2. Пути к бинарникам
         #ifdef _WIN32
-            fs::path latexPath = currentDir / "libraries" / "MikTeX" / "miktex" / "bin" / "x64" / "latex.exe";
-            fs::path dvipngPath = currentDir / "libraries" / "MikTeX" / "miktex" / "bin" / "x64" / "dvipng.exe";
+            fs::path latexPath = __CURRENT__DIR__ / "libraries" / "MikTeX" / "miktex" / "bin" / "x64" / "latex.exe";
+            fs::path dvipngPath = __CURRENT__DIR__ / "libraries" / "MikTeX" / "miktex" / "bin" / "x64" / "dvipng.exe";
         #else
-            fs::path latexPath = currentDir / "libraries" / "TeXLive" / "bin" / "x86_64-linux" / "latex";
-            fs::path dvipngPath = currentDir / "libraries" / "TeXLive" / "bin" / "x86_64-linux" / "dvipng";
+            fs::path latexPath = __CURRENT__DIR__ / "libraries" / "TeXLive" / "bin" / "x86_64-linux" / "latex";
+            fs::path dvipngPath = __CURRENT__DIR__ / "libraries" / "TeXLive" / "bin" / "x86_64-linux" / "dvipng";
         #endif
 
         // 3. Проверка существования бинарников
@@ -279,17 +274,6 @@ namespace MathLib {
     }
     
 
-
-
-
-
-
-
-
-
-
-
-
     /// Разбивает строку s по разделителю delim
     static vector<string> split(const string& s, char delim) {
         vector<string> parts;
@@ -370,17 +354,18 @@ namespace MathLib {
 
 
     string eval(const string& expression) {
+        string result = "";
         //Функция принимает строку с выражением, затем компилирует и запускает временный C++ файл, который вычисляет это выражение и возвращает результат.
-        fs::path currentDir = fs::current_path();
-        fs::path temp_dir = currentDir / "temp_files";
+
+        //1. Создаю временные файлы и директории.
+        fs::path temp_dir = __CURRENT__DIR__ / "temp_files";
         fs::create_directories(temp_dir);
         fs::path src = temp_dir / "temp_eval.cpp";
         fs::path err = temp_dir / "compile_errors.txt";
-        fs::path output = temp_dir / "output.txt";
         fs::path exe = temp_dir / "temp_eval.exe";
 
         
-        //1. Подготовлю выражение-литерал
+        //2. Подготовлю выражение-литерал
         string lit = escapeForCString(expression);
 
         //Берём lit, делаем замену: каждую последовательность цифр с точкой превращаем в mpf_class("…")
@@ -391,7 +376,7 @@ namespace MathLib {
             std::string(R"(mpf_class("$1"))")
         );
 
-        //2. Создам c++ код, что далее компилируется и возвращает результат выражения.
+        //3. Создам c++ код, что далее компилируется во временном файле (в папке temp_files) и возвращает результат выражения.
         string program =
             "#include <iostream>\n"
             "#include <string>\n"
@@ -418,37 +403,60 @@ namespace MathLib {
                 // при выходе из этого блока ofs будет закрыт
             }
 
-        //4. Компилирую файл c++ в исполняемый файл.
+        //4. Компилирую файл c++ в исполняемый файл с помощью g++.
         string compile_cmd = "g++ -std=c++17 -O2 \"" + src.string() +
             "\" -o \"" + exe.string() +
             "\" -lgmpxx -lgmp 2> \"" + err.string() + "\"";
         int ccode = system(compile_cmd.c_str());
-        if (ccode != 0) {
+
+        //4.5 Проверяю, что ошибка компиляции не возникла.
+        if (ccode == 0) {
+            array<char, 128> buffer;
+            
+
+            //5. Запускаю через popen() исполняемый файл и читаю результат в pipe.
+            #ifdef _WIN32
+                FILE* pipe = _popen(exe.string().c_str(), "r");
+            #else
+                FILE* pipe = popen(exe.string().c_str(), "r");
+            #endif
+                if (!pipe) throw runtime_error("popen() failed!");
+
+                // Читаем всё из pipe
+                while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
+                    result += buffer.data();
+                }
+
+                // Закрываем pipe
+            #ifdef _WIN32
+                _pclose(pipe);
+            #else
+                pclose(pipe);
+            #endif
+        }
+
+        else { //Если возникла ошибка компиляции, то читаю её из файла compile_errors.txt и возвращаю результат.
             ifstream iferr(err);
             stringstream ss;
             ss << iferr.rdbuf();
-
-            // Удаляем временные файлы
-            std::remove(src.string().c_str());
-            std::remove(err.string().c_str());
-            return "Compilation Error:\n" + ss.str();
+            result = "Compilation Error:\n" + ss.str();
         }
 
-        //5. Запуск и захват вывода
-        string run_cmd = exe.string() + " > " + output.string();
-        system(run_cmd.c_str());
-        string result;
-        ifstream ifout(output);
-        getline(ifout, result);
-
         //6. Удаляю все временные файлы и возвращаю результат.
-        for (auto &p : {src, err, output, exe}) {
+        for (auto &p : {src, err, exe}) {
             if (fs::exists(p)) {
                 try { fs::remove(p); }
                 catch (...) {}
             }
         }
         return result;
+    }
+
+    string solveLaTeX(const string latexCode) {
+        //1. Преобразую LaTeX выражение в string, содержащий формат выражения, который может выполнить компилятор c++ напрямую.
+        string expression = normalizeFraction(latexCode);
+        //2. Возвращаю результат вычисления, что произвёл компилятор c++ во временном файле.
+        return eval(expression);
     }
 }
 
