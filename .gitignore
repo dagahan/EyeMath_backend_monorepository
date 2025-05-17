@@ -31,8 +31,11 @@
 *.out
 *.app
 
-
 # ignoring temp_files, renderLaTeX and recognizeLaTeX directories.
 temp_files/
 renderLaTeX/
 recognizeLaTeX/
+
+# IDE files
+.vscode/
+.idea/
