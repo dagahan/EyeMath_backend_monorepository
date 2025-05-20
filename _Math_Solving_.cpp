@@ -1,5 +1,5 @@
 #include <iostream>
-#include <C:\Users\dagahan\Desktop\MathLib\_Math_Lib_.h>
+#include </home/usov/myprojects/MathLib/_Math_Lib_.h>
 
 using namespace MathLib;
 using namespace std;

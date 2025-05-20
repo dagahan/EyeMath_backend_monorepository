@@ -52,7 +52,7 @@ see https://www.gnu.org/licenses/.  */
 #endif
 #define __GMPXX_CONSTANT_TRUE(X) (__GMPXX_CONSTANT(X) && (X))
 
-// Use C++11 features
+// Use C++11 featuresS
 #ifndef __GMPXX_USE_CXX11
 #if __cplusplus >= 201103L
 #define __GMPXX_USE_CXX11 1

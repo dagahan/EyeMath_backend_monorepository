@@ -16,7 +16,7 @@
 
 #include <iostream>
 #include <vector>
-#include <C:\Users\dagahan\Desktop\MathLib\libraries\GMP\include\gmpxx.h> //FIXME: путь к библиотеке нужно сделать относительным, а не абсолютным.
+#include <gmpxx.h>
 #include <cstdlib>
 #include <cstdio>
 #include <filesystem>
@@ -31,8 +31,8 @@
 #include <cctype>
 
 // new libs for DeepSeek http requests and JSON parsing
-#include <C:\Users\dagahan\Desktop\MathLib\libraries\curl\include\curl\curl.h>
-#include <C:\Users\dagahan\Desktop\MathLib\libraries\nlohmann\json.hpp>
+#include </home/usov/myprojects/MathLib/libraries/curl/include/curl/curl.h>
+#include </home/usov/myprojects/MathLib/libraries/nlohmann/json.hpp>
 
 
 // Define the namespace for convenience.
@@ -382,7 +382,7 @@ namespace MathLib {
             "#include <string>\n"
             "#include <iomanip>\n"
             "#include <sstream>\n"
-            "#include <C:\\Users\\dagahan\\Desktop\\MathLib\\libraries\\GMP\\include\\gmpxx.h>\n"
+            "#include <gmpxx.h>\n"
             "std::string mpf_to_string(const mpf_class num, int precision = 32) {\n"
             "    std::ostringstream oss;\n"
             "    oss << std::fixed\n"
@@ -463,5 +463,5 @@ namespace MathLib {
 void MATH_LIB_INIT_() {
     mpf_set_default_prec(MathLib::__DEFAULT__PREC__);
     cout << std::setprecision(MathLib::__PRECISION__);
-    SetConsoleOutputCP(CP_UTF8);
+    //SetConsoleOutputCP(CP_UTF8);
 }
