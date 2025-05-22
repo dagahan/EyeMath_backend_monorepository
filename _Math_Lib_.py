@@ -22,7 +22,7 @@
 try:
     import os, sys
     from _Server_ import __BASE_DIR__, __RES_DIR__
-    os.system(f"pip install -r {__RES_DIR__}requirements.txt")
+    os.system(f"pip install -r {__RES_DIR__}req_MaL.txt")
 
     from mpmath import mp, polyroots, mpf
     from sympy import *

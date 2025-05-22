@@ -25,7 +25,7 @@ try:
     __BASE_DIR__ = f"{os.path.abspath(os.path.dirname(__file__))}/"
     __RES_DIR__ = f"{__BASE_DIR__}res/"
 
-    os.system(f"pip install -r {__RES_DIR__}requirements.txt")
+    os.system(f"pip install -r {__RES_DIR__}req_Server.txt")
 
     import _Math_Lib_ as MaL
     from fastapi import FastAPI
