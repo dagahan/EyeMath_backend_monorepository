@@ -21,8 +21,8 @@
                         # SETUP MATH LIBRARY ENVIRONMENT #
 try:
     import os, sys
-    from _Server_ import __BASE_DIR__, __RES_DIR__
-    os.system(f"pip install -r {__RES_DIR__}req_MaL.txt")
+    from _Headers_ import *
+    os.system(f"pip install -r {RES_DIR}req_MaL.txt")
 
     from mpmath import mp, polyroots, mpf
     from sympy import *
@@ -30,9 +30,8 @@ try:
     import re
 
     # Set the precision for mpmath #
-    __PRECISION__ = 32
-    __DEFAULT_PREC__ = 48
-    mp.dps = __PRECISION__
+
+    mp.dps = PRECISION
     # Set the precision for mpmath #
 
 except Exception as e:
