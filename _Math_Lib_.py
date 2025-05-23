@@ -2,6 +2,7 @@ import os, sys, toml, re
 from mpmath import mp, polyroots, mpf
 from sympy import *
 from latex2sympy2 import latex2sympy
+from startup import CONFIG, load_toml, save_toml, read_key_toml, write_key_toml, read_key_config
 
 
 
@@ -43,4 +44,6 @@ def solve_expression(expr):
 
 
 if __name__ == "__main__" or __name__ == "_Math_Lib_":
-    mp.dps = PRECISION
+    mp.dps = CONFIG["MaL"]["PRECISION"]
+
+    print(read_key_config("paths", "base_dir"))
