@@ -1,0 +1,20 @@
+name = "EyeMath"
+version = "0.0.1"
+
+[paths]
+base_dir = "/home/usov/myprojects/EyeMath/"
+res_dir = "/home/usov/myprojects/EyeMath/res/"
+cpp_dir = "/home/usov/myprojects/EyeMath/res/cpp/"
+binary_dir = "/home/usov/myprojects/EyeMath/res/cpp/binary/"
+data_dir = "/home/usov/myprojects/EyeMath/data/"
+
+[cpp]
+compiler = "/usr/bin/g++"
+cpp_version = "-std=c++17"
+cpp_file = "_Server_.cpp"
+compiler_flags = "-lgmp -lgmpxx -o"
+compiled_file = "_Server_"
+
+[MaL]
+PRECISION = 32
+DEFAULT_PREC = 48

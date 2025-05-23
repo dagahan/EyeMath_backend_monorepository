@@ -1,43 +1,7 @@
-# ******************************************************************************
-#  *                              _Math_Lib_.py                                *
-#  *                                                                            *
-#  *  Project: EyeMath                                                         *
-#  *  Author: Usov Nikita                                                      *
-#  *  Created: April 23, 2025                                                  *
-#  *  Last Modified: May 29, 2025                                              *
-#  *                                                                            *
-#  *  Description:                                                             *
-#  *  This is the Mathimatician Library with many of functions for EyeMath     *
-#  *  Project. Here's some funtions how multiply, power, Generate LaTeX and  *
-#  *  simpy recognize LaTeX code from PNG image.                               * 
-#  *                                                                            *
-#  ******************************************************************************
-
-
-
-
-
-#  ******************************************************************************
-                        # SETUP MATH LIBRARY ENVIRONMENT #
-try:
-    import os, sys
-    from _Headers_ import *
-    os.system(f"pip install -r {RES_DIR}req_MaL.txt")
-
-    from mpmath import mp, polyroots, mpf
-    from sympy import *
-    from latex2sympy2 import latex2sympy
-    import re
-
-    # Set the precision for mpmath #
-
-    mp.dps = PRECISION
-    # Set the precision for mpmath #
-
-except Exception as e:
-    print(f"Error installing requirements: {e}\n\nPlease install the requirements manually.")
-    sys.exit(1)
-#  ******************************************************************************
+import os, sys, toml, re
+from mpmath import mp, polyroots, mpf
+from sympy import *
+from latex2sympy2 import latex2sympy
 
 
 
@@ -79,4 +43,4 @@ def solve_expression(expr):
 
 
 if __name__ == "__main__" or __name__ == "_Math_Lib_":
-    ()
+    mp.dps = PRECISION

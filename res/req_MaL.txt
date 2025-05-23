@@ -1,3 +1,0 @@
-mpmath
-sympy
-latex2sympy2

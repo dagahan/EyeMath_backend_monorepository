@@ -14,30 +14,12 @@
 #  ******************************************************************************
 
 
-
-
-
-#  ******************************************************************************
-                        # SETUP SERVER ENVIRONMENT #
-try:
-    import os, sys
-    from _Headers_ import *
-    os.system(f"pip install -r {RES_DIR}req_Server.txt")
-
-    import _Math_Lib_ as MaL
-    from fastapi import FastAPI
-    from pydantic import BaseModel
-    from typing import Optional
-
-
-except Exception as e:
-    print(f"Error installing requirements: {e}\n\nPlease install the requirements manually.")
-    sys.exit(1)
-#  ******************************************************************************
-
-
-
-
+import _Math_Lib_ as MaL
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Optional
+import toml
+import subprocess
     
 
 
