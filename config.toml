@@ -6,14 +6,14 @@ version = "0.0.1"
 base_dir = "/home/usov/myprojects/EyeMath/"
 res_dir = "/home/usov/myprojects/EyeMath/res/"
 data_dir = "/home/usov/myprojects/EyeMath/data/"
-cpp_dir = "/home/usov/myprojects/EyeMath/res/cpp/"
-binary_dir = "/home/usov/myprojects/EyeMath/res/cpp/binary/"
-compiler = "/usr/bin/g++"
+go_dir = "/home/usov/myprojects/EyeMath/res/go/"
+binary_dir = "/home/usov/myprojects/EyeMath/res/go/binary/"
+compiler = "/snap/bin/go"
 
-[cpp]
-cpp_version = "-std=c++17"
-cpp_file = "_Server_.cpp"
-compiler_flags = "-lgmp -lgmpxx -o"
+[go]
+go_build_flags = "build -o"
+check_path_go_cmd = "which go"
+go_file = "_Server_.go"
 compiled_file = "_Server_"
 
 [MaL]

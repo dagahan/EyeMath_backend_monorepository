@@ -7,8 +7,11 @@ def install_requirements():
         print(f"Error installing requirements: {e}\n\nPlease install the requirements manually.")
         sys.exit(1)
 
-import toml, subprocess
-
+try:
+    import toml, subprocess
+except ImportError:
+    install_requirements()
+    import toml, subprocess    
 
 def load_toml():
     with open("config.toml", "r") as f:
@@ -28,9 +31,32 @@ def write_key_toml(database, key, value):
 CONFIG = load_toml()
 read_key_config = lambda database, key: CONFIG[database][key]
 
+def setup_derictories():
+    CONFIG["paths"]["base_dir"] = BASE_DIR
+    CONFIG["paths"]["res_dir"] = RES_DIR
+    CONFIG["paths"]["data_dir"] = DATA_DIR
+    CONFIG["paths"]["go_dir"] = GO_DIR
+    CONFIG["paths"]["binary_dir"] = BINARY_DIR
+    
+    try:
+        CONFIG["paths"]["compiler"] = (subprocess.run(read_key_config("go", "check_path_go_cmd"), shell=True, stdout=subprocess.PIPE)).stdout.decode().strip()
+    except subprocess.CalledProcessError as e:
+        print(f"Error cheking which go is located: {e}")
+        sys.exit(1)
 
+    save_toml(CONFIG)
 
+def setup_binary_backend_go():
+    try:
+        compile_cmd = f"{read_key_config("paths", "compiler")} {read_key_config("go", "go_build_flags")} {read_key_config("paths", "go_dir")}{read_key_config("go", "go_file")} {read_key_config("paths", "binary_dir")}{read_key_config("go", "compiled_file")}"
+        print(f"Compiling go code with command: {compile_cmd}")
+        subprocess.run(compile_cmd, shell=True, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error compiling go code: {e}")
+        sys.exit(1)
 
+def setup_binary_backend_go_run():
+    subprocess.run([f"{read_key_config("paths", "binary_dir")}{read_key_config("paths", "compiled_file")}"])
 
 
 
@@ -40,24 +66,9 @@ if __name__ == "__main__":
     BASE_DIR = f"{os.path.abspath(os.path.dirname(__file__))}/"
     RES_DIR = f"{BASE_DIR}res/"
     DATA_DIR = f"{BASE_DIR}data/"
-    CPP_DIR = f"{RES_DIR}cpp/"
-    BINARY_DIR = f"{CPP_DIR}binary/"
+    GO_DIR = f"{RES_DIR}go/"
+    BINARY_DIR = f"{GO_DIR}binary/"
 
-    
-    CONFIG["paths"]["base_dir"] = BASE_DIR
-    CONFIG["paths"]["res_dir"] = RES_DIR
-    CONFIG["paths"]["data_dir"] = DATA_DIR
-    CONFIG["paths"]["cpp_dir"] = CPP_DIR
-    CONFIG["paths"]["binary_dir"] = BINARY_DIR
-    save_toml(CONFIG)
-
-
-    compile_cmd = f"{read_key_config("paths", "compiler")} {read_key_config("cpp", "cpp_version")} {read_key_config("paths", "cpp_dir")}{read_key_config("cpp", "cpp_file")} {read_key_config("cpp", "compiler_flags")} {read_key_config("paths", "binary_dir")}{read_key_config("cpp", "compiled_file")}"
-    try:
-        print(f"Compiling C++ code with command: {compile_cmd}")
-        subprocess.run(compile_cmd, shell=True, check=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Error compiling C++ code: {e}")
-        sys.exit(1)
-
-    subprocess.run([f"{read_key_config("paths", "binary_dir")}_Server_"])
+    setup_derictories()
+    setup_binary_backend_go()
+    setup_binary_backend_go_run()
