@@ -13,8 +13,8 @@ compiler = "/snap/bin/go"
 [go]
 go_build_flags = "build -o"
 check_path_go_cmd = "which go"
-go_file = "_Server_.go"
-compiled_file = "_Server_"
+go_file = "Server.go"
+compiled_file = "Server"
 
 [MaL]
 PRECISION = 32

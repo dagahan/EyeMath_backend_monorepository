@@ -48,7 +48,7 @@ def setup_derictories():
 
 def setup_binary_backend_go():
     try:
-        compile_cmd = f"{read_key_config("paths", "compiler")} {read_key_config("go", "go_build_flags")} {read_key_config("paths", "go_dir")}{read_key_config("go", "go_file")} {read_key_config("paths", "binary_dir")}{read_key_config("go", "compiled_file")}"
+        compile_cmd = f"{read_key_config("paths", "compiler")} {read_key_config("go", "go_build_flags")} {read_key_config("paths", "binary_dir")}{read_key_config("go", "compiled_file")} {read_key_config("paths", "go_dir")}{read_key_config("go", "go_file")}"
         print(f"Compiling go code with command: {compile_cmd}")
         subprocess.run(compile_cmd, shell=True, check=True)
     except subprocess.CalledProcessError as e:
@@ -56,7 +56,7 @@ def setup_binary_backend_go():
         sys.exit(1)
 
 def setup_binary_backend_go_run():
-    subprocess.run([f"{read_key_config("paths", "binary_dir")}{read_key_config("paths", "compiled_file")}"])
+    subprocess.run([f"{read_key_config("paths", "binary_dir")}{read_key_config("go", "compiled_file")}"])
 
 
 
