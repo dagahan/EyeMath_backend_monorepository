@@ -1,26 +1,29 @@
-version: '3.8'
+version: '3.9'
 
 services:
   api_gateway:
-    build: ./API_GATEWAY  # Путь к Dockerfile API Gateway
+    build: ./API_GATEWAY
     ports:
       - "8080:8080"
     volumes:
-      - ./API_GATEWAY:/app  # Hot-reload для Go
+      - ./API_GATEWAY:/app
+    restart: on-failure  
 
   math_solve:
-    build: ./MATH_SOLVE  # Dockerfile Math Service
+    build: ./MATH_SOLVE 
     ports:
       - "8001:8001"
     volumes:
       - ./MATH_SOLVE:/code
     environment:
-      - DB_URL=postgres://user:pass@postgres:5432/math_db
+      - WATCHFILES_FORCE_POLLING=true
+    restart: on-failure
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+    restart: on-failure
 
   postgres:
     image: postgres:14
@@ -29,6 +32,7 @@ services:
       - POSTGRES_PASSWORD=pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: on-failure
 
 volumes:
    postgres_data:

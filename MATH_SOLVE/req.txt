@@ -6,3 +6,4 @@ mpmath
 sympy
 latex2sympy2
 toml
+loguru

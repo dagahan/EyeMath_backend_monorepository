@@ -24,7 +24,7 @@ COPY . .
 
 
 #Open port for service
-EXPOSE 8080
+EXPOSE ${PORT}
 
 
 #Compile Run the application with toml configuration file.

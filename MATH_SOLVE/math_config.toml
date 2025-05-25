@@ -5,3 +5,4 @@ DEFAULT_PREC = 48
 
 [host]
 PORT = 8001
+reload = true
