@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlalchemy
+aiosqlite
+mpmath
+sympy
+latex2sympy2
+toml

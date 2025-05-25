@@ -11,7 +11,8 @@ binary_dir = "/home/usov/myprojects/EyeMath/res/go/binary/"
 compiler = "/snap/bin/go"
 
 [go]
-go_build_flags = "build -o"
+go_flags = "GOOS=linux GOARCH=amd64"
+go_build = "build -o"
 check_path_go_cmd = "which go"
 go_file = "Server.go"
 compiled_file = "Server"
