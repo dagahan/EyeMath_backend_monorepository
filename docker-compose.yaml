@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  api_gateway:
+    build: ./API_GATEWAY  # Путь к Dockerfile API Gateway
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./API_GATEWAY:/app  # Hot-reload для Go
+
+  math_solve:
+    build: ./MATH_SOLVE  # Dockerfile Math Service
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./MATH_SOLVE:/code
+    environment:
+      - DB_URL=postgres://user:pass@postgres:5432/math_db
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:14
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=pass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+   postgres_data:

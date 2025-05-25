@@ -1,10 +1,15 @@
-from typing import Any
+
 #TODO: переделать все переменные в я mpf из библиотеки mpmath
 
 import os, sys, toml, re
 from mpmath import mp, polyroots, mpf
 from sympy import *
 from latex2sympy2 import latex2sympy
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Optional
+import uvicorn
+
 
 
 def load_toml():
@@ -55,9 +60,41 @@ def solve_expression(expr):
 
 
 
+def INIT_SERVER():
+    app = FastAPI()
+
+    @app.get("/")
+    def read_root():
+        return (f"Hello World!werwerwer HEEEY21!")
+
+    @app.get("/MaL/{operation}")
+    def read_item(operation: str):
+        print(f"Operation: {operation}")
+        a = f"result: {solve_expression(operation)}"
+        print(f"MaL answer: {a}")
+        return a
+    
+    @app.get("/tasks")
+    def get_tasks():
+        task = Task(task="Solve x^2 + 2x + 1 = 0")
+        print(task)
+        return f"data: {task}"
+        
+
+    return app
 
 
-if __name__ == "__main__" or __name__ == "_Math_Lib_":
+
+app = INIT_SERVER()
+
+
+
+if __name__ == "__main__":
+
+    class Task(BaseModel):
+        task: str
+        result: Optional[str] = None
+
     mp.dps = MATH_CONFIG["MaL"]["PRECISION"]
-
-    print(read_key_config("MaL", "PRECISION"))
+    port = int(read_key_config("host", "PORT"))
+    uvicorn.run("Math_Lib:app", host="0.0.0.0", port=port, reload=True)
