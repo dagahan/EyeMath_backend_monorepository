@@ -1,17 +1,31 @@
+from typing import Any
+#TODO: переделать все переменные в я mpf из библиотеки mpmath
+
 import os, sys, toml, re
 from mpmath import mp, polyroots, mpf
 from sympy import *
 from latex2sympy2 import latex2sympy
-from startup import CONFIG, load_toml, save_toml, read_key_toml, write_key_toml, read_key_config
 
 
+def load_toml():
+    with open("math_config.toml", "r") as f:
+        return toml.load(f)
+    
+def save_toml(config):
+    with open("math_config.toml", "w") as f:
+        toml.dump(config, f)
+
+read_key_toml = lambda database, key: load_toml()[database][key]
+
+def write_key_toml(database, key, value):
+    toml = load_toml()
+    toml[database][key] = value
+    save_toml(toml)
+
+MATH_CONFIG = load_toml()
+read_key_config = lambda database, key: MATH_CONFIG[database][key]
 
 
-
-
-
-
-#TODO: переделать все переменные в я mpf из библиотеки mpmath
 
 
 def is_equation(expr):
@@ -44,6 +58,6 @@ def solve_expression(expr):
 
 
 if __name__ == "__main__" or __name__ == "_Math_Lib_":
-    mp.dps = CONFIG["MaL"]["PRECISION"]
+    mp.dps = MATH_CONFIG["MaL"]["PRECISION"]
 
-    print(read_key_config("paths", "base_dir"))
+    print(read_key_config("MaL", "PRECISION"))

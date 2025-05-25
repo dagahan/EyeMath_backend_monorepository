@@ -23,8 +23,9 @@ RUN go mod download
 COPY . .
 
 
-
+#Open port for service
 EXPOSE 8080
 
 
+#Compile Run the application with toml configuration file.
 CMD ["air", "-c", ".air.toml"]
