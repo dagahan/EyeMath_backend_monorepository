@@ -117,7 +117,6 @@ class MathSolver:
             return lhs_vars or rhs_vars
         else:
             logger.debug(f"{expr} is not an equation.")
-            logger.debug(f"{expr} is not an equation.")
             return any(isinstance(node, Symbol) for node in preorder_traversal(expr))
 
 
@@ -158,8 +157,6 @@ class APIService:
             api_answer = self.AnswerModel(answer_class="root", response_data=self.app.version)
             return {self.app.title: api_answer}
 
-
-
         @self.app.get("/MaL/{operation}")
         async def read_operation(operation: str):
 
@@ -184,7 +181,7 @@ def run_service():
     
     uvicorn.run(
         "math_solve:app",
-        host="0.0.0.0",
+        host=config.get("host", "HOST"),
         port=int(config.get("host", "PORT")),
         reload=config.get("host", "reload"),
         reload_excludes=["debug/*", "math_config.toml"],
