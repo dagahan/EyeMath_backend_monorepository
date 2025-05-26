@@ -1,3 +1,8 @@
+[metadata]
+NAME = "EyeMathSolverAPI"
+VERSION = "0.0.1"
+
+
 [MaL]
 PRECISION = 32
 DEFAULT_PREC = 48

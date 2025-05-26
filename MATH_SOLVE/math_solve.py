@@ -1,4 +1,4 @@
-import os, sys, logging, inspect, toml, uvicorn
+import os, sys, logging, inspect, toml, uvicorn, asyncio
 from typing import Optional
 from fastapi import FastAPI
 from fastapi.logger import logger as fastapi_logger
@@ -30,7 +30,6 @@ class InterceptHandler(logging.Handler):
 
 
 
-
 class ConfigLoader:
     _instance = None
     _config = None
@@ -54,7 +53,6 @@ class ConfigLoader:
     @classmethod
     def get(cls, section: str, key: str):
         return cls._config[section][key]
-
 
 
 
@@ -136,46 +134,46 @@ class MathSolver:
             return f"Error: {str(error)}"
 
 
-# class TaskModel(BaseModel):
-#     task: str
-#     result: Optional[str] = None
-
-
 
 
 
 class APIService:
     def __init__(self):
-        self.app = FastAPI(title="EyeMath -- Solver API")
+        self.config = ConfigLoader()
+        self.app = FastAPI(title=self.config.get("metadata", "NAME"), version=self.config.get("metadata", "VERSION"))
         self.solver = MathSolver()
         self._setup_routes()
 
 
+    class AnswerModel(BaseModel):
+        answer_class: str
+        response_data: Optional[str] = None
+
+
+
     def _setup_routes(self):
         @self.app.get("/") #that function we call "endpoint of the rest api"
-        def read_root() -> dict[str, str]:
-            return {"message": "Hello World!! aaa"}
+        async def read_root():
+            api_answer = self.AnswerModel(answer_class="root", response_data=self.app.version)
+            return {self.app.title: api_answer}
+
+
 
         @self.app.get("/MaL/{operation}")
-        def read_item(operation: str) -> dict[str, str]:
-            logger.debug("Processing expression: {operation}")
+        async def read_operation(operation: str):
+
+            logger.debug(f"Processing expression: {operation}")
             solver_answer = str(self.solver.solve(operation))
             logger.debug(f"Solver answer: {solver_answer}")
-            return {"message": solver_answer}
-        
-        @self.app.get("/tasks")
-        def get_tasks() -> dict[str, str]:
-            task = Task(task="Solve x^2 + 2x + 1 = 0")
-            print(task)
-            return {"message": task}
+
+            api_answer = self.AnswerModel(answer_class="operation", response_data=solver_answer)
+            return {self.app.title: api_answer}
+            
 
 
 
 
 app = APIService().app
-
-
-
 
 
 def run_service():
