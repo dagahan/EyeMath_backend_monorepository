@@ -182,13 +182,33 @@ cython_debug/
 
 # Executables
 *.exe
+*.exe~
 *.out
 *.app
 
+
+
+
+
+
+# GOLANG GIT IGNORE
+go.work
+go.work.sum
+
+# Derictories
+binary/
+
+
+
+
+
+
+
+
 # ignoring temp_files, renderLaTeX and recognizeLaTeX directories.
-temp_files/
-renderLaTeX/
-recognizeLaTeX/
+# temp_files/
+# renderLaTeX/
+# recognizeLaTeX/
 
 # IDE files
 .vscode/
