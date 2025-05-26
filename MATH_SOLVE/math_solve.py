@@ -117,7 +117,6 @@ class MathSolver:
             return lhs_vars or rhs_vars
         else:
             logger.debug(f"{expr} is not an equation.")
-            logger.debug(f"{expr} is not an equation.")
             return any(isinstance(node, Symbol) for node in preorder_traversal(expr))
 
 
