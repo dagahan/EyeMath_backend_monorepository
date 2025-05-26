@@ -1,0 +1,13 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "GOOS=linux GOARCH=amd64 go build -o /app/binary/Server Server.go"
+bin = "/app/binary/Server"
+delay = 1000
+exclude_dir = ["vendor", "tmp"]
+include_ext = ["go"]
+run_after_build = "chmod +x /app/binary/Server"
+
+[log]
+level = "debug"

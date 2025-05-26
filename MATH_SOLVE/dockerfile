@@ -1,0 +1,41 @@
+# Используем официальный образ Python 3.10
+FROM python:3.11-slim-bookworm as builder
+
+# Update the system and ensure its ready for usage
+RUN apt-get update && apt-get install --assume-yes --no-install-recommends \
+    gcc-11=11.3.0-12 build-essential=12.9
+
+
+WORKDIR /app
+
+# Устанавливаем системные зависимости
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Копируем зависимости
+COPY req.txt .
+
+# Устанавливаем пакеты глобально (в Docker нет необходимости в venv)
+RUN pip install --user --no-cache-dir -r req.txt
+
+# Копируем исходный код
+COPY math_solve.py .
+COPY math_config.toml .
+
+# Финальный образ
+FROM python:3.11-slim-bookworm
+
+WORKDIR /app
+
+# Копируем установленные пакеты
+COPY --from=builder /root/.local /root/.local
+COPY --from=builder /app .
+
+# Добавляем .local/bin в PATH
+ENV PATH=/root/.local/bin:$PATH
+
+EXPOSE ${PORT}
+
+
+CMD ["uvicorn", "math_solve:app", "--host", "0.0.0.0", "--port", "8001", "--reload"]
