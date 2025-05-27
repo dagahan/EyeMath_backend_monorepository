@@ -1,0 +1,43 @@
+syntax = "proto3";
+package ExternalApiGateway;
+option go_package = "usov.external_api_gateway.v1;exapigate";
+
+
+message RegisterRequest {
+  string email = 1;
+  string password = 2;
+  string name = 3;
+  string surname = 4;
+}
+
+message RegisterResponse {
+  int64 user_id = 1;
+}
+
+
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+  string app_id = 3;
+}
+
+message LoginResponse {
+  int64 token = 1;
+}
+
+
+message IsAdminRequest {
+  int64 user_id = 1;
+}
+
+message IsAdminResponse {
+  bool is_admin = 1;
+}
+
+
+
+service ExternalApiGateway {
+  rpc Register (RegisterRequest) returns (RegisterResponse);
+  rpc Login (LoginRequest) returns (LoginResponse);
+  rpc IsAdmin (IsAdminRequest) returns (IsAdminResponse);
+}

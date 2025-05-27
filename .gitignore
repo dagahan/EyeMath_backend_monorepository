@@ -197,7 +197,7 @@ go.work.sum
 
 # Derictories
 binary/
-
+gen/
 
 
 

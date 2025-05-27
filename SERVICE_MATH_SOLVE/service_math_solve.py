@@ -1,10 +1,12 @@
-import os, sys, logging, inspect, toml, asyncio
+import os, sys, logging, inspect, toml
 
 
 from concurrent import futures
 import grpc
 import service_math_solve_pb2 as pb
 import service_math_solve_pb2_grpc as rpc
+from google.protobuf.json_format import MessageToDict
+import json
 
 
 from loguru import logger
@@ -14,6 +16,7 @@ from latex2sympy2 import latex2sympy
 
 
 
+#logger = logging.getLogger(__name__)
 
 class InterceptHandler(logging.Handler):
     def emit(self, record):
@@ -64,8 +67,6 @@ class ConfigLoader:
 class LogSetup:
     def __init__(self):
         self.configure_loguru()
-        self.configure_uvicorn()
-
 
     @staticmethod
     def configure_loguru():
@@ -81,7 +82,6 @@ class LogSetup:
             catch=True,
         )
 
-
         logger.add(
             sys.stdout,
             format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | "
@@ -91,22 +91,9 @@ class LogSetup:
         )
 
 
-    @staticmethod
-    def configure_uvicorn():
-        logging.getLogger().handlers = []
-        logging.basicConfig(handlers=[InterceptHandler()], level=logging.NOTSET, force=True)
-
-        for name in logging.root.manager.loggerDict:
-            if name.startswith(("uvicorn", "fastapi", "gunicorn")):
-                lg = logging.getLogger(name)
-                lg.handlers = []
-                lg.propagate = True
 
 
-
-
-
-class MathSolverServicer(rpc.MathSolverServicer):
+class MathSolver(rpc.MathSolver):
     def __init__(self):
         self.config = ConfigLoader()
         mp.dps = self.config.get("MaL", "PRECISION")
@@ -122,81 +109,79 @@ class MathSolverServicer(rpc.MathSolverServicer):
         else:
             logger.debug(f"{expr} is not an equation.")
             return any(isinstance(node, Symbol) for node in preorder_traversal(expr))
+        
 
 
-    def Solve(self, request: pb.SolveRequest, context) -> pb.SolveResponse:
+    def _logrequest(self, request, context):
+        if self.config.get("metadata", "LOGGING_REQUESTS"):
+            payload = MessageToDict(request)
+            logger.info(
+                f"Method \"{inspect.stack()[1][3]}\" has called from  |  {context.peer()}\n" #format: 'ipv4:127.0.0.1:54321'
+                f"{json.dumps(payload, indent=4, ensure_ascii=False)}"
+            )
+
+    def _logresponce(self, responce, context):
+        if self.config.get("metadata", "LOGGING_RESPONSES"):
+            payload = MessageToDict(responce)
+            logger.info(
+                f"Method \"{inspect.stack()[1][3]}\" responsing to  |  {context.peer()}\n"
+                f"{json.dumps(payload, indent=4, ensure_ascii=False)}"
+            )
+
+
+
+    def Metadata(self, request: pb.MetadataRequest, context) -> pb.MetadataResponse:
+        self._logrequest(request, context)
+
+        try:
+            responce = pb.MetadataResponse(
+                name = self.config.get("metadata", "NAME"),
+                version = self.config.get("metadata", "VERSION"),
+            )
+
+            self._logresponce(responce, context)
+            return responce
+
+        except Exception as error:
+            logger.error(f"Checking of metadata error: {error}")
+            return pb.MetadataResponse(
+                )
+
+
+
+
+    def Solve(self, request: pb.SolveRequest, context) -> pb.SolveResponse: #that function we call "endpoint of the gRPC api"
+        self._logrequest(request, context)
+
         try:
             parsed = latex2sympy(request.expression)
             if self._is_equation(parsed):
                 to_return = solve(parsed)
             else:
                 to_return = parsed.evalf()
-            return pb.SolveResponse(
+
+            responce = pb.SolveResponse(
                 status=pb.SolveResponse.OK,
                 result=str(to_return),
             )
 
+            self._logresponce(responce, context)
+            return responce
+
+
         except Exception as error:
-            logger.error("Solve error: {error}")
+            logger.error(f"Solve error: {error}")
             return pb.SolveResponse(
                 status=pb.SolveResponse.ERROR,
-                error_msg=str(e),
-            )
-
-
-
-
-
-# class APIService:
-#     def __init__(self):
-#         self.config = ConfigLoader()
-#         self.app = FastAPI(title=self.config.get("metadata", "NAME"), version=self.config.get("metadata", "VERSION"))
-#         self.solver = MathSolver()
-#         self._setup_routes()
-
-
-#     class AnswerModel(BaseModel):
-#         answer_class: str
-#         response_data: Optional[str] = None
-
-
-
-#     def _setup_routes(self):
-#         @self.app.get("/") #that function we call "endpoint of the rest api"
-#         async def read_root():
-#             api_answer = self.AnswerModel(answer_class="root", response_data=self.app.version)
-#             return {self.app.title: api_answer}
-
-#         @self.app.get("/MaL/{operation}")
-#         async def read_operation(operation: str):
-
-#             logger.debug(f"Processing expression: {operation}")
-#             solver_answer = str(self.solver.solve(operation))
-#             logger.debug(f"Solver answer: {solver_answer}")
-
-#             api_answer = self.AnswerModel(answer_class="operation", response_data=solver_answer)
-#             return {self.app.title: api_answer}
+                )
             
 
 
 def run_service():
     LogSetup()
     config = ConfigLoader()
-
-    
-    # uvicorn.run(
-    #     "service_math_solve:app",
-    #     host=config.get("host", "HOST"),
-    #     port=int(config.get("host", "PORT")),
-    #     reload=config.get("host", "reload"),
-    #     reload_excludes=["debug/*", "math_config.toml"],
-    #     log_config=None,
-    #     access_log=False
-    # )
-
-
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    rpc.add_MathSolverServicer_to_server(MathSolverServicer(), server)
+    rpc.add_MathSolverServicer_to_server(MathSolver(), server)
 
     host = config.get("host", "HOST")
     port = int(config.get("host", "PORT"))
@@ -210,6 +195,6 @@ def run_service():
 if __name__ == "__main__":
     try:
         run_service()
-    except Exception as critical_error:
-        logger.critical("Service crashed: {error}", error=critical_error)
+    except Exception as error:
+        logger.critical(f"Service crashed: {error}")
         sys.exit(1)

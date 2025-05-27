@@ -28,4 +28,4 @@ EXPOSE ${PORT}
 
 
 #Compile Run the application with toml configuration file.
-CMD ["air", "-c", ".air.toml"]
+CMD ["air", "-c", "external_api_config.toml"]

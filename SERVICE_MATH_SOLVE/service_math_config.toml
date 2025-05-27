@@ -1,6 +1,8 @@
 [metadata]
 NAME = "EyeMathSolverAPI"
 VERSION = "0.0.1"
+LOGGING_REQUESTS = true
+LOGGING_RESPONSES = false
 
 
 [MaL]
