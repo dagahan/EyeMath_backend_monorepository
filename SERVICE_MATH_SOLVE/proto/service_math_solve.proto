@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package mathsolve;
+
+// Запрос: строковое выражение (LaTeX или простой текст)
+message SolveRequest {
+  string expression = 1;
+}
+
+// Ответ: статус + либо результат, либо текст ошибки
+message SolveResponse {
+  enum Status {
+    OK = 0;
+    ERROR = 1;
+  }
+  Status status = 1;
+  string result = 2;     // например "9.6" или "x = 3"
+  string error_msg = 3;  // если status = ERROR
+}
+
+// Сервис с одним методом Solve
+service MathSolver {
+  rpc Solve (SolveRequest) returns (SolveResponse);
+}

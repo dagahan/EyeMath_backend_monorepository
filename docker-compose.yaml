@@ -1,26 +1,26 @@
 version: '3.9'
 
 services:
-  api_gateway:
-    build: ./API_GATEWAY
+  external_api_gateway:
+    build: ./EXTERNAL_API_GATEWAY
     environment:
-      - HOST=${API_GATEWAY_HOST}
-      - PORT=${API_GATEWAY_APP_PORT}
+      - HOST=${EXTERNAL_API_GATEWAY_HOST}
+      - PORT=${EXTERNAL_API_GATEWAY_APP_PORT}
     ports:
-      - ${API_GATEWAY_PORT}
+      - ${EXTERNAL_API_GATEWAY_PORT}
     volumes:
-      - ./API_GATEWAY:/app
+      - ./EXTERNAL_API_GATEWAY:/app
     restart: on-failure  
 
-  math_solve:
-    build: ./MATH_SOLVE 
+  service_math_solve:
+    build: ./SERVICE_MATH_SOLVE 
     environment:
       - HOST=${MATH_SOLVE_HOST}
       - PORT=${MATH_SOLVE_APP_PORT}
     ports:
       - ${MATH_SOLVE_PORT}
     volumes:
-      - ./MATH_SOLVE:/code
+      - ./SERVICE_MATH_SOLVE:/code
     restart: on-failure
 
   redis:
