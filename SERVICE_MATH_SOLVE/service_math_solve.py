@@ -1,14 +1,11 @@
-import os, sys, logging, inspect, toml
+import os, sys, logging, inspect, toml, grpc, json
 
+sys.path.insert(0, './gen')
 
-from concurrent import futures
-import grpc
 import service_math_solve_pb2 as pb
 import service_math_solve_pb2_grpc as rpc
+from concurrent import futures
 from google.protobuf.json_format import MessageToDict
-import json
-
-
 from loguru import logger
 from mpmath import mp
 from sympy import Eq, Symbol, preorder_traversal, solve
@@ -16,8 +13,8 @@ from latex2sympy2 import latex2sympy
 
 
 
-#logger = logging.getLogger(__name__)
 
+# Setuping the exception handler
 class InterceptHandler(logging.Handler):
     def emit(self, record):
         try:
@@ -75,7 +72,7 @@ class LogSetup:
             "debug/debug.json",
             format="{time} {level} {message}",
             serialize=True,
-            rotation="05:00",
+            rotation="04:00",
             retention="14 days",
             compression="zip",
             level="DEBUG",
@@ -91,14 +88,13 @@ class LogSetup:
         )
 
 
-
-
-class MathSolver(rpc.MathSolver):
+class MathSolver:
     def __init__(self):
         self.config = ConfigLoader()
         mp.dps = self.config.get("MaL", "PRECISION")
 
 
+    @logger.catch
     def _is_equation(self, expr):
         logger.debug(f"Checking if {expr} is an equation...")
         if isinstance(expr, Eq):
@@ -109,9 +105,30 @@ class MathSolver(rpc.MathSolver):
         else:
             logger.debug(f"{expr} is not an equation.")
             return any(isinstance(node, Symbol) for node in preorder_traversal(expr))
-        
 
 
+    @logger.catch    #this we call 'decorator'
+    def SolveExpression(self, request):
+        parsed = latex2sympy(request.expression)
+
+        if self._is_equation(self, parsed):
+            to_return = solve(parsed)
+        else:
+            to_return = parsed.evalf()
+
+        return to_return
+
+
+
+
+
+class gRPC_math_solve(rpc.gRPC_math_solve):
+    def __init__(self):
+        self.config = ConfigLoader()
+        mp.dps = self.config.get("MaL", "PRECISION")
+    
+
+    @logger.catch
     def _logrequest(self, request, context):
         if self.config.get("metadata", "LOGGING_REQUESTS"):
             payload = MessageToDict(request)
@@ -120,6 +137,7 @@ class MathSolver(rpc.MathSolver):
                 f"{json.dumps(payload, indent=4, ensure_ascii=False)}"
             )
 
+    @logger.catch
     def _logresponce(self, responce, context):
         if self.config.get("metadata", "LOGGING_RESPONSES"):
             payload = MessageToDict(responce)
@@ -129,7 +147,7 @@ class MathSolver(rpc.MathSolver):
             )
 
 
-
+    @logger.catch
     def Metadata(self, request: pb.MetadataRequest, context) -> pb.MetadataResponse:
         self._logrequest(request, context)
 
@@ -146,28 +164,20 @@ class MathSolver(rpc.MathSolver):
             logger.error(f"Checking of metadata error: {error}")
             return pb.MetadataResponse(
                 )
-
-
-
-
+        
+    @logger.catch
     def Solve(self, request: pb.SolveRequest, context) -> pb.SolveResponse: #that function we call "endpoint of the gRPC api"
         self._logrequest(request, context)
 
         try:
-            parsed = latex2sympy(request.expression)
-            if self._is_equation(parsed):
-                to_return = solve(parsed)
-            else:
-                to_return = parsed.evalf()
-
+            MathAnswer = MathSolver.SolveExpression(MathSolver, request)
             responce = pb.SolveResponse(
                 status=pb.SolveResponse.OK,
-                result=str(to_return),
+                result=str(MathAnswer),
             )
 
             self._logresponce(responce, context)
             return responce
-
 
         except Exception as error:
             logger.error(f"Solve error: {error}")
@@ -177,11 +187,11 @@ class MathSolver(rpc.MathSolver):
             
 
 
-def run_service():
+def RUN_MATH_SOLVE_SERVICE():
     LogSetup()
     config = ConfigLoader()
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    rpc.add_MathSolverServicer_to_server(MathSolver(), server)
+    rpc.add_gRPC_math_solveServicer_to_server(gRPC_math_solve(), server)
 
     host = config.get("host", "HOST")
     port = int(config.get("host", "PORT"))
@@ -194,7 +204,7 @@ def run_service():
 
 if __name__ == "__main__":
     try:
-        run_service()
+        RUN_MATH_SOLVE_SERVICE()
     except Exception as error:
         logger.critical(f"Service crashed: {error}")
         sys.exit(1)

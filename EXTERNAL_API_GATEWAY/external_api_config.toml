@@ -18,3 +18,4 @@ HOST = "0.0.0.0"
 PORT = 8080
 timeout = 50
 storage_path = "./data"
+TokenTTL = 555

@@ -2,18 +2,23 @@ package main
 
 import (
 	"fmt"
+	"main/app"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"log/slog"
 
-	//exapigate "GoDocker/gen"
+	//exapigate "main/gen"
 
 	"github.com/BurntSushi/toml"
 )
 
 type EnvConfig struct {
-	HOST string `toml:"HOST"`
-	PORT int    `toml:"PORT"`
+	HOST         string `toml:"HOST"`
+	PORT         int    `toml:"PORT"`
+	storage_path string `toml:"storage_path"`
+	//TokenTTL     int    `toml:"TokenTTL"`
 }
 
 type RootConfig struct {
@@ -46,7 +51,7 @@ func setupLogger(env string) *slog.Logger {
 		)
 	}
 
-	// + добавить запись логов в json прямо как на python.
+	//TODO: + добавить запись логов в json прямо как на python.
 	return log
 }
 
@@ -63,4 +68,17 @@ func main() {
 	addr := fmt.Sprintf("%s:%d", cfg.HOST, cfg.PORT)
 
 	log.Info(fmt.Sprintf("Hello! your HOST:PORT is  |  %v", addr))
+
+	application := app.New(log, cfg.PORT, cfg.storage_path)
+
+	application.GRPCSrv.MustRun()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	<-stop
+
+	application.GRPCSrv.Stop()
+
+	log.Info("application stopped")
 }

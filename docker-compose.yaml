@@ -4,40 +4,73 @@ services:
   external_api_gateway:
     build: ./EXTERNAL_API_GATEWAY
     environment:
-      - HOST=${EXTERNAL_API_GATEWAY_HOST}
-      - PORT=${EXTERNAL_API_GATEWAY_APP_PORT}
+      TZ: ${SYSTEM_TIME_ZONE}
+      HOST: ${EXTERNAL_API_GATEWAY_HOST}
+      PORT: ${EXTERNAL_API_GATEWAY_APP_PORT}
     ports:
       - ${EXTERNAL_API_GATEWAY_PORT}
+    networks:
+      - eye_math_network
     volumes:
       - ./EXTERNAL_API_GATEWAY:/app
-    restart: on-failure  
+    restart: ${DOCKER_CONTAINERS_RESTART}
 
   service_math_solve:
     build: ./SERVICE_MATH_SOLVE 
     environment:
-      - HOST=${MATH_SOLVE_HOST}
-      - PORT=${MATH_SOLVE_APP_PORT}
+      TZ: ${SYSTEM_TIME_ZONE}
+      HOST: ${MATH_SOLVE_HOST}
+      PORT: ${MATH_SOLVE_APP_PORT}
     ports:
       - ${MATH_SOLVE_PORT}
+    networks:
+      - eye_math_network
     volumes:
       - ./SERVICE_MATH_SOLVE:/code
-    restart: on-failure
-
-  redis:
-    image: redis:alpine
-    ports:
-      - "6379:6379"
-    restart: on-failure
+    restart: ${DOCKER_CONTAINERS_RESTART}
 
   postgres:
     image: postgres:14
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=pass
+      TZ: ${SYSTEM_TIME_ZONE}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB_NAME}
+    ports:
+      - ${POSTGRES_PORT}
+    networks:
+      - eye_math_network
+    # volumes:
+    #   - postgres_data:/var/lib/postgresql/data
+    restart: ${DOCKER_CONTAINERS_RESTART}
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      TZ: ${SYSTEM_TIME_ZONE}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - ${PGADMIN_PORT}
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    restart: on-failure
+      - pgadmin_data:/var/lib/pgadmin
+
+  # redis:
+  #   image: redis:alpine
+  #   ports:
+  #     - "6379:6379"
+  #   restart: on-failure
+
 
 volumes:
   postgres_data:
     driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  eye_math_network:
+    driver: bridge
