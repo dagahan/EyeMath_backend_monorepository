@@ -3,6 +3,7 @@ package ExternalApiGateway;
 option go_package = "usov.external_api_gateway.v1;exapigate";
 
 
+
 message RegisterRequest {
   string email = 1;
   string password = 2;
@@ -13,6 +14,7 @@ message RegisterRequest {
 message RegisterResponse {
   int64 user_id = 1;
 }
+
 
 
 message LoginRequest {
@@ -26,6 +28,7 @@ message LoginResponse {
 }
 
 
+
 message IsAdminRequest {
   int64 user_id = 1;
 }
@@ -36,8 +39,24 @@ message IsAdminResponse {
 
 
 
+message MathSolverRequest {
+  string expression = 1;
+}
+
+message MathSolverResponse {
+  enum Status {
+    OK = 0;
+    ERROR = 1;
+  }
+  Status status = 1;
+  string result = 2; 
+}
+
+
+
 service ExternalApiGateway {
   rpc Register (RegisterRequest) returns (RegisterResponse);
   rpc Login (LoginRequest) returns (LoginResponse);
   rpc IsAdmin (IsAdminRequest) returns (IsAdminResponse);
+  rpc MathSolver (MathSolverRequest) returns (MathSolverResponse);
 }

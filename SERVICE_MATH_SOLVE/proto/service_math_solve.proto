@@ -1,6 +1,6 @@
 syntax = "proto3";
 package mathsolve;
-option go_package = "mathsolve";
+option go_package = "usov.mathsolve.v1;mathsolve";
 
 
 message MetadataRequest {
@@ -22,7 +22,7 @@ message SolveResponse {
     ERROR = 1;
   }
   Status status = 1;
-  string result = 2;
+  string result = 2; 
 }
 
 

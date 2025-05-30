@@ -2,23 +2,25 @@ package main
 
 import (
 	"fmt"
-	"main/app"
+	"net"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"log/slog"
 
-	//exapigate "main/gen"
+	exapigate "main/gen"
+	handler "main/grpc/handler"
 
 	"github.com/BurntSushi/toml"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type EnvConfig struct {
-	HOST         string `toml:"HOST"`
-	PORT         int    `toml:"PORT"`
-	storage_path string `toml:"storage_path"`
-	//TokenTTL     int    `toml:"TokenTTL"`
+	HOST        string `toml:"HOST"`
+	PORT        int    `toml:"PORT"`
+	StoragePath string `toml:"storage_path"`
 }
 
 type RootConfig struct {
@@ -55,30 +57,68 @@ func setupLogger(env string) *slog.Logger {
 	return log
 }
 
+type Gateway struct {
+}
+
+func runServer(log *slog.Logger, cfg *EnvConfig) (*grpc.Server, net.Listener, error) {
+	addr := fmt.Sprintf("%s:%d", cfg.HOST, cfg.PORT)
+
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to listen: %w", err)
+	}
+
+	server := grpc.NewServer()
+	srv := &handler.ServerAPI{}
+
+	// Register reflection service on gRPC server.
+	reflection.Register(server)
+
+	exapigate.RegisterExternalApiGatewayServer(server, srv)
+
+	log.Info(fmt.Sprintf("your HOST:PORT is  |  %v", addr))
+
+	return server, listener, nil
+
+}
+
 func main() {
 	log := setupLogger("DEBUG")
-
-	log.Info(fmt.Sprintf("Hello!"))
 
 	cfg, err := readConfig("external_api_config.toml")
 	if err != nil {
 		log.Error("Error loading config: %v", err)
 	}
 
-	addr := fmt.Sprintf("%s:%d", cfg.HOST, cfg.PORT)
+	server, listener, err := runServer(log, cfg)
+	if err != nil {
+		log.Error("Server initialization failed", "error", err)
+		os.Exit(1)
+	}
 
-	log.Info(fmt.Sprintf("Hello! your HOST:PORT is  |  %v", addr))
+	// Канал для обработки ошибок запуска сервера
+	serverErr := make(chan error, 1)
 
-	application := app.New(log, cfg.PORT, cfg.storage_path)
+	// Запускаем сервер в отдельной горутине
+	go func() {
+		if err := server.Serve(listener); err != nil {
+			serverErr <- err
+		}
+	}()
 
-	application.GRPCSrv.MustRun()
+	log.Info("Server started successfully", "address", listener.Addr().String())
 
-	stop := make(chan os.Signal, 1)
-	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+	// Ожидаем сигналов ОС или ошибки сервера
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
-	<-stop
-
-	application.GRPCSrv.Stop()
-
-	log.Info("application stopped")
+	select {
+	case err := <-serverErr:
+		log.Error("Server runtime error", "error", err)
+	case sig := <-sigChan:
+		log.Info("Received shutdown signal", "signal", sig)
+		log.Info("Gracefully stopping server...")
+		server.GracefulStop()
+		log.Info("Server stopped")
+	}
 }

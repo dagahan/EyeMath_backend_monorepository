@@ -7,3 +7,4 @@ sympy==1.14.0
 toml==0.10.2
 uvicorn==0.34.2
 grpcio-tools
+grpcio-reflection

@@ -9,23 +9,23 @@ FROM golang:1.24.2-alpine
 RUN apk update && apk add ca-certificates git gcc g++ libc-dev binutils
 
 
+# Creating user "appuser" with home directory /home/appuser 
+RUN addgroup -S appgroup \
+ && adduser  -S appuser -G appgroup
+
+
 WORKDIR /app
 
 
 # Download dependencies.
-RUN mkdir -p ./binary ./tmp
-RUN go install github.com/air-verse/air@latest
+RUN mkdir -p ./binary ./tmp \
+    && go install github.com/air-verse/air@latest
 COPY go.* ./
 RUN go mod download
 
-
-# Copy application source.
 COPY . .
 
-
-#Open port for service
+RUN chown -R appuser:appgroup /app /go/pkg
 EXPOSE ${PORT}
-
-
-#Compile Run the application with toml configuration file.
+USER appuser
 CMD ["air", "-c", "external_api_config.toml"]

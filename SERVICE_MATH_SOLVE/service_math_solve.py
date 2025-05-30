@@ -10,6 +10,7 @@ from loguru import logger
 from mpmath import mp
 from sympy import Eq, Symbol, preorder_traversal, solve
 from latex2sympy2 import latex2sympy
+from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 
 
 
@@ -35,20 +36,20 @@ class InterceptHandler(logging.Handler):
 
 
 class ConfigLoader:
-    _instance = None
-    _config = None
+    __instance = None # char " _ " is used to indicate that this is a private variable
+    __config = None
 
     def __new__(cls):
-        if cls._instance is None:
-            cls._instance = super().__new__(cls)
+        if cls.__instance is None:
+            cls.__instance = super().__new__(cls)
             cls._load()
-        return cls._instance
+        return cls.__instance
 
     @classmethod
     def _load(cls):
         try:
             with open("service_math_config.toml", "r") as f:
-                cls._config = toml.load(f)
+                cls.__config = toml.load(f)
             os.environ["CONFIG_LOADED"] = "1"
         except Exception as error:
             logger.critical("Config load failed: {error}", error=error)
@@ -56,7 +57,7 @@ class ConfigLoader:
    
     @classmethod
     def get(cls, section: str, key: str):
-        return cls._config[section][key]
+        return cls.__config[section][key]
 
 
 
@@ -90,8 +91,8 @@ class LogSetup:
 
 class MathSolver:
     def __init__(self):
-        self.config = ConfigLoader()
-        mp.dps = self.config.get("MaL", "PRECISION")
+        self.__config = ConfigLoader()
+        mp.dps = self.__config.get("MaL", "PRECISION")
 
 
     @logger.catch
@@ -124,25 +125,25 @@ class MathSolver:
 
 class gRPC_math_solve(rpc.gRPC_math_solve):
     def __init__(self):
-        self.config = ConfigLoader()
-        mp.dps = self.config.get("MaL", "PRECISION")
+        self.__config = ConfigLoader()
+        mp.dps = self.__config.get("MaL", "PRECISION")
     
 
     @logger.catch
     def _logrequest(self, request, context):
-        if self.config.get("metadata", "LOGGING_REQUESTS"):
+        if self.__config.get("metadata", "LOGGING_REQUESTS"):
             payload = MessageToDict(request)
             logger.info(
-                f"Method \"{inspect.stack()[1][3]}\" has called from  |  {context.peer()}\n" #format: 'ipv4:127.0.0.1:54321'
+                f"Method \"{inspect.stack()[2][3]}\" has called from  |  {context.peer()}\n" #format: 'ipv4:127.0.0.1:54321'
                 f"{json.dumps(payload, indent=4, ensure_ascii=False)}"
             )
 
     @logger.catch
     def _logresponce(self, responce, context):
-        if self.config.get("metadata", "LOGGING_RESPONSES"):
+        if self.__config.get("metadata", "LOGGING_RESPONSES"):
             payload = MessageToDict(responce)
             logger.info(
-                f"Method \"{inspect.stack()[1][3]}\" responsing to  |  {context.peer()}\n"
+                f"Method \"{inspect.stack()[2][3]}\" responsing to  |  {context.peer()}\n"
                 f"{json.dumps(payload, indent=4, ensure_ascii=False)}"
             )
 
@@ -153,8 +154,8 @@ class gRPC_math_solve(rpc.gRPC_math_solve):
 
         try:
             responce = pb.MetadataResponse(
-                name = self.config.get("metadata", "NAME"),
-                version = self.config.get("metadata", "VERSION"),
+                name = self.__config.get("metadata", "NAME"),
+                version = self.__config.get("metadata", "VERSION"),
             )
 
             self._logresponce(responce, context)
@@ -192,6 +193,13 @@ def RUN_MATH_SOLVE_SERVICE():
     config = ConfigLoader()
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     rpc.add_gRPC_math_solveServicer_to_server(gRPC_math_solve(), server)
+
+    # Enable gRPC reflection for the service
+    SERVICE_NAMES = (
+        pb.DESCRIPTOR.services_by_name['gRPC_math_solve'].full_name,
+        reflection.SERVICE_NAME,
+    )
+    reflection.enable_server_reflection(SERVICE_NAMES, server)
 
     host = config.get("host", "HOST")
     port = int(config.get("host", "PORT"))
