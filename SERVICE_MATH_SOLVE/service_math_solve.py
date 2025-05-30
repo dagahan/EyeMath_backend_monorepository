@@ -123,7 +123,7 @@ class MathSolver:
 
 
 
-class gRPC_math_solve(rpc.gRPC_math_solve):
+class GRPC_math_solve(rpc.GRPC_math_solve):
     def __init__(self):
         self.__config = ConfigLoader()
         mp.dps = self.__config.get("MaL", "PRECISION")
@@ -192,11 +192,11 @@ def RUN_MATH_SOLVE_SERVICE():
     LogSetup()
     config = ConfigLoader()
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    rpc.add_gRPC_math_solveServicer_to_server(gRPC_math_solve(), server)
+    rpc.add_GRPC_math_solveServicer_to_server(GRPC_math_solve(), server)
 
     # Enable gRPC reflection for the service
     SERVICE_NAMES = (
-        pb.DESCRIPTOR.services_by_name['gRPC_math_solve'].full_name,
+        pb.DESCRIPTOR.services_by_name['GRPC_math_solve'].full_name,
         reflection.SERVICE_NAME,
     )
     reflection.enable_server_reflection(SERVICE_NAMES, server)

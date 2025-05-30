@@ -27,7 +27,7 @@ message SolveResponse {
 
 
 
-service gRPC_math_solve {
+service GRPC_math_solve {
   rpc Metadata (MetadataRequest) returns (MetadataResponse);
   rpc Solve (SolveRequest) returns (SolveResponse);
 }

@@ -10,7 +10,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
-	mathsolve "github.com/dagahan/EyeMath_protos/go/mathsolve"
+	"github.com/dagahan/EyeMath_protos/go/mathsolve"
 )
 
 type ServerAPI struct {
