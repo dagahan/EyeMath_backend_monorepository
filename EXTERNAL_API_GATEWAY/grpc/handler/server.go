@@ -3,38 +3,40 @@ package handler
 import (
 	"context"
 	exapigate "main/gen"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
+
+	mathsolve "github.com/dagahan/EyeMath_protos/go/mathsolve"
 )
 
 type ServerAPI struct {
 	exapigate.UnimplementedExternalApiGatewayServer
 }
 
-func SendRequestMathSolver(expression string) (*exapigate.MathSolverResponse, error) {
-	conn, err := grpc.Dial("localhost:8001", grpc.WithInsecure())
+func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) {
+	conn, err := grpc.Dial(
+		"localhost:8001",
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithBlock(),
+		grpc.WithTimeout(5*time.Second),
+	)
 	if err != nil {
 		return nil, err
 	}
 	defer conn.Close()
 
-	client := exapigate.NewExternalApiGatewayClient(conn)
-	res, err := client.MathSolver(
-		context.Background(),
-		//&exapigate.MathSolverRequest{Expression: expression},
-		//&gRPC_math_solve.SolveRequest{Expression: expression},
-	)
+	client := mathsolve.NewGRPC_math_solveClient(conn)
 
+	req := &mathsolve.SolveRequest{
+		Expression: expression,
+	}
+
+	res, err := client.Solve(context.Background(), req)
 	if err != nil {
-		// Преобразуем gRPC ошибку в статус
-		if st, ok := status.FromError(err); ok {
-			return &exapigate.MathSolverResponse{
-				Status: exapigate.MathSolverResponse_ERROR,
-				Result: st.Message(),
-			}, nil
-		}
 		return nil, err
 	}
 

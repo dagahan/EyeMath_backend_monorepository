@@ -6,11 +6,14 @@ require (
 	github.com/BurntSushi/toml v1.5.0
 	google.golang.org/grpc v1.61.0
 	google.golang.org/protobuf v1.36.5
+	github.com/dagahan/EyeMath_protos/go/exapigate v0.0.0
+    github.com/dagahan/EyeMath_protos/go/mathsolve v0.0.0
 )
 
 require (
 	github.com/bufbuild/protocompile v0.14.1 // indirect
 	github.com/cncf/xds/go v0.0.0-20231109132714-523115ebc101 // indirect
+	github.com/dagahan/EyeMath_protos v0.0.0-20250530172425-051326d1de69 // indirect
 	github.com/envoyproxy/go-control-plane v0.11.1 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.0.2 // indirect
 	github.com/fullstorydev/grpcurl v1.9.3 // indirect
