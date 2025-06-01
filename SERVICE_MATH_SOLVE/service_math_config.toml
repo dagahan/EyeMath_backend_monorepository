@@ -11,6 +11,12 @@ DEFAULT_PREC = 48
 
 
 [host]
-HOST = "0.0.0.0"
+HOST = "0.0.0.0"    
 PORT = 8001
 reload = true
+
+
+[proto]
+PROTO_REPO_URL = 'https://github.com/dagahan/EyeMath_protos.git'
+PROTO_REPO_BRANCH = 'master'
+PROTO_PYTHON_PATH = 'py'

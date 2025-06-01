@@ -2,8 +2,9 @@ package handler
 
 import (
 	"context"
-	exapigate "main/gen"
 	"time"
+
+	exapigate "github.com/dagahan/EyeMath_protos/go/external_api_gateway"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -29,7 +30,7 @@ func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) 
 	}
 	defer conn.Close()
 
-	client := mathsolve.NewGRPC_math_solveClient(conn)
+	client := mathsolve.NewGRPCMathSolveClient(conn)
 
 	req := &mathsolve.SolveRequest{
 		Expression: expression,
@@ -91,7 +92,7 @@ func (s *ServerAPI) MathSolver(ctx context.Context, req *exapigate.MathSolverReq
 	}
 
 	return &exapigate.MathSolverResponse{
-		Status: response.Status,
+		Status: exapigate.MathSolverResponse_Status(response.Status),
 		Result: response.Result,
 	}, nil
 }

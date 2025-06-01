@@ -1,6 +1,6 @@
 syntax = "proto3";
 package mathsolve;
-option go_package = "usov.mathsolve.v1;mathsolve";
+option go_package = "github.com/dagahan/EyeMath_protos/go/mathsolve;mathsolve";
 
 
 message MetadataRequest {

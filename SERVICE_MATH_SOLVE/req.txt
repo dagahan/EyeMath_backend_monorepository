@@ -8,3 +8,5 @@ toml==0.10.2
 uvicorn==0.34.2
 grpcio-tools
 grpcio-reflection
+gitpython
+import_from_github_com

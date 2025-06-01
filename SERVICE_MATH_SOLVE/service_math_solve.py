@@ -1,9 +1,4 @@
-import os, sys, logging, inspect, toml, grpc, json
-
-sys.path.insert(0, './gen')
-
-import service_math_solve_pb2 as pb
-import service_math_solve_pb2_grpc as rpc
+import os, sys, logging, inspect, toml, grpc, json, git, tempfile, shutil
 from concurrent import futures
 from google.protobuf.json_format import MessageToDict
 from loguru import logger
@@ -11,6 +6,10 @@ from mpmath import mp
 from sympy import Eq, Symbol, preorder_traversal, solve
 from latex2sympy2 import latex2sympy
 from grpc_reflection.v1alpha import reflection #reflections to gRPC server
+
+import protofileseyemath
+from protofileseyemath.mathsolve import service_math_solve_pb2 as pb
+from protofileseyemath.mathsolve import service_math_solve_pb2_grpc as rpc
 
 
 

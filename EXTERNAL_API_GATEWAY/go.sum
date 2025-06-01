@@ -12,8 +12,12 @@ github.com/cncf/xds/go v0.0.0-20250121191232-2f005788dc42 h1:Om6kYQYDUk5wWbT0t0q
 github.com/cncf/xds/go v0.0.0-20250121191232-2f005788dc42/go.mod h1:W+zGtBO5Y1IgJhy4+A9GOqVhqLpfZi+vwmdNXUehLA8=
 github.com/dagahan/EyeMath_protos v0.0.0-20250530172425-051326d1de69 h1:gtT8VITR6+NYyF+xVRZiZv5x5ZNoCxmnWZJM4Dyjl5M=
 github.com/dagahan/EyeMath_protos v0.0.0-20250530172425-051326d1de69/go.mod h1:NAiLMNA6rYJ6gEewq6DGru3lfDCwcXRjMRyQ82FMm/w=
+github.com/dagahan/EyeMath_protos/go/external_api_gateway v0.0.0-20250601140114-af4d80274667 h1:AWf2gL9B7WlJjj+F4NRY3nhpNG8TF1o8dIwoqft0ixg=
+github.com/dagahan/EyeMath_protos/go/external_api_gateway v0.0.0-20250601140114-af4d80274667/go.mod h1:1u/Nxf1dOuRTQ31QuVHnwhv+Dr+z7dZVtr1lHVUvh7A=
 github.com/dagahan/EyeMath_protos/go/mathsolve v0.0.0-20250530182057-859c027811b2 h1:/LwVZb1uZO7mSs4mIf4ZWCGTuNiovYrq4VjaFP8iOHE=
 github.com/dagahan/EyeMath_protos/go/mathsolve v0.0.0-20250530182057-859c027811b2/go.mod h1:OfJKiJU5yKC3aSnPMIIcFHykIQyg697pwCrxN9DpBm0=
+github.com/dagahan/EyeMath_protos/go/mathsolve v0.0.0-20250601141425-b66f9564b07e h1:lSmwif9y4NPfGjUW0suxhnS9JqZc0zqw35zwJ4gMiGI=
+github.com/dagahan/EyeMath_protos/go/mathsolve v0.0.0-20250601141425-b66f9564b07e/go.mod h1:OfJKiJU5yKC3aSnPMIIcFHykIQyg697pwCrxN9DpBm0=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.11.1 h1:wSUXTlLfiAQRWs2F+p+EKOY9rUyis1MyGqJ2DIk5HpM=
 github.com/envoyproxy/go-control-plane v0.11.1/go.mod h1:uhMcXKCQMEJHiAb0w+YGefQLaTEw+YhGluxZkrTmD0g=

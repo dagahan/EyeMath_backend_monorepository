@@ -12,7 +12,8 @@ require (
 	github.com/bufbuild/protocompile v0.14.1 // indirect
 	github.com/cncf/xds/go v0.0.0-20250121191232-2f005788dc42 // indirect
 	github.com/dagahan/EyeMath_protos v0.0.0-20250530172425-051326d1de69 // indirect
-	github.com/dagahan/EyeMath_protos/go/mathsolve v0.0.0-20250530182057-859c027811b2 // indirect
+	github.com/dagahan/EyeMath_protos/go/external_api_gateway v0.0.0-20250601140114-af4d80274667 // indirect
+	github.com/dagahan/EyeMath_protos/go/mathsolve v0.0.0-20250601141425-b66f9564b07e // indirect
 	github.com/envoyproxy/go-control-plane v0.13.4 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
 	github.com/fullstorydev/grpcurl v1.9.3 // indirect
