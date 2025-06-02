@@ -8,7 +8,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       build-essential \
       protobuf-compiler \
-      gcc && \
+      gcc \
+      git && \
     rm -rf /var/lib/apt/lists/*
 
 
@@ -21,18 +22,18 @@ ENV PYTHONPATH=/install/lib/python3.11/site-packages:$PYTHONPATH \
     PYTHONPATH=/install/lib/python3.11/site-packages:/app/gen:$PYTHONPATH
 
 
-COPY proto/service_math_solve.proto proto/service_math_solve.proto
-RUN mkdir -p gen && \
-    python -m grpc_tools.protoc \
-      -I proto \
-      --python_out=./gen \
-      --grpc_python_out=./gen \
-      --pyi_out=./gen \
-      proto/service_math_solve.proto
+# COPY proto/service_math_solve.proto proto/service_math_solve.proto
+# RUN mkdir -p gen && \
+#     python -m grpc_tools.protoc \
+#       -I proto \
+#       --python_out=./gen \
+#       --grpc_python_out=./gen \
+#       --pyi_out=./gen \
+#       proto/service_math_solve.proto
 
 
 COPY service_math_solve.py service_math_solve.py
-COPY service_math_config.toml service_math_config.toml
+COPY pyproject.toml pyproject.toml
 
 
 # ----------------------------
