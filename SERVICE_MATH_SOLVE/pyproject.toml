@@ -12,7 +12,6 @@ dependencies = [
     "uvicorn==0.34.2",
     "grpcio-tools",
     "grpcio-reflection",
-    "protofileseyemath@git+https://github.com/dagahan/EyeMath_protosPY"
 ]
 LOGGING_REQUESTS = true
 LOGGING_RESPONSES = false
@@ -20,16 +19,10 @@ LOGGING_RESPONSES = false
 
 [MaL]
 PRECISION = 32
-DEFAULT_PREC = 48
+DEFAULT_PREC = 64
 
 
 [host]
 HOST = "0.0.0.0"    
 PORT = 8001
 reload = true
-
-
-[proto]
-PROTO_REPO_URL = 'https://github.com/dagahan/EyeMath_protos.git'
-PROTO_REPO_BRANCH = 'master'
-PROTO_PYTHON_PATH = 'py'

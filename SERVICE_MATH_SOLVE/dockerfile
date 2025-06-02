@@ -9,8 +9,20 @@ RUN apt-get update && \
       build-essential \
       protobuf-compiler \
       gcc \
-      git && \
+      git \
+      curl && \
     rm -rf /var/lib/apt/lists/*
+
+
+RUN git clone https://github.com/dagahan/EyeMath_protos.git /protos
+
+# Генерируем Python stubs из всех .proto файлов
+RUN mkdir -p /app/gen
+RUN find /protos -name '*.proto' -exec python -m grpc_tools.protoc \
+      -I /protos \
+      --python_out=/app/gen \
+      --grpc_python_out=/app/gen \
+      --pyi_out=/app/gen {} \;
 
 
 WORKDIR /app

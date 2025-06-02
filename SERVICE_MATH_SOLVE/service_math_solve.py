@@ -7,9 +7,9 @@ from sympy import Eq, Symbol, preorder_traversal, solve
 from latex2sympy2 import latex2sympy
 from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 
-import protofileseyemath
-from protofileseyemath.mathsolve import service_math_solve_pb2 as pb
-from protofileseyemath.mathsolve import service_math_solve_pb2_grpc as rpc
+
+from protos4eyemath.mathsolve import service_math_solve_pb2 as pb
+from protos4eyemath.mathsolve import service_math_solve_pb2_grpc as rpc
 
 
 
