@@ -1,0 +1,33 @@
+syntax = "proto3";
+package mathsolve;
+option go_package = "github.com/dagahan/EyeMath_protos/go/mathsolve;mathsolve";
+
+
+message MetadataRequest {
+}
+
+message MetadataResponse {
+  string name = 1;
+  string version = 2;
+}
+
+
+message SolveRequest {
+  string expression = 1;
+}
+
+message SolveResponse {
+  enum Status {
+    OK = 0;
+    ERROR = 1;
+  }
+  Status status = 1;
+  string result = 2; 
+}
+
+
+
+service GRPC_math_solve {
+  rpc Metadata (MetadataRequest) returns (MetadataResponse);
+  rpc Solve (SolveRequest) returns (SolveResponse);
+}

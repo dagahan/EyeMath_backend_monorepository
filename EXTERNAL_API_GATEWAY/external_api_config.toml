@@ -1,0 +1,21 @@
+root = "."
+tmp_dir = "tmp"
+
+[build]
+cmd = "GOOS=linux GOARCH=amd64 go build -o /app/binary/external_api_gateway external_api_gateway.go"
+bin = "/app/binary/external_api_gateway"
+delay = 1000
+exclude_dir = ["vendor", "tmp"]
+include_ext = ["go"]
+run_after_build = "chmod +x /app/binary/external_api_gateway"
+
+[log]
+level = "debug"
+
+
+[env]
+HOST = "0.0.0.0"
+PORT = 8080
+timeout = 50
+storage_path = "./data"
+TokenTTL = 555
