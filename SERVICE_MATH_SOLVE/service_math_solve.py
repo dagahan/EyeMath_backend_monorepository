@@ -1,4 +1,4 @@
-import os, sys, logging, inspect, toml, grpc, json, git, tempfile, shutil
+import os, sys, logging, inspect, toml, grpc, json
 from concurrent import futures
 from google.protobuf.json_format import MessageToDict
 from loguru import logger
@@ -7,9 +7,10 @@ from sympy import Eq, Symbol, preorder_traversal, solve
 from latex2sympy2 import latex2sympy
 from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 
-import protofileseyemath
-from protofileseyemath.mathsolve import service_math_solve_pb2 as pb
-from protofileseyemath.mathsolve import service_math_solve_pb2_grpc as rpc
+
+sys.path.insert(0, './gen')
+import service_math_solve_pb2 as pb
+import service_math_solve_pb2_grpc as rpc
 
 
 
@@ -47,7 +48,7 @@ class ConfigLoader:
     @classmethod
     def _load(cls):
         try:
-            with open("service_math_config.toml", "r") as f:
+            with open("pyproject.toml", "r") as f:
                 cls.__config = toml.load(f)
             os.environ["CONFIG_LOADED"] = "1"
         except Exception as error:
@@ -130,7 +131,7 @@ class GRPC_math_solve(rpc.GRPC_math_solve):
 
     @logger.catch
     def _logrequest(self, request, context):
-        if self.__config.get("metadata", "LOGGING_REQUESTS"):
+        if self.__config.get("project", "LOGGING_REQUESTS"):
             payload = MessageToDict(request)
             logger.info(
                 f"Method \"{inspect.stack()[2][3]}\" has called from  |  {context.peer()}\n" #format: 'ipv4:127.0.0.1:54321'
@@ -139,7 +140,7 @@ class GRPC_math_solve(rpc.GRPC_math_solve):
 
     @logger.catch
     def _logresponce(self, responce, context):
-        if self.__config.get("metadata", "LOGGING_RESPONSES"):
+        if self.__config.get("project", "LOGGING_RESPONSES"):
             payload = MessageToDict(responce)
             logger.info(
                 f"Method \"{inspect.stack()[2][3]}\" responsing to  |  {context.peer()}\n"
@@ -153,8 +154,8 @@ class GRPC_math_solve(rpc.GRPC_math_solve):
 
         try:
             responce = pb.MetadataResponse(
-                name = self.__config.get("metadata", "NAME"),
-                version = self.__config.get("metadata", "VERSION"),
+                name = self.__config.get("project", "name"),
+                version = self.__config.get("project", "version"),
             )
 
             self._logresponce(responce, context)

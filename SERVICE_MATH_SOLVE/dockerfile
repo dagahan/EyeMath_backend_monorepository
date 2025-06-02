@@ -1,58 +1,72 @@
 # ----------------------------
-# 1. Builder stage: ставим protoc, grpcio-tools, генерим stubs и ставим все зависимости
+# 1. Builder stage
 # ----------------------------
 
 
-FROM python:3.11-slim-bookworm as builder
+FROM python:3.12-slim as builder
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       build-essential \
       protobuf-compiler \
-      gcc && \
+      gcc \
+      git \
+      curl && \
     rm -rf /var/lib/apt/lists/*
 
 
-WORKDIR /app
-COPY req.txt .
-RUN pip install --no-cache-dir --prefix=/install -r req.txt
-# добавляем /install/lib/... в PYTHONPATH
-ENV PYTHONPATH=/install/lib/python3.11/site-packages:$PYTHONPATH \
-    PATH=/install/bin:$PATH \
-    PYTHONPATH=/install/lib/python3.11/site-packages:/app/gen:$PYTHONPATH
+# Cloning actual protos files from the repository
+RUN git clone https://github.com/dagahan/EyeMath_protos.git /protos
 
 
-COPY proto/service_math_solve.proto proto/service_math_solve.proto
-RUN mkdir -p gen && \
-    python -m grpc_tools.protoc \
-      -I proto \
-      --python_out=./gen \
-      --grpc_python_out=./gen \
-      --pyi_out=./gen \
-      proto/service_math_solve.proto
+# Generating Python stubs from all of .proto files
+RUN pip install --no-cache-dir --prefix=/install \
+      grpcio-tools grpcio-reflection
+RUN mkdir -p /app/gen && \
+    find /protos -type f -name '*.proto' -exec /install/bin/python -m grpc_tools.protoc \
+      -I /protos \
+      --python_out=/app/gen \
+      --grpc_python_out=/app/gen \
+      --pyi_out=/app/gen \
+      {} \;
 
 
-COPY service_math_solve.py service_math_solve.py
-COPY service_math_config.toml service_math_config.toml
+# Copying main service file and pyproject.toml to the app directory
+COPY service_math_solve.py  /app/service_math_solve.py
+COPY pyproject.toml         /app/pyproject.toml
 
 
 # ----------------------------
-# 2. Runtime stage: только минимальный набор
+# 2. Runtime stage
 # ----------------------------
 
 
-FROM python:3.11-slim-bookworm
+FROM python:3.12-slim
 WORKDIR /app
-# Берём из билдера установленные пакеты и stubs
+# Copying from the builder stage installed packages and stub files
 COPY --from=builder /install /usr/local
-COPY --from=builder /app /app
+COPY --from=builder /app/gen /app/gen
+COPY --from=builder /app/service_math_solve.py /app/
+COPY --from=builder /app/pyproject.toml /app/
+
+
+# Download the latest UV tool
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY . /app
+WORKDIR /app
+RUN uv sync --frozen --no-cache
+
+
+# Creation of user "appuser" with home directory /home/appuser
 RUN useradd -m appuser && \
     chown -R appuser:appuser /app /usr/local
 
-ENV PYTHONPATH=/app/gen:$PYTHONPATH \
-    PATH=/usr/local/bin:$PATH
+
+# Setting environment variables
+ENV PATH=/usr/local/bin:$PATH \
+    PYTHONPATH=/app/gen:$PYTHONPATH
 
 
-
+# Setting the port for the service and running the service using UV!
 EXPOSE ${PORT}
 USER appuser
-CMD ["python", "-u", "service_math_solve.py"]
+CMD ["sh", "-c", "uv sync && uv run python service_math_solve.py"]
