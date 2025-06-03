@@ -1,72 +1,49 @@
-# ----------------------------
-# 1. Builder stage
-# ----------------------------
+# Dockerfile для service_math_solve
+FROM python:3.12-slim
 
-
-FROM python:3.12-slim as builder
+# Установка системных зависимостей
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       build-essential \
       protobuf-compiler \
       gcc \
       git \
-      curl && \
+      curl \
+      ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
+# Создание пользователя и группы
+RUN useradd -m appuser && \
+    mkdir -p /app/gen && \
+    chown -R appuser:appuser /app
 
-# Cloning actual protos files from the repository
-RUN git clone https://github.com/dagahan/EyeMath_protos.git /protos
+# Установка UV напрямую через pip
+RUN pip install --no-cache-dir uv
 
+# Клонирование .proto файлов
+RUN git clone --depth=1 https://github.com/dagahan/EyeMath_protos.git /protos
 
-# Generating Python stubs from all of .proto files
-RUN pip install --no-cache-dir --prefix=/install \
-      grpcio-tools grpcio-reflection
-RUN mkdir -p /app/gen && \
-    find /protos -type f -name '*.proto' -exec /install/bin/python -m grpc_tools.protoc \
+# Генерация Python стабов
+RUN pip install --no-cache-dir grpcio-tools grpcio-reflection && \
+    find /protos -type f -name '*.proto' -exec python -m grpc_tools.protoc \
       -I /protos \
       --python_out=/app/gen \
       --grpc_python_out=/app/gen \
       --pyi_out=/app/gen \
       {} \;
 
-
-# Copying main service file and pyproject.toml to the app directory
-COPY service_math_solve.py  /app/service_math_solve.py
-COPY pyproject.toml         /app/pyproject.toml
-
-
-# ----------------------------
-# 2. Runtime stage
-# ----------------------------
-
-
-FROM python:3.12-slim
-WORKDIR /app
-# Copying from the builder stage installed packages and stub files
-COPY --from=builder /install /usr/local
-COPY --from=builder /app/gen /app/gen
-COPY --from=builder /app/service_math_solve.py /app/
-COPY --from=builder /app/pyproject.toml /app/
-
-
-# Download the latest UV tool
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# Копирование исходного кода
 COPY . /app
 WORKDIR /app
-RUN uv sync --frozen --no-cache
 
+# Настройка окружения
+ENV PATH="/usr/local/bin:$PATH" \
+    PYTHONPATH="/app/gen:$PYTHONPATH"
 
-# Creation of user "appuser" with home directory /home/appuser
-RUN useradd -m appuser && \
-    chown -R appuser:appuser /app /usr/local
+# Настройка прав
+RUN chown -R appuser:appuser /app
 
-
-# Setting environment variables
-ENV PATH=/usr/local/bin:$PATH \
-    PYTHONPATH=/app/gen:$PYTHONPATH
-
-
-# Setting the port for the service and running the service using UV!
+# Экспорт порта и запуск
 EXPOSE ${PORT}
 USER appuser
 CMD ["sh", "-c", "uv sync && uv run python service_math_solve.py"]

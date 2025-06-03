@@ -1,0 +1,6 @@
+**/*.log
+**/*.pb.go
+gen/ 
+proto/
+tmp/
+binary/

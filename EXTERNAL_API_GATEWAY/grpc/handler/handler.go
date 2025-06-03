@@ -2,16 +2,15 @@ package handler
 
 import (
 	"context"
-	"time"
 
-	exapigate "github.com/dagahan/EyeMath_protos/go/external_api_gateway"
+	exapigate "main/gen/exapigate"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
-	"github.com/dagahan/EyeMath_protos/go/mathsolve"
+	mathsolve "main/gen/mathsolve"
 )
 
 type ServerAPI struct {
@@ -19,11 +18,11 @@ type ServerAPI struct {
 }
 
 func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) {
-	conn, err := grpc.Dial(
-		"localhost:8001",
+	conn, err := grpc.NewClient(
+		"service_math_solve:8001",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
+		// grpc.WithBlock(),
+		// grpc.WithTimeout(5*time.Second),
 	)
 	if err != nil {
 		return nil, err
@@ -62,6 +61,10 @@ func (s *ServerAPI) Login(ctx context.Context, req *exapigate.LoginRequest) (res
 			err = status.Errorf(codes.Internal, "panic: %v", r)
 		}
 	}()
+
+	if s == nil {
+		return nil, status.Error(codes.Internal, "server instance is nil")
+	}
 
 	return &exapigate.LoginResponse{
 		Token: "0",

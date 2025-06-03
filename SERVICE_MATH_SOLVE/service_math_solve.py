@@ -2,15 +2,19 @@ import os, sys, logging, inspect, toml, grpc, json
 from concurrent import futures
 from google.protobuf.json_format import MessageToDict
 from loguru import logger
+
 from mpmath import mp
+import math
+import sympy
 from sympy import Eq, Symbol, preorder_traversal, solve
-from latex2sympy2 import latex2sympy
+
+from sympy.parsing.latex import parse_latex
 from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 
 
 sys.path.insert(0, './gen')
-import service_math_solve_pb2 as pb
-import service_math_solve_pb2_grpc as rpc
+import service_math_solve_pb2 as sevice_math_solve_pb
+import service_math_solve_pb2_grpc as sevice_math_solve_rpc
 
 
 
@@ -100,12 +104,28 @@ class MathSolver:
         logger.debug(f"Checking if {expr} is an equation...")
         if isinstance(expr, Eq):
             logger.debug(f"{expr} is an equation.")
-            lhs_vars = any(isinstance(node, Symbol) for node in preorder_traversal(expr.lhs))
-            rhs_vars = any(isinstance(node, Symbol) for node in preorder_traversal(expr.rhs))
-            return lhs_vars or rhs_vars
-        else:
-            logger.debug(f"{expr} is not an equation.")
-            return any(isinstance(node, Symbol) for node in preorder_traversal(expr))
+            return True
+        return any(isinstance(node, Symbol) for node in preorder_traversal(expr))
+    
+
+    @logger.catch
+    def _extract_solutions(self, solutions):
+        """Extract solution values from solve() output"""
+        results = []
+        for solution in solutions:
+            if isinstance(solution, Eq):
+                # Extract numerical value from equation solution
+                results.append(solution.rhs)
+            elif isinstance(solution, (list, tuple)):
+                # Handle systems of equations
+                results.extend(self._extract_solutions(solution))
+            elif isinstance(solution, dict):
+                # Extract values from dictionary solution
+                results.extend(solution.values())
+            else:
+                # Direct numerical solution
+                results.append(solution)
+        return results
 
 
     @logger.catch    #this we call 'decorator'
@@ -118,12 +138,36 @@ class MathSolver:
             to_return = parsed.evalf()
 
         return to_return
+    
 
 
 
 
 
-class GRPC_math_solve(rpc.GRPC_math_solve):
+
+
+    @logger.catch
+    def SolveExpressionDebugMode(self, request):
+        parsed = parse_latex(request.expression)
+
+        logger.debug(f"{parsed}")
+        # to_return = sympy.sqrt(parsed)
+
+        if self._is_equation(self, parsed):
+            to_return = sympy.solve(parsed)
+        else:
+            to_return = parsed.evalf()
+        
+
+        return to_return
+
+
+
+
+
+
+
+class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
     def __init__(self):
         self.__config = ConfigLoader()
         mp.dps = self.__config.get("MaL", "PRECISION")
@@ -149,11 +193,11 @@ class GRPC_math_solve(rpc.GRPC_math_solve):
 
 
     @logger.catch
-    def Metadata(self, request: pb.MetadataRequest, context) -> pb.MetadataResponse:
+    def Metadata(self, request: sevice_math_solve_pb.MetadataRequest, context) -> sevice_math_solve_pb.MetadataResponse:
         self._logrequest(request, context)
 
         try:
-            responce = pb.MetadataResponse(
+            responce = sevice_math_solve_pb.MetadataResponse(
                 name = self.__config.get("project", "name"),
                 version = self.__config.get("project", "version"),
             )
@@ -163,17 +207,20 @@ class GRPC_math_solve(rpc.GRPC_math_solve):
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
-            return pb.MetadataResponse(
+            return sevice_math_solve_pb.MetadataResponse(
                 )
         
     @logger.catch
-    def Solve(self, request: pb.SolveRequest, context) -> pb.SolveResponse: #that function we call "endpoint of the gRPC api"
+    def Solve(self, request: sevice_math_solve_pb.SolveRequest, context) -> sevice_math_solve_pb.SolveResponse: #that function we call "endpoint of the gRPC api"
         self._logrequest(request, context)
 
         try:
-            MathAnswer = MathSolver.SolveExpression(MathSolver, request)
-            responce = pb.SolveResponse(
-                status=pb.SolveResponse.OK,
+            if self.__config.get("host", "debug_mode"):
+                MathAnswer = MathSolver.SolveExpressionDebugMode(MathSolver, request)
+            else:
+                MathAnswer = MathSolver.SolveExpression(MathSolver, request)
+            responce = sevice_math_solve_pb.SolveResponse(
+                status=sevice_math_solve_pb.SolveResponse.OK,
                 result=str(MathAnswer),
             )
 
@@ -182,8 +229,8 @@ class GRPC_math_solve(rpc.GRPC_math_solve):
 
         except Exception as error:
             logger.error(f"Solve error: {error}")
-            return pb.SolveResponse(
-                status=pb.SolveResponse.ERROR,
+            return sevice_math_solve_pb.SolveResponse(
+                status=sevice_math_solve_pb.SolveResponse.ERROR,
                 )
             
 
@@ -192,11 +239,11 @@ def RUN_MATH_SOLVE_SERVICE():
     LogSetup()
     config = ConfigLoader()
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    rpc.add_GRPC_math_solveServicer_to_server(GRPC_math_solve(), server)
+    sevice_math_solve_rpc.add_GRPC_math_solveServicer_to_server(GRPC_math_solve(), server)
 
     # Enable gRPC reflection for the service
     SERVICE_NAMES = (
-        pb.DESCRIPTOR.services_by_name['GRPC_math_solve'].full_name,
+        sevice_math_solve_pb.DESCRIPTOR.services_by_name['GRPC_math_solve'].full_name,
         reflection.SERVICE_NAME,
     )
     reflection.enable_server_reflection(SERVICE_NAMES, server)
@@ -213,6 +260,8 @@ def RUN_MATH_SOLVE_SERVICE():
 if __name__ == "__main__":
     try:
         RUN_MATH_SOLVE_SERVICE()
+    except KeyboardInterrupt:
+        logger.info("Service stopped by user")
     except Exception as error:
         logger.critical(f"Service crashed: {error}")
         sys.exit(1)

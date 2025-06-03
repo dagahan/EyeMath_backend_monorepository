@@ -3,6 +3,7 @@ version: '3.9'
 services:
   external_api_gateway:
     build: ./EXTERNAL_API_GATEWAY
+    container_name: external_api_gateway
     environment:
       TZ: ${SYSTEM_TIME_ZONE}
       HOST: ${EXTERNAL_API_GATEWAY_HOST}
@@ -11,12 +12,13 @@ services:
       - ${EXTERNAL_API_GATEWAY_PORT}
     networks:
       - eye_math_network
-    volumes:
-      - ./EXTERNAL_API_GATEWAY:/app
+    depends_on:
+      - service_math_solve
     restart: ${DOCKER_CONTAINERS_RESTART}
 
   service_math_solve:
     build: ./SERVICE_MATH_SOLVE 
+    container_name: service_math_solve
     environment:
       TZ: ${SYSTEM_TIME_ZONE}
       HOST: ${MATH_SOLVE_HOST}
@@ -25,8 +27,6 @@ services:
       - ${MATH_SOLVE_PORT}
     networks:
       - eye_math_network
-    volumes:
-      - ./SERVICE_MATH_SOLVE:/code
     restart: ${DOCKER_CONTAINERS_RESTART}
 
   postgres:
@@ -74,3 +74,4 @@ volumes:
 networks:
   eye_math_network:
     driver: bridge
+    name: eye_math_network
