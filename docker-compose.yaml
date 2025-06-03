@@ -8,6 +8,7 @@ services:
       TZ: ${SYSTEM_TIME_ZONE}
       HOST: ${EXTERNAL_API_GATEWAY_HOST}
       PORT: ${EXTERNAL_API_GATEWAY_APP_PORT}
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - ${EXTERNAL_API_GATEWAY_PORT}
     networks:
@@ -23,6 +24,7 @@ services:
       TZ: ${SYSTEM_TIME_ZONE}
       HOST: ${MATH_SOLVE_HOST}
       PORT: ${MATH_SOLVE_APP_PORT}
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - ${MATH_SOLVE_PORT}
     networks:

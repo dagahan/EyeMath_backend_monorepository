@@ -65,6 +65,19 @@ class ConfigLoader:
 
 
 
+class DockerTools:
+    @staticmethod
+    def is_running_inside_docker():
+        try:
+            if os.environ['RUNNING_INSIDE_DOCKER'] == "1":
+                return True
+        except KeyError:
+            ()
+        return False
+
+
+
+
 
 class LogSetup:
     def __init__(self):
@@ -109,23 +122,10 @@ class MathSolver:
     
 
     @logger.catch
-    def _extract_solutions(self, solutions):
-        """Extract solution values from solve() output"""
-        results = []
-        for solution in solutions:
-            if isinstance(solution, Eq):
-                # Extract numerical value from equation solution
-                results.append(solution.rhs)
-            elif isinstance(solution, (list, tuple)):
-                # Handle systems of equations
-                results.extend(self._extract_solutions(solution))
-            elif isinstance(solution, dict):
-                # Extract values from dictionary solution
-                results.extend(solution.values())
-            else:
-                # Direct numerical solution
-                results.append(solution)
-        return results
+    def RevomeExtraZeroesFloat(self, value):
+        if isinstance(value, (sympy.core.numbers.Float)):
+            value = float(str(value).strip("0"))
+        return value
 
 
     @logger.catch    #this we call 'decorator'
@@ -140,7 +140,7 @@ class MathSolver:
         return to_return
     
 
-
+    
 
 
 
@@ -155,12 +155,17 @@ class MathSolver:
         # to_return = sympy.sqrt(parsed)
 
         if self._is_equation(self, parsed):
-            to_return = sympy.solve(parsed)
+            answer = sympy.solve(parsed)
         else:
-            to_return = parsed.evalf()
-        
+            answer = parsed.evalf()
 
-        return to_return
+        # print(type(to_return))
+
+        answer = self.RevomeExtraZeroesFloat(self, answer)
+        
+        # logger.info(DockerTools.is_docker())
+
+        return answer
 
 
 
