@@ -2,9 +2,13 @@ import os, sys, logging, inspect, toml, grpc, json
 from concurrent import futures
 from google.protobuf.json_format import MessageToDict
 from loguru import logger
+
 from mpmath import mp
+import math
+import sympy
 from sympy import Eq, Symbol, preorder_traversal, solve
-from latex2sympy2 import latex2sympy
+
+from sympy.parsing.latex import parse_latex
 from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 
 
@@ -100,12 +104,28 @@ class MathSolver:
         logger.debug(f"Checking if {expr} is an equation...")
         if isinstance(expr, Eq):
             logger.debug(f"{expr} is an equation.")
-            lhs_vars = any(isinstance(node, Symbol) for node in preorder_traversal(expr.lhs))
-            rhs_vars = any(isinstance(node, Symbol) for node in preorder_traversal(expr.rhs))
-            return lhs_vars or rhs_vars
-        else:
-            logger.debug(f"{expr} is not an equation.")
-            return any(isinstance(node, Symbol) for node in preorder_traversal(expr))
+            return True
+        return any(isinstance(node, Symbol) for node in preorder_traversal(expr))
+    
+
+    @logger.catch
+    def _extract_solutions(self, solutions):
+        """Extract solution values from solve() output"""
+        results = []
+        for solution in solutions:
+            if isinstance(solution, Eq):
+                # Extract numerical value from equation solution
+                results.append(solution.rhs)
+            elif isinstance(solution, (list, tuple)):
+                # Handle systems of equations
+                results.extend(self._extract_solutions(solution))
+            elif isinstance(solution, dict):
+                # Extract values from dictionary solution
+                results.extend(solution.values())
+            else:
+                # Direct numerical solution
+                results.append(solution)
+        return results
 
 
     @logger.catch    #this we call 'decorator'
@@ -118,6 +138,30 @@ class MathSolver:
             to_return = parsed.evalf()
 
         return to_return
+    
+
+
+
+
+
+
+
+    @logger.catch
+    def SolveExpressionDebugMode(self, request):
+        parsed = parse_latex(request.expression)
+
+        logger.debug(f"{parsed}")
+        # to_return = sympy.sqrt(parsed)
+
+        if self._is_equation(self, parsed):
+            to_return = sympy.solve(parsed)
+        else:
+            to_return = parsed.evalf()
+        
+
+        return to_return
+
+
 
 
 
@@ -171,7 +215,10 @@ class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
         self._logrequest(request, context)
 
         try:
-            MathAnswer = MathSolver.SolveExpression(MathSolver, request)
+            if self.__config.get("host", "debug_mode"):
+                MathAnswer = MathSolver.SolveExpressionDebugMode(MathSolver, request)
+            else:
+                MathAnswer = MathSolver.SolveExpression(MathSolver, request)
             responce = sevice_math_solve_pb.SolveResponse(
                 status=sevice_math_solve_pb.SolveResponse.OK,
                 result=str(MathAnswer),

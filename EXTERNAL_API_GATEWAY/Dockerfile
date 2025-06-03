@@ -12,8 +12,7 @@ WORKDIR /workspace
 
 # Установка инструментов
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1 \
-    && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0 \
-    && go install github.com/air-verse/air@latest
+    && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
 
 # Добавление GOPATH/bin в PATH
 ENV PATH="$PATH:$(go env GOPATH)/bin"
@@ -54,4 +53,4 @@ RUN chown -R appuser:appgroup /workspace
 # Экспорт порта и запуск
 EXPOSE ${PORT}
 USER appuser
-CMD ["air", "-c", "external_api_config.toml"]
+CMD ["./bin/app"]

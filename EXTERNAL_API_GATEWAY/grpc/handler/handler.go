@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"time"
 
 	exapigate "main/gen/exapigate"
 
@@ -19,11 +18,11 @@ type ServerAPI struct {
 }
 
 func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) {
-	conn, err := grpc.Dial(
-		"localhost:8001",
+	conn, err := grpc.NewClient(
+		"service_math_solve:8001",
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
-		grpc.WithBlock(),
-		grpc.WithTimeout(5*time.Second),
+		// grpc.WithBlock(),
+		// grpc.WithTimeout(5*time.Second),
 	)
 	if err != nil {
 		return nil, err
