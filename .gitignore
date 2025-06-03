@@ -194,11 +194,13 @@ cython_debug/
 go.work
 go.work.sum
 
-# Derictories
+# Directories
 #gen/
 debug/
 tmp/
-*uv.lock
+gen/
+**/uv.lock
+**/*.log
 
 
 
