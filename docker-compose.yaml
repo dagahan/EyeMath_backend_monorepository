@@ -11,6 +11,8 @@ services:
       - ${EXTERNAL_API_GATEWAY_PORT}
     networks:
       - eye_math_network
+    depends_on:
+      - service_math_solve
     volumes:
       - ./EXTERNAL_API_GATEWAY:/app
     restart: ${DOCKER_CONTAINERS_RESTART}
@@ -74,3 +76,4 @@ volumes:
 networks:
   eye_math_network:
     driver: bridge
+    name: eye_math_network

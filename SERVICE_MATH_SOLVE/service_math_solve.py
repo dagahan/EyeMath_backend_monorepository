@@ -9,8 +9,8 @@ from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 
 
 sys.path.insert(0, './gen')
-import service_math_solve_pb2 as pb
-import service_math_solve_pb2_grpc as rpc
+import service_math_solve_pb2 as sevice_math_solve_pb
+import service_math_solve_pb2_grpc as sevice_math_solve_rpc
 
 
 
@@ -123,7 +123,7 @@ class MathSolver:
 
 
 
-class GRPC_math_solve(rpc.GRPC_math_solve):
+class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
     def __init__(self):
         self.__config = ConfigLoader()
         mp.dps = self.__config.get("MaL", "PRECISION")
@@ -149,11 +149,11 @@ class GRPC_math_solve(rpc.GRPC_math_solve):
 
 
     @logger.catch
-    def Metadata(self, request: pb.MetadataRequest, context) -> pb.MetadataResponse:
+    def Metadata(self, request: sevice_math_solve_pb.MetadataRequest, context) -> sevice_math_solve_pb.MetadataResponse:
         self._logrequest(request, context)
 
         try:
-            responce = pb.MetadataResponse(
+            responce = sevice_math_solve_pb.MetadataResponse(
                 name = self.__config.get("project", "name"),
                 version = self.__config.get("project", "version"),
             )
@@ -163,17 +163,17 @@ class GRPC_math_solve(rpc.GRPC_math_solve):
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
-            return pb.MetadataResponse(
+            return sevice_math_solve_pb.MetadataResponse(
                 )
         
     @logger.catch
-    def Solve(self, request: pb.SolveRequest, context) -> pb.SolveResponse: #that function we call "endpoint of the gRPC api"
+    def Solve(self, request: sevice_math_solve_pb.SolveRequest, context) -> sevice_math_solve_pb.SolveResponse: #that function we call "endpoint of the gRPC api"
         self._logrequest(request, context)
 
         try:
             MathAnswer = MathSolver.SolveExpression(MathSolver, request)
-            responce = pb.SolveResponse(
-                status=pb.SolveResponse.OK,
+            responce = sevice_math_solve_pb.SolveResponse(
+                status=sevice_math_solve_pb.SolveResponse.OK,
                 result=str(MathAnswer),
             )
 
@@ -182,8 +182,8 @@ class GRPC_math_solve(rpc.GRPC_math_solve):
 
         except Exception as error:
             logger.error(f"Solve error: {error}")
-            return pb.SolveResponse(
-                status=pb.SolveResponse.ERROR,
+            return sevice_math_solve_pb.SolveResponse(
+                status=sevice_math_solve_pb.SolveResponse.ERROR,
                 )
             
 
@@ -192,11 +192,11 @@ def RUN_MATH_SOLVE_SERVICE():
     LogSetup()
     config = ConfigLoader()
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    rpc.add_GRPC_math_solveServicer_to_server(GRPC_math_solve(), server)
+    sevice_math_solve_rpc.add_GRPC_math_solveServicer_to_server(GRPC_math_solve(), server)
 
     # Enable gRPC reflection for the service
     SERVICE_NAMES = (
-        pb.DESCRIPTOR.services_by_name['GRPC_math_solve'].full_name,
+        sevice_math_solve_pb.DESCRIPTOR.services_by_name['GRPC_math_solve'].full_name,
         reflection.SERVICE_NAME,
     )
     reflection.enable_server_reflection(SERVICE_NAMES, server)
@@ -213,6 +213,8 @@ def RUN_MATH_SOLVE_SERVICE():
 if __name__ == "__main__":
     try:
         RUN_MATH_SOLVE_SERVICE()
+    except KeyboardInterrupt:
+        logger.info("Service stopped by user")
     except Exception as error:
         logger.critical(f"Service crashed: {error}")
         sys.exit(1)

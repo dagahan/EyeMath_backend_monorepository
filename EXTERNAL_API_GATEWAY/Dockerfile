@@ -1,74 +1,57 @@
 # Dockerfile для external_api_gateway
-# ----------------------------
-# 1. Builder stage
-# ----------------------------
-FROM golang:1.24.2-alpine AS builder
+FROM golang:1.24.2-alpine
 
-# Setup base software for building an app.
-RUN apk add --no-cache git protobuf protobuf-dev protoc
+# Установка зависимостей
+RUN apk add --no-cache git protobuf protobuf-dev protoc ca-certificates
 
-# Устанавливаем air для hot-reload - ИСПРАВЛЕНО!
-RUN go install github.com/air-verse/air@latest  # <--- Ключевое исправление
-
-# Creating user "appuser" with home directory /home/appuser 
+# Создание пользователя и группы (один раз)
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
+# Настройка рабочей директории
 WORKDIR /workspace
 
-# Устанавливаем плагины для protoc
+# Установка инструментов
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1 \
-    && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0
+    && go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2.0 \
+    && go install github.com/air-verse/air@latest
 
-# Добавляем GOPATH/bin в PATH
+# Добавление GOPATH/bin в PATH
 ENV PATH="$PATH:$(go env GOPATH)/bin"
 
-# Клонируем репозиторий с .proto-файлами
+# Клонирование .proto файлов
 RUN git clone --depth=1 https://github.com/dagahan/EyeMath_protos.git /protos
 
-# Создаём директорию для сгенерированных Go-файлов
-RUN mkdir -p /workspace/gen
+# Генерация Go-кода
+RUN mkdir -p gen && \
+    protoc \
+        -I /protos \
+        --go_out=gen --go_opt=paths=source_relative \
+        --go_opt=Mservice_math_solve.proto=mathsolve/v1 \
+        --go_opt=Mexternal_api_gateway.proto=exapigate/v1 \
+        --go-grpc_out=gen --go-grpc_opt=paths=source_relative \
+        --go-grpc_opt=Mservice_math_solve.proto=mathsolve/v1 \
+        --go-grpc_opt=Mexternal_api_gateway.proto=exapigate/v1 \
+        /protos/external_api_gateway.proto \
+        /protos/service_math_solve.proto
 
-# Генерируем Go-stubs
-RUN protoc \
-    -I /protos \
-    --go_out=/workspace/gen --go_opt=paths=source_relative \
-    --go-grpc_out=/workspace/gen --go-grpc_opt=paths=source_relative \
-    /protos/external_api_gateway.proto \
-    /protos/service_math_solve.proto
+# Организация сгенерированного кода
+RUN mkdir -p gen/mathsolve gen/exapigate \
+    && mv gen/service_math_solve*.pb.go gen/mathsolve/ \
+    && mv gen/external_api_gateway*.pb.go gen/exapigate/
 
-# Копируем исходный код
-COPY go.mod go.sum /workspace/
-COPY . /workspace
+# Копирование исходного кода и установка зависимостей
+COPY go.mod go.sum ./
+RUN go mod tidy
 
-# Собираем бинарь
-RUN go mod tidy \
-    && go build -o /workspace/bin/app ./
+COPY . .
 
-# ----------------------------
-# 2. Runtime stage
-# ----------------------------
-FROM alpine:latest
+# Сборка приложения
+RUN go build -o ./bin/app ./
 
-# Устанавливаем необходимые пакеты
-RUN apk add --no-cache ca-certificates
+# Настройка прав доступа
+RUN chown -R appuser:appgroup /workspace
 
-WORKDIR /app
-
-# Копируем собранный бинарь
-COPY --from=builder /workspace/bin/app /app/app
-COPY --from=builder /workspace/gen /app/gen
-
-# Копируем air из builder - ПУТЬ ОСТАЁТСЯ ПРЕЖНИМ
-COPY --from=builder /go/bin/air /usr/local/bin/air
-
-# Копируем конфиг air
-COPY --from=builder /workspace/external_api_config.toml /app/
-
-# Создаём пользователя и группу
-RUN addgroup -S appgroup && \
-    adduser -S -G appgroup appuser && \
-    chown -R appuser:appgroup /app
-
+# Экспорт порта и запуск
 EXPOSE ${PORT}
 USER appuser
 CMD ["air", "-c", "external_api_config.toml"]

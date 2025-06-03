@@ -11,7 +11,7 @@ import (
 
 	handler "main/grpc/handler"
 
-	exapigate "github.com/dagahan/EyeMath_protos/go/external_api_gateway"
+	exapigate "main/gen/exapigate"
 
 	"github.com/BurntSushi/toml"
 	"google.golang.org/grpc"

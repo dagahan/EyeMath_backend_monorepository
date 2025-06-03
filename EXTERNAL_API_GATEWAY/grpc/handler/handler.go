@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
-	exapigate "github.com/dagahan/EyeMath_protos/go/external_api_gateway"
+	exapigate "main/gen/exapigate"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
-	"github.com/dagahan/EyeMath_protos/go/mathsolve"
+	mathsolve "main/gen/mathsolve"
 )
 
 type ServerAPI struct {
@@ -62,6 +62,10 @@ func (s *ServerAPI) Login(ctx context.Context, req *exapigate.LoginRequest) (res
 			err = status.Errorf(codes.Internal, "panic: %v", r)
 		}
 	}()
+
+	if s == nil {
+		return nil, status.Error(codes.Internal, "server instance is nil")
+	}
 
 	return &exapigate.LoginResponse{
 		Token: "0",
