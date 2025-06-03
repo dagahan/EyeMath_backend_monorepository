@@ -198,7 +198,6 @@ go.work.sum
 #gen/
 debug/
 tmp/
-gen/
 **/uv.lock
 **/*.log
 
