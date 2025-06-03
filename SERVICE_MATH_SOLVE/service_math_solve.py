@@ -150,6 +150,7 @@ class MathSolver:
     def SolveExpressionDebugMode(self, request):
         parsed = parse_latex(request.expression)
 
+
         logger.debug(f"{parsed}")
         # to_return = sympy.sqrt(parsed)
 
