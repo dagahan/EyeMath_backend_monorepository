@@ -10,7 +10,7 @@ EyeMath is a mobile app that helps users solve math equations. Instead of enteri
 
 
 EyeMath backend use:
-* Python 3.12
+* Python 3.13.2
 * Golang 1.24.2
 * PosgreSQL
 * Redis
@@ -21,16 +21,41 @@ EyeMath backend use:
 
 
 
-## ARCHETECTURE OF BACKEND
+## How to run
 
-[Mobile app (frontend)] ↔ gRPC ↔ [API External gRPC Gateway (golang)] ↔ gRPC ↔ microservices([MATH_SOLVE] (py),
-                                        ↑                                                    [MATH_RECOGNIZE] (py))
-                                        ↑          
-                                    microservice[Auth] (golang)  
-                                        ↓
-                                        ↓
-                                    ([PostgreSQL], [Redis])
+First, clone repo and cd into it
 
+```bash
+git clone https://github.com/dagahan/EyeMath_backend_monorepository
+cd EyeMath_backend_monorepository
+```
+
+Then, install docker uv to your system
+
+```bash
+sudo apt update
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+sudo apt install docker-ce
+sudo systemctl status docker
+```
+
+You also need to create .env or pass env variables directly.
+Please, see .env.example file!
+
+```bash
+cp .env.example .env
+```
+
+Finally, run the docker compose.
+
+```bash
+sudo docker-compose --env-file .env  up --build
+```
+
+
+Now your backend is online!
 
 
 

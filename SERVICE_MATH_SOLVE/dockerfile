@@ -1,49 +1,48 @@
-# Dockerfile для service_math_solve
-FROM python:3.12-slim
+FROM python:3.13.2-slim
 
-# Установка системных зависимостей
+
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       build-essential \
       protobuf-compiler \
-      gcc \
       git \
       curl \
       ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
-# Создание пользователя и группы
+# Creating of appuser and group.
 RUN useradd -m appuser && \
     mkdir -p /app/gen && \
     chown -R appuser:appuser /app
 
-# Установка UV напрямую через pip
-RUN pip install --no-cache-dir uv
-
-# Клонирование .proto файлов
+# Clonning .proto files from owr repo.
 RUN git clone --depth=1 https://github.com/dagahan/EyeMath_protos.git /protos
 
-# Генерация Python стабов
+# Installing UV and other reqs for python.
 RUN pip install --no-cache-dir grpcio-tools grpcio-reflection && \
-    find /protos -type f -name '*.proto' -exec python -m grpc_tools.protoc \
+    pip install --no-cache-dir uv
+
+# Generating stubs from cloned .proto files.
+RUN find /protos -type f -name '*.proto' -exec python -m grpc_tools.protoc \
       -I /protos \
       --python_out=/app/gen \
       --grpc_python_out=/app/gen \
       --pyi_out=/app/gen \
       {} \;
 
-# Копирование исходного кода
+# Copying everything (except .dockerignore files) to /app directory.
 COPY . /app
 WORKDIR /app
 
-# Настройка окружения
+# Configure owr Python path.
 ENV PATH="/usr/local/bin:$PATH" \
     PYTHONPATH="/app/gen:$PYTHONPATH"
 
-# Настройка прав
+# Apply appuser's previlegies for /app directory.
 RUN chown -R appuser:appuser /app
 
-# Экспорт порта и запуск
+# Executing Math Solve Service!
 EXPOSE ${PORT}
 USER appuser
-CMD ["sh", "-c", "uv sync && uv run python service_math_solve.py"]
+CMD ["sh", "-c", "uv sync && uv run service_math_solve.py"]
