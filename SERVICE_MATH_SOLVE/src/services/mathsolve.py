@@ -1,107 +1,25 @@
-import os, sys, logging, inspect, toml, grpc, json
+import inspect, grpc, json
+from loguru import logger
+from src.core.config import ConfigLoader
+
+
 from concurrent import futures
 from google.protobuf.json_format import MessageToDict
-from loguru import logger
+
 
 from mpmath import mp
-import math
 import sympy
 from sympy import Eq, Symbol, preorder_traversal, solve
+
+
 
 from sympy.parsing.latex import parse_latex
 from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 
 
-sys.path.insert(0, './gen')
-import service_math_solve_pb2 as sevice_math_solve_pb
-import service_math_solve_pb2_grpc as sevice_math_solve_rpc
+import gen.service_math_solve_pb2 as sevice_math_solve_pb
+import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
 
-
-
-
-# Setuping the exception handler
-class InterceptHandler(logging.Handler):
-    def emit(self, record):
-        try:
-            level = logger.level(record.levelname).name
-        except ValueError:
-            level = record.levelno
-
-        frame, depth = inspect.currentframe(), 0
-        while frame and depth < 10:
-            if frame.f_code.co_filename == logging.__file__:
-                depth += 1
-            frame = frame.f_back
-
-        logger.opt(depth=depth, exception=record.exc_info, record=True).log(
-            level, record.getMessage()
-        )
-
-
-
-class ConfigLoader:
-    __instance = None # char " _ " is used to indicate that this is a private variable
-    __config = None
-
-    def __new__(cls):
-        if cls.__instance is None:
-            cls.__instance = super().__new__(cls)
-            cls._load()
-        return cls.__instance
-
-    @classmethod
-    def _load(cls):
-        try:
-            with open("pyproject.toml", "r") as f:
-                cls.__config = toml.load(f)
-            os.environ["CONFIG_LOADED"] = "1"
-        except Exception as error:
-            logger.critical("Config load failed: {error}", error=error)
-            raise
-   
-    @classmethod
-    def get(cls, section: str, key: str):
-        return cls.__config[section][key]
-
-
-
-class DockerTools:
-    @staticmethod
-    def is_running_inside_docker():
-        try:
-            if os.environ['RUNNING_INSIDE_DOCKER'] == "1":
-                return True
-        except KeyError:
-            ()
-        return False
-
-
-
-class LogSetup:
-    def __init__(self):
-        self.configure_loguru()
-
-    @staticmethod
-    def configure_loguru():
-        logger.remove()
-        logger.add(
-            "debug/debug.json",
-            format="{time} {level} {message}",
-            serialize=True,
-            rotation="04:00",
-            retention="14 days",
-            compression="zip",
-            level="DEBUG",
-            catch=True,
-        )
-
-        logger.add(
-            sys.stdout,
-            format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | "
-                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> – {message}",
-            level="DEBUG",
-            catch=True,
-        )
 
 
 class MathSolver:
@@ -238,34 +156,28 @@ class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
                 )
             
 
-
-def RUN_MATH_SOLVE_SERVICE():
-    LogSetup()
-    config = ConfigLoader()
-    server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
-    sevice_math_solve_rpc.add_GRPC_math_solveServicer_to_server(GRPC_math_solve(), server)
-
-    # Enable gRPC reflection for the service
-    SERVICE_NAMES = (
-        sevice_math_solve_pb.DESCRIPTOR.services_by_name['GRPC_math_solve'].full_name,
-        reflection.SERVICE_NAME,
-    )
-    reflection.enable_server_reflection(SERVICE_NAMES, server)
-
-    host = config.get("host", "HOST")
-    port = int(config.get("host", "PORT"))
-    addr = f"{host}:{port}"
-    server.add_insecure_port(addr)
-    logger.info(f"gRPC сервер запущен на {addr}")
-    server.start()
-    server.wait_for_termination()
+class service:
+    def __init__(self):
+        self.config = ConfigLoader()
 
 
-if __name__ == "__main__":
-    try:
-        RUN_MATH_SOLVE_SERVICE()
-    except KeyboardInterrupt:
-        logger.info("Service stopped by user")
-    except Exception as error:
-        logger.critical(f"Service crashed: {error}")
-        sys.exit(1)
+    def RUN_MATH_SOLVE_SERVICE(self):
+        server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        sevice_math_solve_rpc.add_GRPC_math_solveServicer_to_server(GRPC_math_solve(), server)
+
+        # Enable gRPC reflection for the service
+        # SERVICE_NAMES = (
+        #     sevice_math_solve_pb.DESCRIPTOR.services_by_name['GRPC_math_solve'].full_name,
+        #     reflection.SERVICE_NAME,
+        # )
+        # reflection.enable_server_reflection(SERVICE_NAMES, server)
+
+        host = self.config.get("host", "HOST")
+        port = int(self.config.get("host", "PORT"))
+        addr = f"{host}:{port}"
+        server.add_insecure_port(addr)
+        logger.info(f"gRPC сервер запущен на {addr}")
+        server.start()
+        server.wait_for_termination()
+
+

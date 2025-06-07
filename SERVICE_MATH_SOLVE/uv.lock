@@ -116,6 +116,7 @@ version = "0.0.1"
 source = { virtual = "." }
 dependencies = [
     { name = "antlr4-python3-runtime" },
+    { name = "colorama" },
     { name = "grpcio-reflection" },
     { name = "grpcio-tools" },
     { name = "loguru" },
@@ -127,6 +128,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "antlr4-python3-runtime", specifier = "==4.11.1" },
+    { name = "colorama", specifier = "==0.4.6" },
     { name = "grpcio-reflection", specifier = "==1.72.1" },
     { name = "grpcio-tools", specifier = "==1.72.1" },
     { name = "loguru", specifier = "==0.7.3" },

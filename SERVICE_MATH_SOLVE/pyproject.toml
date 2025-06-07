@@ -10,6 +10,7 @@ dependencies = [
     "toml==0.10.2",
     "grpcio-tools==1.72.1",
     "grpcio-reflection==1.72.1",
+    "colorama==0.4.6",
 ]
 LOGGING_REQUESTS = true
 LOGGING_RESPONSES = false

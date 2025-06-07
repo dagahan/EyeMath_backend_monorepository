@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-import service_math_solve_pb2 as service__math__solve__pb2
+import gen.service_math_solve_pb2 as service__math__solve__pb2
 
 GRPC_GENERATED_VERSION = '1.72.1'
 GRPC_VERSION = grpc.__version__
