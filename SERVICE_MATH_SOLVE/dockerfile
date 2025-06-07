@@ -18,11 +18,18 @@ RUN useradd -m appuser && \
 # Clonning .proto files from owr repo.
 RUN git clone --depth=1 https://github.com/dagahan/EyeMath_protos.git /protos
 
-ADD https://astral.sh/uv/install.sh /uv-installer.sh
-RUN sh /uv-installer.sh /usr/local/bin && rm /uv-installer.sh
+RUN curl -fsSL https://astral.sh/uv/install.sh -o /tmp/uv-installer.sh
+RUN sh /tmp/uv-installer.sh ~/.local/bin \
+    && rm /tmp/uv-installer.sh
 
+# Copying uv binary from ~/.local/bin to /usr/local/bin
+RUN cp /root/.local/bin/uv /usr/local/bin/uv \
+    && cp /root/.local/bin/uvx /usr/local/bin/uvx \
+    && chmod +x /usr/local/bin/uv /usr/local/bin/uvx
+ENV PATH="/usr/local/bin:${PATH}"
+
+# Using uv installing reqs to generate stubs.
 RUN $UV pip install --no-cache-dir grpcio-tools grpcio-reflection
-ENV PATH="/root/.local/bin/:$PATH"
 
 # Generating stubs from cloned .proto files.
 RUN find /protos -type f -name '*.proto' -exec python -m grpc_tools.protoc \

@@ -1,6 +1,7 @@
 import sys, colorama
 from loguru import logger
 
+sys.path.insert(0, './gen') #Fix of relative import in generated stubs
 from src.core.config import ConfigLoader
 from src.services.logging import InterceptHandler, LogSetup
 from src.services.grpc_server import gRPC_Server_Runner
