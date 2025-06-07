@@ -15,6 +15,7 @@ dependencies = [
     "python-dotenv==1.1.0",
 ]
 show_params_on_run = true
+# debug_mode parameter is declaring in .env file!
 
 
 [MaL]
