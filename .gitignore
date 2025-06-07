@@ -130,7 +130,6 @@ celerybeat.pid
 # Environments
 .venv
 env/
-.env
 venv/
 ENV/
 env.bak/
@@ -197,10 +196,11 @@ go.work.sum
 
 # Directories
 #gen/
-debug/
-tmp/
+**debug/
+**tmp/
 **/uv.lock
 **/*.log
+**/*.env
 
 
 
