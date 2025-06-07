@@ -1,58 +1,48 @@
-import sys, inspect, logging, colorama
-from src.services.mathsolve import service
+import sys, colorama
 from loguru import logger
 
+from src.core.config import ConfigLoader
+from src.services.logging import InterceptHandler, LogSetup
+from src.services.grpc_server import gRPC_Server_Runner
 
 
 
-class InterceptHandler(logging.Handler):
-    def emit(self, record):
-        try:
-            level = logger.level(record.levelname).name
-        except ValueError:
-            level = record.levelno
 
-        frame, depth = inspect.currentframe(), 0
-        while frame and depth < 10:
-            if frame.f_code.co_filename == logging.__file__:
-                depth += 1
-            frame = frame.f_back
+class service:
+    def __init__(self):
+        self.config = ConfigLoader()
+        self.intercept_handler = InterceptHandler()
+        self.logger_setup = LogSetup()
+        self.grpc_server_runner = gRPC_Server_Runner()
+        self.service_name = self.config.get("project", "name")
+        self.show_params_on_start = self.config.get("project", "show_params_on_run")
 
-        logger.opt(depth=depth, exception=record.exc_info, record=True).log(
-            level, record.getMessage()
-        )
+    
+    def service_start_message(self):
+        match self.show_params_on_start:
+            case True:
+                from tabulate import tabulate
+                table = self.config["MaL"]
+                table.update(self.config["grpc_server"])
+            
+                logger.info(f"""{colorama.Fore.CYAN}{self.service_name} started with parameters:\n
+                {colorama.Fore.GREEN}{tabulate([table], headers="keys", tablefmt="grid")}""")
+
+            case default:
+                (logger.info(f"{colorama.Fore.CYAN}{self.service_name} starting..."))
 
 
-
-class LogSetup:
-    @staticmethod
-    def configure():
-        logger.remove()
-        logger.add(
-            "debug/debug.json",
-            format="{time} {level} {message}",
-            serialize=True,
-            rotation="04:00",
-            retention="14 days",
-            compression="zip",
-            level="DEBUG",
-            catch=True,
-        )
-
-        logger.add(
-            sys.stdout,
-            format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | "
-                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - {message}",
-            level="DEBUG",
-            catch=True,
-        )
+    def run_service(self):
+        self.logger_setup.configure()
+        self.service_start_message()
+        self.grpc_server_runner.run_grpc_server()
 
 
 
 if __name__ == "__main__":
     try:
         mathsolve = service()
-        mathsolve.RUN_MATH_SOLVE_SERVICE()
+        mathsolve.run_service()
     except KeyboardInterrupt:
         logger.info(f"{colorama.Fore.CYAN}Service stopped by user")
     except Exception as error:

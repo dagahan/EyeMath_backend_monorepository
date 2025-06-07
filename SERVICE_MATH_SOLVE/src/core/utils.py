@@ -14,7 +14,7 @@ class MethodTools:
     @staticmethod
     def name_of_method(one=+1, two=3):
         try:
-            return inspect.stack()[one][3]
+            return inspect.stack()[one][two]
         except Exception as ex:
             logger.error(f"There is an error with checking your method's name: {ex}")
             return "Unknown Method"
@@ -25,7 +25,7 @@ class EnvTools:
     def __init__(self):
         load_dotenv()
 
-
+ 
     @staticmethod
     def load_env_var(variable_name):
         try:
@@ -34,6 +34,12 @@ class EnvTools:
             logger.critical(f"Error with {inspect.stack()[0][3]}\n{ex}")
             return None
         
+
+    @staticmethod
+    def is_debug_mode():
+        return EnvTools.load_env_var("debug_mode")
+        
+
     @staticmethod
     def is_running_inside_docker():
         try:
