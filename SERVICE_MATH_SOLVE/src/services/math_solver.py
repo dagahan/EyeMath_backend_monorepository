@@ -18,9 +18,9 @@ class MathSolver:
 
     @logger.catch
     def _is_equation(self, expr):
-        logger.debug(f"Checking if {expr} is an equation...")
+        logger.debug(f"{colorama.Fore.MAGENTA}Checking if {colorama.Fore.YELLOW}{expr} {colorama.Fore.MAGENTA}is an equation...")
         if isinstance(expr, Eq):
-            logger.debug(f"{expr} is an equation.")
+            logger.debug(f"{colorama.Fore.YELLOW}{expr} {colorama.Fore.MAGENTA}is an equation.")
             return True
         return any(isinstance(node, Symbol) for node in preorder_traversal(expr))
     
@@ -34,14 +34,21 @@ class MathSolver:
 
     @logger.catch    #this we call 'decorator'
     def SolveExpression(self, request):
-        parsed = latex2sympy(request.expression)
+        parsed = parse_latex(request.expression)
+
+
+        logger.debug(f"{parsed}")
+        # to_return = sympy.sqrt(parsed)
 
         if self._is_equation(parsed):
-            to_return = solve(parsed)
+            answer = sympy.solve(parsed)
         else:
-            to_return = parsed.evalf()
+            answer = parsed.evalf()
 
-        return to_return
+
+        answer = self.RevomeExtraZeroesFloat(answer)
+
+        return answer
     
 
     
@@ -63,10 +70,7 @@ class MathSolver:
         else:
             answer = parsed.evalf()
 
-        # print(type(to_return))
 
         answer = self.RevomeExtraZeroesFloat(answer)
-        
-        # logger.info(DockerTools.is_docker())
 
         return answer
