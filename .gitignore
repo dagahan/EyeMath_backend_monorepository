@@ -128,7 +128,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -195,10 +194,14 @@ cython_debug/
 go.work
 go.work.sum
 
-# Derictories
-binary/
-gen/
-
+# Directories
+**gen/
+**debug/
+**tmp/
+**/uv.lock
+**/*.log
+**/*.env
+**/uv.lock
 
 
 

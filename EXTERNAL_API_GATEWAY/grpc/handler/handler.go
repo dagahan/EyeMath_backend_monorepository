@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"os"
 
 	exapigate "main/gen/exapigate"
 
@@ -17,9 +18,26 @@ type ServerAPI struct {
 	exapigate.UnimplementedExternalApiGatewayServer
 }
 
+func is_running_in_docker() bool {
+	if os.Getenv("RUNNING_INSIDE_DOCKER") == "1" {
+		return true
+	}
+	return false
+}
+
 func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) {
+	var address string
+	// TODO: данную проверку нужно проводить всего один раз, значение вынести в константу.
+	if is_running_in_docker() {
+		address = "service_math_solve:8001"
+		// fmt.Println("Running inside Docker, using service address")
+	} else {
+		address = "localhost:8001"
+		// fmt.Println("Running outside Docker, using localhost address")
+	}
+
 	conn, err := grpc.NewClient(
-		"service_math_solve:8001",
+		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		// grpc.WithBlock(),
 		// grpc.WithTimeout(5*time.Second),

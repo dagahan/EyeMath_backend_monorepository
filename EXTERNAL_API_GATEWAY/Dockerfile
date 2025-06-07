@@ -1,5 +1,7 @@
-# Dockerfile для external_api_gateway
 FROM golang:1.24.2-alpine
+
+
+
 
 # Установка зависимостей
 RUN apk add --no-cache git protobuf protobuf-dev protoc ca-certificates
