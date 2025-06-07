@@ -201,6 +201,7 @@ go.work.sum
 **/uv.lock
 **/*.log
 **/*.env
+**/uv.lock
 
 
 
