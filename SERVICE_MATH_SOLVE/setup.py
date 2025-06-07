@@ -1,6 +1,7 @@
 import sys, colorama
 from loguru import logger
 
+sys.path.insert(0, './gen') #Fix of relative import in generated stubs
 from src.core.config import ConfigLoader
 from src.services.logging import InterceptHandler, LogSetup
 from src.services.grpc_server import gRPC_Server_Runner
@@ -25,7 +26,7 @@ class service:
                 table = self.config["MaL"]
                 table.update(self.config["grpc_server"])
             
-                logger.info(f"""{colorama.Fore.CYAN}{self.service_name} started with parameters:\n
+                logger.info(f"""{colorama.Fore.CYAN}{self.service_name} started with configuration parameters:\n
                 {colorama.Fore.GREEN}{tabulate([table], headers="keys", tablefmt="grid")}""")
 
             case default:
