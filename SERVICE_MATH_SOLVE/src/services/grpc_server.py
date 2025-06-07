@@ -69,7 +69,7 @@ class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
         self._logrequest(request, context)
 
         try:
-            if self.env_tools.is_debug_mode():
+            if self.env_tools.is_debug_mode() == "1":
                 MathAnswer = self.mathsolver.SolveExpressionDebugMode(request)
             else:
                 MathAnswer = self.mathsolver.SolveExpression(request)
