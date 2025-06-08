@@ -112,7 +112,7 @@ class gRPC_Server_Runner:
         # )
         # reflection.enable_server_reflection(SERVICE_NAMES, server)
 
-        logger.info(f"{colorama.Fore.GREEN}gRPC server has been started on {colorama.Fore.YELLOW}({self.addr})")
+        logger.info(f"{colorama.Fore.GREEN}gRPC server of {self.grpc_math_solve.project_name} has been started on {colorama.Fore.YELLOW}({self.addr})")
         self.grpc_server.start()
         self.grpc_server.wait_for_termination()
 
