@@ -18,7 +18,7 @@ import gen.service_math_recognize_pb2_grpc as sevice_math_recognize_rpc
 class GRPC_math_recognize(sevice_math_recognize_rpc.GRPC_math_recognize):
     def __init__(self):
         self.config = ConfigLoader()
-        self.mathrecognize = MathRecognizer()
+        self.mathrecognizer = MathRecognizer()
         self.env_tools = EnvTools()
         self.method_tools = MethodTools()
         self.log_requests = self.config.get("grpc_server", "log_requests")

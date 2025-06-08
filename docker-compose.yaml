@@ -31,6 +31,20 @@ services:
       - eye_math_network
     restart: ${DOCKER_CONTAINERS_RESTART}
 
+  service_math_recognize:
+    build: ./SERVICE_MATH_RECOGNIZE
+    container_name: service_math_recognize
+    environment:
+      TZ: ${SYSTEM_TIME_ZONE}
+      HOST: ${MATH_RECOGNIZE_HOST}
+      PORT: ${MATH_RECOGNIZE_APP_PORT}
+      RUNNING_INSIDE_DOCKER: 1
+    ports:
+      - ${MATH_RECOGNIZE_PORT}
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
+
   postgres:
     image: postgres:14
     environment:

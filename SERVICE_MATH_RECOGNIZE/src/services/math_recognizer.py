@@ -11,4 +11,6 @@ class MathRecognizer:
         self.config = ConfigLoader()
      
 
-    
+    @logger.catch
+    def RecognizeExpression(self, request):
+        return 23

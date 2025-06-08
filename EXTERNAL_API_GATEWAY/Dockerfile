@@ -20,6 +20,7 @@ RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1 \
 ENV PATH="$PATH:$(go env GOPATH)/bin"
 
 # Клонирование .proto файлов
+ARG CACHEBUST=1
 RUN git clone --depth=1 https://github.com/dagahan/EyeMath_protos.git /protos
 
 # Генерация Go-кода
