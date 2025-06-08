@@ -1,5 +1,5 @@
 syntax = "proto3";
-package mathsolve;
+package mathrecognize;
 option go_package = "github.com/dagahan/EyeMath_protos/go/mathsolve;mathsolve";
 
 

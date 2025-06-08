@@ -1,0 +1,33 @@
+syntax = "proto3";
+package mathrecognize;
+option go_package = "github.com/dagahan/EyeMath_protos/go/mathrecognize;mathrecognize";
+
+
+
+message MetadataRequest {
+}
+
+message MetadataResponse {
+  string name = 1;
+  string version = 2;
+}
+
+
+message RecognizeRequest {
+  string expression = 1;
+}
+
+message RecognizeResponse {
+  enum Status {
+    OK = 0;
+    ERROR = 1;
+  }
+  Status status = 1;
+  string result = 2; 
+}
+
+
+service GRPC_math_recognize {
+    rpc Metadata (MetadataRequest) returns (MetadataResponse);
+    rpc Recognize (RecognizeRequest) returns (RecognizeResponse);
+}

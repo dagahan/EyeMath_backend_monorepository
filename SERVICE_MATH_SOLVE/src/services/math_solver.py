@@ -14,7 +14,7 @@ class MathSolver:
     def __init__(self):
         self.config = ConfigLoader()
         mp.dps = self.config.get("MaL", "precision")
-
+     
 
     @logger.catch
     def _is_equation(self, expr):
