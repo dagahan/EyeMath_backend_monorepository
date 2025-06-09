@@ -14,7 +14,7 @@ message MetadataResponse {
 
 
 message RecognizeRequest {
-  string expression = 1;
+  bytes image = 1;
 }
 
 message RecognizeResponse {
@@ -29,5 +29,5 @@ message RecognizeResponse {
 
 service GRPC_math_recognize {
     rpc Metadata (MetadataRequest) returns (MetadataResponse);
-    rpc Recognize (RecognizeRequest) returns (RecognizeResponse);
+    rpc Recognize (stream RecognizeRequest) returns (RecognizeResponse);
 }
