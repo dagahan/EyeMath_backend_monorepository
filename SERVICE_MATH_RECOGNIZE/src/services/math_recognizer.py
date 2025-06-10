@@ -55,7 +55,7 @@ class MathRecognizer:
     # TODO: clear_saved_msgs_pictures()
 
 
-    async def save_image_localy(self, image):
+    async def save_image_localy(self, image) -> None:
         image.save(f"recived_images/image{self.count_files_in_dir(self.save_imgs_dir) + 1}.jpg")
 
 

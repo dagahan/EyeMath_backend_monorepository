@@ -12,6 +12,7 @@ class MethodTools:
     def __init__(self):
         pass
 
+
     @staticmethod
     def name_of_method(one=+1, two=3):
         try:
@@ -25,6 +26,7 @@ class EnvTools:
     def __init__(self):
         load_dotenv()
 
+
     @staticmethod
     def load_env_var(variable_name):
         try:
@@ -33,24 +35,27 @@ class EnvTools:
             logger.critical(f"Error with {inspect.stack()[0][3]}\n{ex}")
             return None
 
-    @staticmethod
-    def is_debug_mode():
-        return EnvTools.load_env_var("debug_mode")
 
     @staticmethod
-    def is_running_inside_docker():
+    def is_debug_mode() -> int:
+        return EnvTools.load_env_var("debug_mode")
+
+
+    @staticmethod
+    def is_running_inside_docker() -> int:
         try:
-            if EnvTools.load_env_var("RUNNING_INSIDE_DOCKER") == "1":
-                return True
+            return EnvTools.load_env_var("RUNNING_INSIDE_DOCKER")
         except KeyError as ex:
             logger.error(
-                f"Error with {inspect.stack()[0][3]}. Returns default 'False'\n{ex}"
+                f"Error with {inspect.stack()[0][3]}. Returns default '0'\n{ex}"
             )
-        return False
+        return 0
+
 
     @staticmethod
     def is_file_exist(directory, file):
         return os.path.exists(os.path.join(os.getcwd(), directory, file))
+
 
     @staticmethod
     def create_file_in_directory(dir, file):
@@ -76,6 +81,7 @@ class JsonLoader:
             info = {}
         return info
 
+
     @staticmethod
     def write_json(path, data):
         try:
@@ -90,6 +96,7 @@ class Filters:
     def filter_strings(list1: List[str], list2: List[str]) -> List[str]:
         set2 = set(list2)
         return [s for s in list1 if s not in set2]
+
 
     @staticmethod
     def personalized_line(line, artifact, name):

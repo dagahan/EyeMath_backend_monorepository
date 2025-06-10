@@ -22,7 +22,6 @@ class MethodTools:
             return "Unknown Method"
 
 
-
 class EnvTools:
     def __init__(self):
         load_dotenv()
@@ -38,18 +37,19 @@ class EnvTools:
 
 
     @staticmethod
-    def is_debug_mode():
+    def is_debug_mode() -> int:
         return EnvTools.load_env_var("debug_mode")
 
 
     @staticmethod
-    def is_running_inside_docker():
+    def is_running_inside_docker() -> int:
         try:
-            if EnvTools.load_env_var('RUNNING_INSIDE_DOCKER') == "1":
-                return True
+            return EnvTools.load_env_var("RUNNING_INSIDE_DOCKER")
         except KeyError as ex:
-            logger.error(f"Error with {inspect.stack()[0][3]}. Returns default 'False'\n{ex}")
-        return False
+            logger.error(
+                f"Error with {inspect.stack()[0][3]}. Returns default '0'\n{ex}"
+            )
+        return 0
 
 
     @staticmethod
@@ -62,7 +62,6 @@ class EnvTools:
         os.makedirs(dir)
         with open(dir+file, 'w') as newfile:
             newfile.write("")
-
 
 
 class JsonLoader:

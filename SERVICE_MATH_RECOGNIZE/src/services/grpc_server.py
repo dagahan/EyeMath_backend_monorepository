@@ -83,7 +83,7 @@ class GRPCServerRunner:
         self.addr = f"{self.host}:{self.port}"
 
 
-    def run_grpc_server(self):
+    def run_grpc_server(self) -> None:
         sevice_math_recognize_rpc.add_GRPCMathRecognizeServicer_to_server(GRPCMathRecognize(), self.grpc_server)
 
         self.grpc_server.add_insecure_port(self.addr)

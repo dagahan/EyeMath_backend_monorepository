@@ -15,7 +15,7 @@ class MathSolver:
 
 
     @logger.catch
-    def _is_equation(self, expr):
+    def _is_equation(self, expr) -> bool:
         logger.debug(
             f"{colorama.Fore.MAGENTA}Checking if {colorama.Fore.YELLOW}{expr} {colorama.Fore.MAGENTA}is an equation..."
         )
@@ -28,7 +28,7 @@ class MathSolver:
 
 
     @logger.catch
-    def remove_extra_zeroes_float(self, value):
+    def remove_extra_zeroes_float(self, value) -> float:
         if isinstance(value, (sympy.core.numbers.Float)):
             value = float(str(value).strip("0"))
         return value

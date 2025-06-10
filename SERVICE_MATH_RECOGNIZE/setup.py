@@ -19,7 +19,7 @@ class Service:
         self.show_params_on_start = self.config.get("project", "show_params_on_run")
 
 
-    def service_start_message(self):
+    def service_start_message(self) -> None:
         match self.show_params_on_start:
             case True:
                 from tabulate import tabulate
@@ -33,7 +33,7 @@ class Service:
                 (logger.info(f"{colorama.Fore.CYAN}{self.service_name} starting..."))
 
 
-    def run_service(self):
+    def run_service(self) -> None:
         self.logger_setup.configure()
         self.service_start_message()
         self.grpc_server_runner.run_grpc_server()
