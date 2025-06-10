@@ -23,6 +23,6 @@ message recognize_response {
 
 
 service GRPCMathRecognize {
-    rpc meta_data (metadata_request) returns (metadata_response);
+    rpc meta_data (meta_data_request) returns (meta_data_response);
     rpc recognize (recognize_request) returns (recognize_response);
 }

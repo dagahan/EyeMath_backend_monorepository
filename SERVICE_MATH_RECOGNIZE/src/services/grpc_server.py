@@ -24,7 +24,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
 
 
     @logger.catch
-    def meta_data(self, request: sevice_math_recognize_pb.metadata_request, context) -> sevice_math_recognize_pb.metadata_response:
+    def meta_data(self, request: sevice_math_recognize_pb.meta_data_recognize_request, context) -> sevice_math_recognize_pb.meta_data_recognize_response:
         '''
         This endpoint just returns metadata of service.
         Look at service's protobuf file to get more info.
@@ -32,7 +32,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         asyncio.run(self.log_api._logrequest(request, context))
 
         try:
-            responce = sevice_math_recognize_pb.metadata_response(
+            responce = sevice_math_recognize_pb.meta_data_recognize_response(
                 name = self.project_name,
                 version = self.project_version,
             )
@@ -42,8 +42,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
-            return sevice_math_recognize_pb.metadata_response(
-                )
+            return sevice_math_recognize_pb.meta_data_recognize_response()
 
 
     @logger.catch

@@ -1,17 +1,15 @@
-import json
+import asyncio
 from concurrent import futures
 
 import colorama
 import grpc
-from google.protobuf.json_format import MessageToDict
 from loguru import logger
 
 import gen.service_math_solve_pb2 as sevice_math_solve_pb
 import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
-
-# from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 from src.core.config import ConfigLoader
-from src.core.utils import EnvTools, MethodTools
+from src.core.utils import EnvTools
+from src.services.logging import LogAPI
 from src.services.math_solver import MathSolver
 
 
@@ -20,64 +18,52 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
         self.config = ConfigLoader()
         self.mathsolver = MathSolver()
         self.env_tools = EnvTools()
-        self.method_tools = MethodTools()
-        self.log_requests = self.config.get("grpc_server", "log_requests")
-        self.log_responses = self.config.get("grpc_server", "log_responses")
+        self.log_api = LogAPI()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
 
 
     @logger.catch
-    def _logrequest(self, request, context):
-        if self.log_requests:
-            payload = MessageToDict(request)
-            logger.info(
-                f"Method \"{self.method_tools.name_of_method(3, 3)}\" has called from  |  {context.peer()}\n" #format: 'ipv4:127.0.0.1:54321'
-                f"{json.dumps(payload, indent=4, ensure_ascii=False)}"
-            )
-
-    @logger.catch
-    def _logresponce(self, responce, context):
-        if self.log_responses:
-            payload = MessageToDict(responce)
-            logger.info(
-                f"Method \"{self.method_tools.name_of_method(3, 3)}\" responsing to  |  {context.peer()}\n"
-                f"{json.dumps(payload, indent=4, ensure_ascii=False)}"
-            )
-
-
-    @logger.catch
-    def meta_data(self, request: sevice_math_solve_pb.meta_data_request, context) -> sevice_math_solve_pb.meta_data_response:
-        self._logrequest(request, context)
+    def meta_data(self, request: sevice_math_solve_pb.meta_data_solve_request, context) -> sevice_math_solve_pb.meta_data_solve_response:
+        '''
+        This endpoint just returns metadata of service.
+        Look at service's protobuf file to get more info.
+        '''
+        asyncio.run(self.log_api._logrequest(request, context))
 
         try:
-            responce = sevice_math_solve_pb.meta_data_response(
+            responce = sevice_math_solve_pb.meta_data_solve_response(
                 name = self.project_name,
                 version = self.project_version,
             )
 
-            self._logresponce(responce, context)
+            asyncio.run(self.log_api._logresponce(responce, context))
             return responce
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
-            return sevice_math_solve_pb.meta_data_response(
+            return sevice_math_solve_pb.meta_data_solve_response(
                 )
+        
 
     @logger.catch
-    def solve(self, request: sevice_math_solve_pb.solve_request, context) -> sevice_math_solve_pb.solve_response: #that function we call "endpoint of the gRPC api"
-        self._logrequest(request, context)
+    def solve(self, request: sevice_math_solve_pb.solve_request, context) -> sevice_math_solve_pb.solve_response:
+        '''
+        Endpoint returns a result of recognizing latex on sended picture by client.
+        Look at service's protobuf file to get more info.
+        '''
+        asyncio.run(self.log_api._logrequest(request, context))
 
         try:
             if self.env_tools.is_debug_mode() == "1":
-                math_answer = self.mathsolver.solve_expression_debug(request)
+                solver_answer = self.mathsolver.solve_expression_debug(request)
             else:
-                math_answer = self.mathsolver.solve_expression(request)
+                solver_answer = self.mathsolver.solve_expression(request)
             responce = sevice_math_solve_pb.solve_response(
-                result=str(math_answer),
+                result=str(solver_answer),
             )
 
-            self._logresponce(responce, context)
+            asyncio.run(self.log_api._logresponce(responce, context))
             return responce
 
         except Exception as error:
