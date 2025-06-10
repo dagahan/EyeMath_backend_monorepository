@@ -1,8 +1,7 @@
-import tomllib
 import os
+import tomllib
+
 from loguru import logger
-
-
 
 
 class ConfigLoader:
@@ -26,14 +25,14 @@ class ConfigLoader:
         except Exception as error:
             logger.critical("Config load failed: {error}", error=error)
             raise
-   
+
 
     @classmethod
     def get(cls, section: str, key: str = None):
         if key is None:
             return cls.__config.get(section, {})
         return cls.__config[section][key]
-    
+
 
     def __getitem__(self, section: str):
         return self.get(section)

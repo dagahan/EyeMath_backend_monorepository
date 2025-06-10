@@ -107,13 +107,11 @@ func (s *ServerAPI) MathSolver(ctx context.Context, req *exapigate.MathSolverReq
 	if err != nil {
 		// В случае ошибки возвращаем ответ с статусом ERROR
 		return &exapigate.MathSolverResponse{
-			Status: exapigate.MathSolverResponse_ERROR,
 			Result: "Failed to contact math service: " + err.Error(),
 		}, nil
 	}
 
 	return &exapigate.MathSolverResponse{
-		Status: exapigate.MathSolverResponse_Status(response.Status),
 		Result: response.Result,
 	}, nil
 }

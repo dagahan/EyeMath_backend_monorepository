@@ -1,12 +1,11 @@
-import os
-import json
-import chardet
 import inspect
-from loguru import logger
+import json
+import os
 from typing import List
+
+import chardet
 from dotenv import load_dotenv
-
-
+from loguru import logger
 
 
 class MethodTools:
@@ -28,7 +27,7 @@ class EnvTools:
     def __init__(self):
         load_dotenv()
 
- 
+
     @staticmethod
     def load_env_var(variable_name):
         try:
@@ -36,12 +35,12 @@ class EnvTools:
         except Exception as ex:
             logger.critical(f"Error with {inspect.stack()[0][3]}\n{ex}")
             return None
-        
+
 
     @staticmethod
     def is_debug_mode():
         return EnvTools.load_env_var("debug_mode")
-        
+
 
     @staticmethod
     def is_running_inside_docker():
@@ -51,7 +50,7 @@ class EnvTools:
         except KeyError as ex:
             logger.error(f"Error with {inspect.stack()[0][3]}. Returns default 'False'\n{ex}")
         return False
-    
+
 
     @staticmethod
     def is_file_exist(directory, file):
@@ -82,7 +81,7 @@ class JsonLoader:
             logger.error(f"Error during reading JSON file {path}: {e}")
             info = {}
         return info
-    
+
 
     @staticmethod
     def write_json(path, data):
@@ -99,9 +98,8 @@ class Filters:
     def filter_strings(list1: List[str], list2: List[str]) -> List[str]:
         set2 = set(list2)
         return [s for s in list1 if s not in set2]
-    
+
 
     @staticmethod
     def personalized_line(line, artifact, name):
-        person_line = line.replace(artifact, name)
-        return person_line
+        return  line.replace(artifact, name)

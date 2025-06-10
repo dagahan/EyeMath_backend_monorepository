@@ -18,11 +18,6 @@ message recognize_request {
 }
 
 message recognize_response {
-  enum status {
-    OK = 0;
-    ERROR = 1;
-  }
-  status status = 1;
   string result = 2; 
 }
 

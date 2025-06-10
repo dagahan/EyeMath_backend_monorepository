@@ -6,8 +6,8 @@ import grpc
 from google.protobuf.json_format import MessageToDict
 from loguru import logger
 
-import gen.service_math_solve_pb2 as SeviceMathSolvePb
-import gen.service_math_solve_pb2_grpc as SeviceMathSolveRpc
+import gen.service_math_solve_pb2 as sevice_math_solve_pb
+import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
 
 # from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 from src.core.config import ConfigLoader
@@ -15,7 +15,7 @@ from src.core.utils import EnvTools, MethodTools
 from src.services.math_solver import MathSolver
 
 
-class GRPCMathSolve(SeviceMathSolveRpc.GRPCMathSolve):
+class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
     def __init__(self):
         self.config = ConfigLoader()
         self.mathsolver = MathSolver()
@@ -47,11 +47,11 @@ class GRPCMathSolve(SeviceMathSolveRpc.GRPCMathSolve):
 
 
     @logger.catch
-    def meta_data(self, request: SeviceMathSolvePb.meta_data_request, context) -> SeviceMathSolvePb.meta_data_response:
+    def meta_data(self, request: sevice_math_solve_pb.meta_data_request, context) -> sevice_math_solve_pb.meta_data_response:
         self._logrequest(request, context)
 
         try:
-            responce = SeviceMathSolvePb.meta_data_response(
+            responce = sevice_math_solve_pb.meta_data_response(
                 name = self.project_name,
                 version = self.project_version,
             )
@@ -61,11 +61,11 @@ class GRPCMathSolve(SeviceMathSolveRpc.GRPCMathSolve):
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
-            return SeviceMathSolvePb.meta_data_response(
+            return sevice_math_solve_pb.meta_data_response(
                 )
 
     @logger.catch
-    def solve(self, request: SeviceMathSolvePb.solve_request, context) -> SeviceMathSolvePb.solve_response: #that function we call "endpoint of the gRPC api"
+    def solve(self, request: sevice_math_solve_pb.solve_request, context) -> sevice_math_solve_pb.solve_response: #that function we call "endpoint of the gRPC api"
         self._logrequest(request, context)
 
         try:
@@ -73,7 +73,7 @@ class GRPCMathSolve(SeviceMathSolveRpc.GRPCMathSolve):
                 math_answer = self.mathsolver.solve_expression_debug(request)
             else:
                 math_answer = self.mathsolver.solve_expression(request)
-            responce = SeviceMathSolvePb.solve_response(
+            responce = sevice_math_solve_pb.solve_response(
                 result=str(math_answer),
             )
 
@@ -82,7 +82,7 @@ class GRPCMathSolve(SeviceMathSolveRpc.GRPCMathSolve):
 
         except Exception as error:
             logger.error(f"Solve error: {error}")
-            return SeviceMathSolvePb.solve_response(
+            return sevice_math_solve_pb.solve_response(
                 result="None",
                 )
 
@@ -98,7 +98,7 @@ class GRPCServerRunner:
 
 
     def run_grpc_server(self):
-        SeviceMathSolveRpc.add_GRPCMathSolveServicer_to_server(GRPCMathSolve(), self.grpc_server)
+        sevice_math_solve_rpc.add_GRPCMathSolveServicer_to_server(GRPCMathSolve(), self.grpc_server)
 
         self.grpc_server.add_insecure_port(self.addr)
 

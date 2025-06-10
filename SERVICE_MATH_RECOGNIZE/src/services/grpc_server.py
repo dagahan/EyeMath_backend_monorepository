@@ -1,22 +1,19 @@
-import grpc
 import json
-import colorama
-
-from loguru import logger
 from concurrent import futures
-from google.protobuf.json_format import MessageToDict
 
-from src.core.config import ConfigLoader
-from src.services.math_recognizer import MathRecognizer
-from src.core.utils import EnvTools, MethodTools
+import colorama
+import grpc
+from google.protobuf.json_format import MessageToDict
+from loguru import logger
 
 import gen.service_math_recognize_pb2 as sevice_math_recognize_pb
 import gen.service_math_recognize_pb2_grpc as sevice_math_recognize_rpc
+from src.core.config import ConfigLoader
+from src.core.utils import EnvTools, MethodTools
+from src.services.math_recognizer import MathRecognizer
 
 
-
-
-class GRPC_math_recognize(sevice_math_recognize_rpc.GRPC_math_recognize):
+class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
     def __init__(self):
         self.config = ConfigLoader()
         self.mathrecognizer = MathRecognizer()
@@ -26,7 +23,7 @@ class GRPC_math_recognize(sevice_math_recognize_rpc.GRPC_math_recognize):
         self.log_responses = self.config.get("grpc_server", "log_responses")
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
-    
+
 
     @logger.catch
     def _logrequest(self, request, context):
@@ -48,11 +45,11 @@ class GRPC_math_recognize(sevice_math_recognize_rpc.GRPC_math_recognize):
 
 
     @logger.catch
-    def meta_data(self, request: sevice_math_recognize_pb.MetadataRequest, context) -> sevice_math_recognize_pb.MetadataResponse:
+    def meta_data(self, request: sevice_math_recognize_pb.metadata_request, context) -> sevice_math_recognize_pb.metadata_response:
         self._logrequest(request, context)
 
         try:
-            responce = sevice_math_recognize_pb.MetadataResponse(
+            responce = sevice_math_recognize_pb.metadata_response(
                 name = self.project_name,
                 version = self.project_version,
             )
@@ -62,21 +59,20 @@ class GRPC_math_recognize(sevice_math_recognize_rpc.GRPC_math_recognize):
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
-            return sevice_math_recognize_pb.MetadataResponse(
+            return sevice_math_recognize_pb.metadata_response(
                 )
-        
+
     @logger.catch
-    def Recognize(self, request: sevice_math_recognize_pb.RecognizeRequest, context) -> sevice_math_recognize_pb.RecognizeResponse: #that function we call "endpoint of the gRPC api"
+    def recognize(self, request: sevice_math_recognize_pb.recognize_request, context) -> sevice_math_recognize_pb.recognize_response: #that function we call "endpoint of the gRPC api"
         self._logrequest(request, context)
 
         try:
             if self.env_tools.is_debug_mode() == "1":
-                MathAnswer = self.mathrecognizer.RecognizeExpressionDebugMode(request)
+                recognizer_answer = self.mathrecognizer.recognize_expression(request)
             else:
-                MathAnswer = self.mathrecognizer.RecognizeExpression(request)
-            responce = sevice_math_recognize_pb.RecognizeResponse(
-                status=sevice_math_recognize_pb.RecognizeResponse.OK,
-                result=str(MathAnswer),
+                recognizer_answer = self.mathrecognizer.recognize_expression(request)
+            responce = sevice_math_recognize_pb.recognize_response(
+                result=str(recognizer_answer),
             )
 
             self._logresponce(responce, context)
@@ -84,31 +80,31 @@ class GRPC_math_recognize(sevice_math_recognize_rpc.GRPC_math_recognize):
 
         except Exception as error:
             logger.error(f"Recognize error: {error}")
-            return sevice_math_recognize_pb.RecognizeResponse(
-                status=sevice_math_recognize_pb.RecognizeResponse.ERROR,
+            return sevice_math_recognize_pb.recognize_response(
+                result="None",
                 )
-        
+
 
 class GRPCServerRunner:
     def __init__(self):
         self.config = ConfigLoader()
-        self.grpc_math_recognize = GRPC_math_recognize()
+        self.grpc_math_recognize = GRPCMathRecognize()
         self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         self.host = self.config.get("grpc_server", "host")
         self.port = int(self.config.get("grpc_server", "port"))
         self.addr = f"{self.host}:{self.port}"
 
-        
 
-    
+
+
     def run_grpc_server(self):
-        sevice_math_recognize_rpc.add_GRPC_math_recognizeServicer_to_server(GRPC_math_recognize(), self.grpc_server)
+        sevice_math_recognize_rpc.add_GRPCMathRecognizeServicer_to_server(GRPCMathRecognize(), self.grpc_server)
 
         self.grpc_server.add_insecure_port(self.addr)
 
         # Enable gRPC reflection for the service
         # SERVICE_NAMES = (
-        #     sevice_math_recognize_pb.DESCRIPTOR.services_by_name['GRPC_math_recognize'].full_name,
+        #     sevice_math_recognize_pb.DESCRIPTOR.services_by_name['GRPCMathRecognize'].full_name,
         #     reflection.SERVICE_NAME,
         # )
         # reflection.enable_server_reflection(SERVICE_NAMES, server)
@@ -117,4 +113,3 @@ class GRPCServerRunner:
         self.grpc_server.start()
         self.grpc_server.wait_for_termination()
 
-        

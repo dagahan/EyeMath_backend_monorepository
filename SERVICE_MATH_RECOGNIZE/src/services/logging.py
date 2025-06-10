@@ -1,9 +1,8 @@
-import sys
 import inspect
 import logging
+import sys
+
 from loguru import logger
-
-
 
 
 class InterceptHandler(logging.Handler):
