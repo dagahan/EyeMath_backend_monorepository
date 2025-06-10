@@ -23,11 +23,13 @@ show_params_on_run = true
 [tool.ruff.lint]
 extend-select = ["W", "N", "R", "I"]
 # Letters means included rules classes from PEP8
+ignore = ["W293"]
 
 
-[MaL]
-precision = 32
-default_precision = 64
+[recognizer]
+save_receive_imgs = true
+save_imgs_dir = "recived_images"
+preprocess_imgs = true
 
 
 [grpc_server]
@@ -36,3 +38,6 @@ port = 8002
 reload = true
 log_requests = true
 log_responses = false
+log_huge_reqs_and_resps = false
+replace_huge_logs_by_small_msgs = true
+count_of_chars_in_huge_logs = 200

@@ -1,16 +1,16 @@
-import json
+import asyncio
 from concurrent import futures
 
 import colorama
 import grpc
-from google.protobuf.json_format import MessageToDict
 from loguru import logger
 
 import gen.service_math_recognize_pb2 as sevice_math_recognize_pb
 import gen.service_math_recognize_pb2_grpc as sevice_math_recognize_rpc
 from src.core.config import ConfigLoader
-from src.core.utils import EnvTools, MethodTools
+from src.core.utils import EnvTools
 from src.services.math_recognizer import MathRecognizer
+from src.services.logging import LogAPI
 
 
 class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
@@ -18,35 +18,14 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.config = ConfigLoader()
         self.mathrecognizer = MathRecognizer()
         self.env_tools = EnvTools()
-        self.method_tools = MethodTools()
-        self.log_requests = self.config.get("grpc_server", "log_requests")
-        self.log_responses = self.config.get("grpc_server", "log_responses")
+        self.log_api = LogAPI()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
 
 
     @logger.catch
-    def _logrequest(self, request, context):
-        if self.log_requests:
-            payload = MessageToDict(request)
-            logger.info(
-                f"Method \"{self.method_tools.name_of_method(3, 3)}\" has called from  |  {context.peer()}\n" #format: 'ipv4:127.0.0.1:54321'
-                f"{json.dumps(payload, indent=4, ensure_ascii=False)}"
-            )
-
-    @logger.catch
-    def _logresponce(self, responce, context):
-        if self.log_responses:
-            payload = MessageToDict(responce)
-            logger.info(
-                f"Method \"{self.method_tools.name_of_method(3, 3)}\" responsing to  |  {context.peer()}\n"
-                f"{json.dumps(payload, indent=4, ensure_ascii=False)}"
-            )
-
-
-    @logger.catch
     def meta_data(self, request: sevice_math_recognize_pb.metadata_request, context) -> sevice_math_recognize_pb.metadata_response:
-        self._logrequest(request, context)
+        asyncio.run(self.log_api._logrequest(request, context))
 
         try:
             responce = sevice_math_recognize_pb.metadata_response(
@@ -54,7 +33,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
                 version = self.project_version,
             )
 
-            self._logresponce(responce, context)
+            asyncio.run(self.log_api._logresponce(responce, context))
             return responce
 
         except Exception as error:
@@ -62,20 +41,22 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
             return sevice_math_recognize_pb.metadata_response(
                 )
 
+
     @logger.catch
     def recognize(self, request: sevice_math_recognize_pb.recognize_request, context) -> sevice_math_recognize_pb.recognize_response: #that function we call "endpoint of the gRPC api"
-        self._logrequest(request, context)
+        asyncio.run(self.log_api._logrequest(request, context))
 
         try:
             if self.env_tools.is_debug_mode() == "1":
                 recognizer_answer = self.mathrecognizer.recognize_expression(request)
             else:
                 recognizer_answer = self.mathrecognizer.recognize_expression(request)
+
             responce = sevice_math_recognize_pb.recognize_response(
-                result=str(recognizer_answer),
+                result=recognizer_answer,
             )
 
-            self._logresponce(responce, context)
+            asyncio.run(self.log_api._logresponce(responce, context))
             return responce
 
         except Exception as error:
@@ -93,8 +74,6 @@ class GRPCServerRunner:
         self.host = self.config.get("grpc_server", "host")
         self.port = int(self.config.get("grpc_server", "port"))
         self.addr = f"{self.host}:{self.port}"
-
-
 
 
     def run_grpc_server(self):

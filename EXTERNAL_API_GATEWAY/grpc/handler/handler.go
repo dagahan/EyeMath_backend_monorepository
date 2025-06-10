@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
+	mathrecognize "main/gen/mathrecognize"
 	mathsolve "main/gen/mathsolve"
 )
 
@@ -54,6 +55,43 @@ func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) 
 	}
 
 	res, err := client.Solve(context.Background(), req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+
+}
+
+func SendRequestMathRecognizer(expression []byte) (*mathrecognize.RecognizeResponse, error) {
+	var address string
+	// TODO: данную проверку нужно проводить всего один раз, значение вынести в константу.
+	if is_running_in_docker() {
+		address = "service_math_solve:8001"
+		// fmt.Println("Running inside Docker, using service address")
+	} else {
+		address = "localhost:8001"
+		// fmt.Println("Running outside Docker, using localhost address")
+	}
+
+	conn, err := grpc.NewClient(
+		address,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		// grpc.WithBlock(),
+		// grpc.WithTimeout(5*time.Second),
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	client := mathrecognize.NewGRPCMathRecognizeClient(conn)
+
+	req := &mathrecognize.RecognizeRequest{
+		Image: expression,
+	}
+
+	res, err := client.Recognize(context.Background(), req)
 	if err != nil {
 		return nil, err
 	}
@@ -112,6 +150,21 @@ func (s *ServerAPI) MathSolver(ctx context.Context, req *exapigate.MathSolverReq
 	}
 
 	return &exapigate.MathSolverResponse{
+		Result: response.Result,
+	}, nil
+}
+
+func (s *ServerAPI) MathRecognizer(ctx context.Context, req *exapigate.MathRecognizerRequest) (*exapigate.MathRecognizerResponse, error) {
+	response, err := SendRequestMathRecognizer(req.Image)
+
+	if err != nil {
+		// В случае ошибки возвращаем ответ с статусом ERROR
+		return &exapigate.MathRecognizerResponse{
+			Result: "Failed to contact math service: " + err.Error(),
+		}, nil
+	}
+
+	return &exapigate.MathRecognizerResponse{
 		Result: response.Result,
 	}, nil
 }
