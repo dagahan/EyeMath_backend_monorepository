@@ -17,7 +17,7 @@ message solve_request {
 }
 
 message solve_response {
-  string result = 2; 
+  string result = 1; 
 }
 
 

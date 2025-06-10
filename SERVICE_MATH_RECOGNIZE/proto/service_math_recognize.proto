@@ -18,7 +18,7 @@ message recognize_request {
 }
 
 message recognize_response {
-  string result = 2; 
+  string result = 1; 
 }
 
 

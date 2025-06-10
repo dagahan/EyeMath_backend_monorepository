@@ -44,14 +44,25 @@ message math_solver_request {
 }
 
 message math_solver_response {
-  string result = 2; 
+  string result = 1; 
+}
+
+
+
+message math_recognizer_request {
+  bytes image = 1;
+}
+
+message math_recognizer_response {
+  string result = 1; 
 }
 
 
 
 service ExternalApiGateway {
-  rpc Register (register_request) returns (register_response);
-  rpc Login (login_request) returns (login_response);
-  rpc IsAdmin (is_admin_request) returns (is_admin_response);
-  rpc MathSolver (math_solver_request) returns (math_solver_response);
+  rpc register (register_request) returns (register_response);
+  rpc login (login_request) returns (login_response);
+  rpc is_admin (is_admin_request) returns (is_admin_response);
+  rpc math_solver (math_solver_request) returns (math_solver_response);
+  rpc math_recognizer (math_recognizer_request) returns (math_recognizer_response);
 }

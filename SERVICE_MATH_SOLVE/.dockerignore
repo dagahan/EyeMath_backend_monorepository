@@ -4,4 +4,5 @@ gen/
 **/__pycache__
 **/.venv
 **/*.pyc
-*uv.lock
+**/uv.lock
+**/.ruff_cache
