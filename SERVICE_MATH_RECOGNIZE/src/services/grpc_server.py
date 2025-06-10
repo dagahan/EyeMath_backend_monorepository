@@ -1,4 +1,3 @@
-import asyncio
 from concurrent import futures
 
 import colorama
@@ -29,16 +28,16 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         This endpoint just returns metadata of service.
         Look at service's protobuf file to get more info.
         '''
-        asyncio.run(self.log_api._logrequest(request, context))
+        self.log_api._logrequest(request, context)
 
         try:
-            responce = sevice_math_recognize_pb.meta_data_recognize_response(
+            response = sevice_math_recognize_pb.meta_data_recognize_response(
                 name = self.project_name,
                 version = self.project_version,
             )
 
-            asyncio.run(self.log_api._logresponce(responce, context))
-            return responce
+            self.log_api._logresponse(response, context)
+            return response
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
@@ -51,7 +50,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         Endpoint returns a result of recognizing latex on sended picture by client.
         Look at service's protobuf file to get more info.
         '''
-        asyncio.run(self.log_api._logrequest(request, context))
+        self.log_api._logrequest(request, context)
 
         try:
             if self.env_tools.is_debug_mode() == "1":
@@ -59,12 +58,12 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
             else:
                 recognizer_answer = self.mathrecognizer.recognize_expression(request)
 
-            responce = sevice_math_recognize_pb.recognize_response(
+            response = sevice_math_recognize_pb.recognize_response(
                 result=recognizer_answer,
             )
 
-            asyncio.run(self.log_api._logresponce(responce, context))
-            return responce
+            self.log_api._logresponse(response, context)
+            return response
 
         except Exception as error:
             logger.error(f"Recognize error: {error}")
@@ -77,10 +76,11 @@ class GRPCServerRunner:
     def __init__(self):
         self.config = ConfigLoader()
         self.grpc_math_recognize = GRPCMathRecognize()
-        self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
+        self.max_workers = self.config.get("grpc_server", "max_workers")
         self.host = self.config.get("grpc_server", "host")
         self.port = int(self.config.get("grpc_server", "port"))
         self.addr = f"{self.host}:{self.port}"
+        self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=self.max_workers))
 
 
     def run_grpc_server(self) -> None:

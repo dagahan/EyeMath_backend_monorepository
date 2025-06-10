@@ -4,10 +4,10 @@ option go_package = "github.com/dagahan/EyeMath_protos/go/mathrecognize;mathreco
 
 
 
-message metadata_request {
+message meta_data_recognize_request {
 }
 
-message metadata_response {
+message meta_data_recognize_response {
   string name = 1;
   string version = 2;
 }
@@ -23,6 +23,6 @@ message recognize_response {
 
 
 service GRPCMathRecognize {
-    rpc meta_data (meta_data_request) returns (meta_data_response);
+    rpc meta_data_recognize (meta_data_recognize_request) returns (meta_data_recognize_response);
     rpc recognize (recognize_request) returns (recognize_response);
 }

@@ -75,7 +75,7 @@ class LogAPI:
 
 
     @logger.catch
-    async def _logrequest(self, request, context) -> None:
+    def _logrequest(self, request, context) -> None:
         if not self.log_requests:
             return
 
@@ -89,7 +89,7 @@ class LogAPI:
 
 
     @logger.catch
-    async def _logresponce(self, responce, context) -> None:
+    def _logresponse(self, response, context) -> None:
         if not self.log_responses:
             return
 
@@ -97,7 +97,7 @@ class LogAPI:
             if self.replace_huge_logs_by_small_msgs:
                 payload = "too huge to display."
             else:
-                payload = MessageToDict(responce)
+                payload = MessageToDict(response)
 
             method_name = self.method_tools.name_of_method(9, 3)
             peer_info = context.peer()  # формат вида 'ipv4:127.0.0.1:54321'

@@ -1,7 +1,7 @@
 [project]
 name = "service_mathsolve"
 version = "0.0.1"
-requires-python = ">=3.13.2"
+requires-python = "==3.13.2"
 dependencies = [
     "loguru==0.7.3",
     "mpmath==1.3.0",
@@ -34,11 +34,12 @@ default_precision = 64
 
 
 [grpc_server]
+max_workers = 15
 host = "0.0.0.0"
 port = 8001
 reload = true
 log_requests = true
-log_responses = false
+log_responses = true
 log_huge_reqs_and_resps = false
 replace_huge_logs_by_small_msgs = true
 count_of_chars_in_huge_logs = 200

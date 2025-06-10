@@ -1,12 +1,12 @@
 syntax = "proto3";
-package mathrecognize;
+package mathsolve;
 option go_package = "github.com/dagahan/EyeMath_protos/go/mathsolve;mathsolve";
 
 
-message meta_data_request {
+message meta_data_solve_request {
 }
 
-message meta_data_response {
+message meta_data_solve_response {
   string name = 1;
   string version = 2;
 }
@@ -23,6 +23,6 @@ message solve_response {
 
 
 service GRPCMathSolve {
-  rpc meta_data (meta_data_request) returns (meta_data_response);
+  rpc meta_data_solve (meta_data_solve_request) returns (meta_data_solve_response);
   rpc solve (solve_request) returns (solve_response);
 }

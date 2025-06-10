@@ -67,10 +67,10 @@ func SendRequestMathRecognizer(expression []byte) (*mathrecognize.RecognizeRespo
 	var address string
 	// TODO: данную проверку нужно проводить всего один раз, значение вынести в константу.
 	if is_running_in_docker() {
-		address = "service_math_solve:8001"
+		address = "service_math_recognize:8002"
 		// fmt.Println("Running inside Docker, using service address")
 	} else {
-		address = "localhost:8001"
+		address = "localhost:8002"
 		// fmt.Println("Running outside Docker, using localhost address")
 	}
 
