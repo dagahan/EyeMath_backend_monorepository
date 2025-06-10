@@ -1,4 +1,6 @@
-import sys, inspect, logging, colorama
+import sys
+import inspect
+import logging
 from loguru import logger
 
 

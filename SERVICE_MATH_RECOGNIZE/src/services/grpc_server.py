@@ -1,9 +1,10 @@
-import inspect, grpc, json, sys, colorama
+import grpc
+import json
+import colorama
 
 from loguru import logger
 from concurrent import futures
 from google.protobuf.json_format import MessageToDict
-from grpc_reflection.v1alpha import reflection #reflections to gRPC server
 
 from src.core.config import ConfigLoader
 from src.services.math_recognizer import MathRecognizer

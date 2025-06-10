@@ -1,4 +1,5 @@
-import sys, colorama
+import sys
+import colorama
 from loguru import logger
 
 sys.path.insert(0, './gen') #Fix of relative import in generated stubs
@@ -29,7 +30,7 @@ class service:
                 logger.info(f"""{colorama.Fore.CYAN}{self.service_name} started with configuration parameters:\n
                 {colorama.Fore.GREEN}{tabulate([table], headers="keys", tablefmt="grid")}""")
 
-            case default:
+            case False:
                 (logger.info(f"{colorama.Fore.CYAN}{self.service_name} starting..."))
 
 

@@ -202,6 +202,7 @@ go.work.sum
 **/*.log
 **/*.env
 **/uv.lock
+**/.ruff_cache
 
 
 

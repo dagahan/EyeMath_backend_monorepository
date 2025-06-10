@@ -10,7 +10,7 @@ EyeMath is a mobile app that helps users solve math equations. Instead of enteri
 
 
 EyeMath backend use:
-* Python 3.13.2
+* Python 3.13.2 with UV and Ruff
 * Golang 1.24.2
 * PosgreSQL
 * Redis

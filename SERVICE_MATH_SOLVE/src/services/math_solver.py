@@ -1,6 +1,7 @@
-import colorama, sympy
+import colorama
+import sympy
 
-from sympy import Eq, Symbol, preorder_traversal, solve
+from sympy import Eq, Symbol, preorder_traversal
 from sympy.parsing.latex import parse_latex
 from mpmath import mp
 from loguru import logger
