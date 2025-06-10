@@ -6,3 +6,4 @@ gen/
 **/*.pyc
 **/uv.lock
 **/.ruff_cache
+**/recived_images

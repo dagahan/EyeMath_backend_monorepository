@@ -48,8 +48,11 @@ class MathRecognizer:
             return result
         
 
-    def count_files_in_dir(self, dir):
+    def count_files_in_dir(self, dir) -> int:
         return len([name for name in os.listdir(dir) if os.path.isfile(os.path.join(dir, name))])
+    
+
+    # TODO: clear_saved_msgs_pictures()
 
 
     async def save_image_localy(self, image):
@@ -57,9 +60,9 @@ class MathRecognizer:
 
 
     @logger.catch
-    def recognize_expression(self, request_picture):
+    def recognize_expression(self, request_picture) -> str:
         if not hasattr(request_picture, "image"):
-            return None
+            return ""
         try:
             img_to_recognize = Image.open(BytesIO(request_picture.image))
             if img_to_recognize.mode != "RGB":
@@ -73,6 +76,6 @@ class MathRecognizer:
 
         except Exception as ex:
             logger.debug(f"Regognition error: {ex}")
-            recognition_result = None
+            recognition_result = ""
         return recognition_result
 

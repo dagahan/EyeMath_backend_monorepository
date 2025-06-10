@@ -9,8 +9,8 @@ import gen.service_math_recognize_pb2 as sevice_math_recognize_pb
 import gen.service_math_recognize_pb2_grpc as sevice_math_recognize_rpc
 from src.core.config import ConfigLoader
 from src.core.utils import EnvTools
-from src.services.math_recognizer import MathRecognizer
 from src.services.logging import LogAPI
+from src.services.math_recognizer import MathRecognizer
 
 
 class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
@@ -25,6 +25,10 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
 
     @logger.catch
     def meta_data(self, request: sevice_math_recognize_pb.metadata_request, context) -> sevice_math_recognize_pb.metadata_response:
+        '''
+        This endpoint just returns metadata of service.
+        Look at service's protobuf file to get more info.
+        '''
         asyncio.run(self.log_api._logrequest(request, context))
 
         try:
@@ -43,7 +47,11 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
 
 
     @logger.catch
-    def recognize(self, request: sevice_math_recognize_pb.recognize_request, context) -> sevice_math_recognize_pb.recognize_response: #that function we call "endpoint of the gRPC api"
+    def recognize(self, request: sevice_math_recognize_pb.recognize_request, context) -> sevice_math_recognize_pb.recognize_response:
+        '''
+        Endpoint returns a result of recognizing latex on sended picture by client.
+        Look at service's protobuf file to get more info.
+        '''
         asyncio.run(self.log_api._logrequest(request, context))
 
         try:

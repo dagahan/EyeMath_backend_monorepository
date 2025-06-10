@@ -203,6 +203,7 @@ go.work.sum
 **/*.env
 **/uv.lock
 **/.ruff_cache
+**/recived_images
 
 
 
