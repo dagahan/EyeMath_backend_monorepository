@@ -18,6 +18,15 @@ show_params_on_run = true
 # debug_mode parameter is declaring in .env file!
 
 
+# [tool.ruff]
+# line-length = 88
+
+
+[tool.ruff.lint]
+extend-select = ["W", "N", "R", "I"]
+# Letters means included rules classes from PEP8
+
+
 [MaL]
 precision = 32
 default_precision = 64

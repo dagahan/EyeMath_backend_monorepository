@@ -48,7 +48,7 @@ class GRPC_math_recognize(sevice_math_recognize_rpc.GRPC_math_recognize):
 
 
     @logger.catch
-    def Metadata(self, request: sevice_math_recognize_pb.MetadataRequest, context) -> sevice_math_recognize_pb.MetadataResponse:
+    def meta_data(self, request: sevice_math_recognize_pb.MetadataRequest, context) -> sevice_math_recognize_pb.MetadataResponse:
         self._logrequest(request, context)
 
         try:
@@ -89,7 +89,7 @@ class GRPC_math_recognize(sevice_math_recognize_rpc.GRPC_math_recognize):
                 )
         
 
-class gRPC_Server_Runner:
+class GRPCServerRunner:
     def __init__(self):
         self.config = ConfigLoader()
         self.grpc_math_recognize = GRPC_math_recognize()

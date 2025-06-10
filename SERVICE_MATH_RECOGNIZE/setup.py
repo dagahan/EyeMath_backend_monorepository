@@ -5,7 +5,7 @@ from loguru import logger
 sys.path.insert(0, './gen') #Fix of relative import in generated stubs
 from src.core.config import ConfigLoader
 from src.services.logging import InterceptHandler, LogSetup
-from src.services.grpc_server import gRPC_Server_Runner
+from src.services.grpc_server import GRPCServerRunner
 
 
 
@@ -15,7 +15,7 @@ class service:
         self.config = ConfigLoader()
         self.intercept_handler = InterceptHandler()
         self.logger_setup = LogSetup()
-        self.grpc_server_runner = gRPC_Server_Runner()
+        self.grpc_server_runner = GRPCServerRunner()
         self.service_name = self.config.get("project", "name")
         self.show_params_on_start = self.config.get("project", "show_params_on_run")
 

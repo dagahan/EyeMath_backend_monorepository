@@ -1,32 +1,32 @@
 import sys
+
 import colorama
 from loguru import logger
 
-sys.path.insert(0, './gen') #Fix of relative import in generated stubs
+sys.path.insert(0, "./gen")  # Fix of relative import in generated stubs
 from src.core.config import ConfigLoader
+from src.services.grpc_server import GRPCServerRunner
 from src.services.logging import InterceptHandler, LogSetup
-from src.services.grpc_server import gRPC_Server_Runner
 
 
-
-
-class service:
+class Service:
     def __init__(self):
         self.config = ConfigLoader()
         self.intercept_handler = InterceptHandler()
         self.logger_setup = LogSetup()
-        self.grpc_server_runner = gRPC_Server_Runner()
+        self.grpc_server_runner = GRPCServerRunner()
         self.service_name = self.config.get("project", "name")
         self.show_params_on_start = self.config.get("project", "show_params_on_run")
 
-    
+
     def service_start_message(self):
         match self.show_params_on_start:
             case True:
                 from tabulate import tabulate
+
                 table = self.config["MaL"]
                 table.update(self.config["grpc_server"])
-            
+
                 logger.info(f"""{colorama.Fore.CYAN}{self.service_name} started with configuration parameters:\n
                 {colorama.Fore.GREEN}{tabulate([table], headers="keys", tablefmt="grid")}""")
 
@@ -40,10 +40,9 @@ class service:
         self.grpc_server_runner.run_grpc_server()
 
 
-
 if __name__ == "__main__":
     try:
-        mathsolve = service()
+        mathsolve = Service()
         mathsolve.run_service()
     except KeyboardInterrupt:
         logger.info(f"{colorama.Fore.CYAN}Service stopped by user")

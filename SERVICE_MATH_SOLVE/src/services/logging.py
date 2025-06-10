@@ -1,19 +1,13 @@
-import sys
 import inspect
 import logging
+import sys
+
 from loguru import logger
-
-
-
-
-
-
 
 
 class InterceptHandler(logging.Handler):
     # def __init__(self):
     #     self.emit(self, record)
-
 
     def emit(self, record):
         try:
@@ -30,7 +24,6 @@ class InterceptHandler(logging.Handler):
         logger.opt(depth=depth, exception=record.exc_info, record=True).log(
             level, record.getMessage()
         )
-
 
 
 class LogSetup:
@@ -51,7 +44,7 @@ class LogSetup:
         logger.add(
             sys.stdout,
             format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | "
-                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - {message}",
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - {message}",
             level="DEBUG",
             catch=True,
         )

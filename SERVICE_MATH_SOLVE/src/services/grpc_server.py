@@ -1,23 +1,21 @@
-import grpc
 import json
-import colorama
-
-from loguru import logger
 from concurrent import futures
+
+import colorama
+import grpc
 from google.protobuf.json_format import MessageToDict
+from loguru import logger
+
+import gen.service_math_solve_pb2 as SeviceMathSolvePb
+import gen.service_math_solve_pb2_grpc as SeviceMathSolveRpc
+
 # from grpc_reflection.v1alpha import reflection #reflections to gRPC server
-
 from src.core.config import ConfigLoader
-from src.services.math_solver import MathSolver
 from src.core.utils import EnvTools, MethodTools
-
-import gen.service_math_solve_pb2 as sevice_math_solve_pb
-import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
+from src.services.math_solver import MathSolver
 
 
-
-
-class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
+class GRPCMathSolve(SeviceMathSolveRpc.GRPCMathSolve):
     def __init__(self):
         self.config = ConfigLoader()
         self.mathsolver = MathSolver()
@@ -27,7 +25,7 @@ class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
         self.log_responses = self.config.get("grpc_server", "log_responses")
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
-    
+
 
     @logger.catch
     def _logrequest(self, request, context):
@@ -49,11 +47,11 @@ class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
 
 
     @logger.catch
-    def Metadata(self, request: sevice_math_solve_pb.MetadataRequest, context) -> sevice_math_solve_pb.MetadataResponse:
+    def meta_data(self, request: SeviceMathSolvePb.meta_data_request, context) -> SeviceMathSolvePb.meta_data_response:
         self._logrequest(request, context)
 
         try:
-            responce = sevice_math_solve_pb.MetadataResponse(
+            responce = SeviceMathSolvePb.meta_data_response(
                 name = self.project_name,
                 version = self.project_version,
             )
@@ -63,21 +61,20 @@ class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
-            return sevice_math_solve_pb.MetadataResponse(
+            return SeviceMathSolvePb.meta_data_response(
                 )
-        
+
     @logger.catch
-    def Solve(self, request: sevice_math_solve_pb.SolveRequest, context) -> sevice_math_solve_pb.SolveResponse: #that function we call "endpoint of the gRPC api"
+    def solve(self, request: SeviceMathSolvePb.solve_request, context) -> SeviceMathSolvePb.solve_response: #that function we call "endpoint of the gRPC api"
         self._logrequest(request, context)
 
         try:
             if self.env_tools.is_debug_mode() == "1":
-                MathAnswer = self.mathsolver.SolveExpressionDebugMode(request)
+                math_answer = self.mathsolver.solve_expression_debug(request)
             else:
-                MathAnswer = self.mathsolver.SolveExpression(request)
-            responce = sevice_math_solve_pb.SolveResponse(
-                status=sevice_math_solve_pb.SolveResponse.OK,
-                result=str(MathAnswer),
+                math_answer = self.mathsolver.solve_expression(request)
+            responce = SeviceMathSolvePb.solve_response(
+                result=str(math_answer),
             )
 
             self._logresponce(responce, context)
@@ -85,31 +82,29 @@ class GRPC_math_solve(sevice_math_solve_rpc.GRPC_math_solve):
 
         except Exception as error:
             logger.error(f"Solve error: {error}")
-            return sevice_math_solve_pb.SolveResponse(
-                status=sevice_math_solve_pb.SolveResponse.ERROR,
+            return SeviceMathSolvePb.solve_response(
+                result="None",
                 )
-        
 
-class gRPC_Server_Runner:
+
+class GRPCServerRunner:
     def __init__(self):
         self.config = ConfigLoader()
-        self.grpc_math_solve = GRPC_math_solve()
+        self.grpc_math_solve = GRPCMathSolve()
         self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
         self.host = self.config.get("grpc_server", "host")
         self.port = int(self.config.get("grpc_server", "port"))
         self.addr = f"{self.host}:{self.port}"
 
-        
 
-    
     def run_grpc_server(self):
-        sevice_math_solve_rpc.add_GRPC_math_solveServicer_to_server(GRPC_math_solve(), self.grpc_server)
+        SeviceMathSolveRpc.add_GRPCMathSolveServicer_to_server(GRPCMathSolve(), self.grpc_server)
 
         self.grpc_server.add_insecure_port(self.addr)
 
         # Enable gRPC reflection for the service
         # SERVICE_NAMES = (
-        #     sevice_math_solve_pb.DESCRIPTOR.services_by_name['GRPC_math_solve'].full_name,
+        #     sevice_math_solve_pb.DESCRIPTOR.services_by_name['GRPCMathSolve'].full_name,
         #     reflection.SERVICE_NAME,
         # )
         # reflection.enable_server_reflection(SERVICE_NAMES, server)
@@ -118,4 +113,3 @@ class gRPC_Server_Runner:
         self.grpc_server.start()
         self.grpc_server.wait_for_termination()
 
-        

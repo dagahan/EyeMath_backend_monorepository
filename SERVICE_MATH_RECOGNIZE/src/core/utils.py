@@ -68,7 +68,7 @@ class EnvTools:
 
 class JsonLoader:
     @staticmethod
-    def readJson(path):
+    def read_json(path):
         try:
             with open(os.path.abspath(path), 'rb') as file:
                 raw_data = file.read()
@@ -85,7 +85,7 @@ class JsonLoader:
     
 
     @staticmethod
-    def writeJson(path, data):
+    def write_json(path, data):
         try:
             with open(os.path.abspath(path), 'w', encoding='utf-8') as file:
                 json.dump(data, file, ensure_ascii=False, indent=4)

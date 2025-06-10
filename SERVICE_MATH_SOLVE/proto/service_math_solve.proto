@@ -3,31 +3,26 @@ package mathrecognize;
 option go_package = "github.com/dagahan/EyeMath_protos/go/mathsolve;mathsolve";
 
 
-message MetadataRequest {
+message meta_data_request {
 }
 
-message MetadataResponse {
+message meta_data_response {
   string name = 1;
   string version = 2;
 }
 
 
-message SolveRequest {
+message solve_request {
   string expression = 1;
 }
 
-message SolveResponse {
-  enum Status {
-    OK = 0;
-    ERROR = 1;
-  }
-  Status status = 1;
+message solve_response {
   string result = 2; 
 }
 
 
 
-service GRPC_math_solve {
-  rpc Metadata (MetadataRequest) returns (MetadataResponse);
-  rpc Solve (SolveRequest) returns (SolveResponse);
+service GRPCMathSolve {
+  rpc meta_data (meta_data_request) returns (meta_data_response);
+  rpc solve (solve_request) returns (solve_response);
 }
