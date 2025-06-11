@@ -58,9 +58,6 @@ func setupLogger(env string) *slog.Logger {
 	return log
 }
 
-type Gateway struct {
-}
-
 func runServer(log *slog.Logger, cfg *EnvConfig) (*grpc.Server, net.Listener, error) {
 	addr := fmt.Sprintf("%s:%d", cfg.HOST, cfg.PORT)
 
