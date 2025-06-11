@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   external_api_gateway:
-    build: ./EXTERNAL_API_GATEWAY
+    build: gateway
     container_name: external_api_gateway
     environment:
       TZ: ${SYSTEM_TIME_ZONE}

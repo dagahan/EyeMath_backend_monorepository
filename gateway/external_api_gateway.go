@@ -9,9 +9,9 @@ import (
 
 	"log/slog"
 
-	handler "main/grpc/handler"
+	handler "github.com/dagahan/EyeMath_backend_monorepository/gateway/grpc/handler"
 
-	exapigate "main/gen/exapigate"
+	exapigate "github.com/dagahan/EyeMath_backend_monorepository/gateway/gen/exapigate"
 
 	"github.com/BurntSushi/toml"
 	"google.golang.org/grpc"
@@ -56,9 +56,6 @@ func setupLogger(env string) *slog.Logger {
 
 	//TODO: + добавить запись логов в json прямо как на python.
 	return log
-}
-
-type Gateway struct {
 }
 
 func runServer(log *slog.Logger, cfg *EnvConfig) (*grpc.Server, net.Listener, error) {

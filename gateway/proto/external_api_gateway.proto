@@ -1,6 +1,6 @@
 syntax = "proto3";
-package ExternalApiGateway;
-option go_package = "usov.external_api_gateway.v1;exapigate";
+package gateway;
+option go_package = "usov.gateway.v1;exapigate";
 
 
 

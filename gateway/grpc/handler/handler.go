@@ -4,32 +4,29 @@ import (
 	"context"
 	"os"
 
-	exapigate "main/gen/exapigate"
+	exapigate "github.com/dagahan/EyeMath_backend_monorepository/gateway/gen/exapigate"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
-	mathrecognize "main/gen/mathrecognize"
-	mathsolve "main/gen/mathsolve"
+	mathrecognize "github.com/dagahan/EyeMath_backend_monorepository/gateway/gen/mathrecognize"
+	mathsolve "github.com/dagahan/EyeMath_backend_monorepository/gateway/gen/mathsolve"
 )
 
 type ServerAPI struct {
 	exapigate.UnimplementedExternalApiGatewayServer
 }
 
-func is_running_in_docker() bool {
-	if os.Getenv("RUNNING_INSIDE_DOCKER") == "1" {
-		return true
-	}
-	return false
+func isRunningInDocker() bool {
+	return os.Getenv("RUNNING_INSIDE_DOCKER") != "1"
 }
 
 func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) {
 	var address string
 	// TODO: данную проверку нужно проводить всего один раз, значение вынести в константу.
-	if is_running_in_docker() {
+	if isRunningInDocker() {
 		address = "service_math_solve:8001"
 		// fmt.Println("Running inside Docker, using service address")
 	} else {
@@ -66,7 +63,7 @@ func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) 
 func SendRequestMathRecognizer(expression []byte) (*mathrecognize.RecognizeResponse, error) {
 	var address string
 	// TODO: данную проверку нужно проводить всего один раз, значение вынести в константу.
-	if is_running_in_docker() {
+	if isRunningInDocker() {
 		address = "service_math_recognize:8002"
 		// fmt.Println("Running inside Docker, using service address")
 	} else {
