@@ -7,8 +7,8 @@ from loguru import logger
 import gen.service_math_recognize_pb2 as sevice_math_recognize_pb
 import gen.service_math_recognize_pb2_grpc as sevice_math_recognize_rpc
 from src.core.config import ConfigLoader
-from src.core.utils import EnvTools
 from src.core.logging import LogAPI
+from src.core.utils import EnvTools
 from src.services.math_recognizer import MathRecognizer
 
 
