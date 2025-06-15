@@ -1,21 +1,20 @@
 import colorama
-
 from loguru import logger
-from PIL import ImageFilter, ImageEnhance
+from PIL import Image, ImageEnhance, ImageFilter
 
 from src.core.config import ConfigLoader
 
-
+# from src.core.utils import MethodTools
 
 
 class ImgProcessing():
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = ConfigLoader()
         self.preprocess_imgs = self.config.get("recognizer", "preprocess_imgs")
 
 
     @logger.catch
-    def preprocess_image(self, image):
+    def preprocess_image(self, image: Image.Image) -> Image.Image:
         '''
         increase sharpness, contrast and enhance the image
         it's needed to getting better result of recognition
@@ -24,13 +23,20 @@ class ImgProcessing():
         try:
             if not self.preprocess_imgs:
                 return image
-            if image.mode != "RGB":
-                image = image.convert("RGB")
-            image = image.filter(ImageFilter.SHARPEN)
-            image = ImageEnhance.Contrast(image).enhance(10000.0)
-            processed_image = image.convert("L")
+            
+            processed_image = image
+            
+            if processed_image.mode != "RGB":
+                processed_image = processed_image.convert("RGB")
+
+            processed_image = processed_image.filter(ImageFilter.SHARPEN)
+            processed_image = ImageEnhance.Contrast(processed_image).enhance(10000.0)
+
+            processed_image = processed_image.convert("L")
+
             logger.debug(f"{colorama.Fore.GREEN}Image preprocessing done.")
             return processed_image
+        
         except Exception as ex:
             logger.error(f"There is an error with preprocessing of image: {ex}\n returning image without preprocess.")
             return image
