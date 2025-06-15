@@ -1,17 +1,16 @@
 import asyncio
 import tempfile
 from io import BytesIO
+from typing import Any
 
 import colorama
 from loguru import logger
 from PIL import Image
 from pix2tex import cli
 
-from typing import List
-
 from src.core.config import ConfigLoader
-from src.services.math_img_processing import ImgProcessing
 from src.core.utils import FileSystemTools
+from src.services.math_img_processing import ImgProcessing
 
 
 class MathRecognizer:
@@ -23,13 +22,13 @@ class MathRecognizer:
         self.save_imgs_dir = self.config.get("recognizer", "save_imgs_dir")
 
 
-    def image_to_latex(self, IMAGE: Image) -> str:
+    def image_to_latex(self, image: Image.Image) -> str:
         try:
-            return self.model(IMAGE)
+            return self.model(image)
         
         except Exception:
             with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-                IMAGE.save(tmp.name, format="JPG")
+                image.save(tmp.name, format="JPG")
                 tmp_path = tmp.name
             try:
                 result = self.model(tmp_path)
@@ -41,26 +40,26 @@ class MathRecognizer:
             return result
     
 
-    def clear_saved_msgs_pictures(self, DIR: str) -> None:
-        FileSystemTools.delete_directory(DIR)
+    def clear_saved_msgs_pictures(self, dir: str) -> None:
+        FileSystemTools.delete_directory(dir)
 
 
-    async def save_image_localy(self, IMAGE: Image) -> None:
+    async def save_image_localy(self, image: Image.Image) -> None:
         if self.save_receive_imgs:
-            IMAGE.save(f"recived_images/image{FileSystemTools.count_files_in_dir(self.save_imgs_dir)}.jpg")
+            image.save(f"recived_images/image{FileSystemTools.count_files_in_dir(self.save_imgs_dir)}.jpg")
 
 
-    def _convert_bytes_to_img(self, bytes: str) -> Image:
+    def _convert_bytes_to_img(self, bytes: Any) -> Image.Image:
         return Image.open(BytesIO(bytes.image))
         
             
     @logger.catch
-    def recognize_expression(self, REQUEST_PICTURE: str) -> str:
+    def recognize_expression(self, request_picture: str) -> str:
         '''returns recognized LaTeX on picture.'''
-        if not hasattr(REQUEST_PICTURE, "image"):
+        if not hasattr(request_picture, "image"):
             return ""
         try:
-            img_to_recognize = self._convert_bytes_to_img(REQUEST_PICTURE)
+            img_to_recognize = self._convert_bytes_to_img(request_picture)
             img_to_recognize = self.img_processing.preprocess_image(img_to_recognize)
 
             asyncio.run(self.save_image_localy(img_to_recognize))

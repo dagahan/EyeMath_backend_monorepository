@@ -34,18 +34,18 @@ class FileSystemTools:
         pass
 
     @staticmethod
-    def count_files_in_dir(DIR: str) -> int:
-        return len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))])
+    def count_files_in_dir(dir: str) -> int:
+        return len([name for name in os.listdir(dir) if os.path.isfile(os.path.join(dir, name))])
     
 
     @staticmethod
-    def delete_directory(DIR: str) -> None:
-        shutil.rmtree(DIR)
+    def delete_directory(dir: str) -> None:
+        shutil.rmtree(dir)
 
 
     @staticmethod
-    def delete_file(FILE_PATH: str) -> None:
-        os.remove(FILE_PATH)
+    def delete_file(file_path: str) -> None:
+        os.remove(file_path)
 
 
 class EnvTools:
