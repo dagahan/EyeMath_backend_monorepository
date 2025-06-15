@@ -8,7 +8,7 @@ import gen.service_math_solve_pb2 as sevice_math_solve_pb
 import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
 from src.core.config import ConfigLoader
 from src.core.utils import EnvTools
-from src.services.logging import LogAPI
+from src.core.logging import LogAPI
 from src.services.math_solver import MathSolver
 
 
