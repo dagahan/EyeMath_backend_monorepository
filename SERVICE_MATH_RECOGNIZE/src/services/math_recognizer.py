@@ -1,6 +1,4 @@
 import asyncio
-import os
-import os.path
 import tempfile
 from io import BytesIO
 
@@ -9,12 +7,15 @@ from loguru import logger
 from PIL import Image
 from pix2tex import cli
 
+from typing import List
+
 from src.core.config import ConfigLoader
 from src.services.math_img_processing import ImgProcessing
+from src.core.utils import FileSystemTools
 
 
 class MathRecognizer:
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = ConfigLoader()
         self.img_processing = ImgProcessing()
         self.model = cli.LatexOCR()
@@ -22,46 +23,44 @@ class MathRecognizer:
         self.save_imgs_dir = self.config.get("recognizer", "save_imgs_dir")
 
 
-    def image_to_latex(self, image) -> str:
+    def image_to_latex(self, IMAGE: Image) -> str:
         try:
-            return self.model(image)
+            return self.model(IMAGE)
+        
         except Exception:
             with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-                image.save(tmp.name, format="JPG")
+                IMAGE.save(tmp.name, format="JPG")
                 tmp_path = tmp.name
             try:
                 result = self.model(tmp_path)
             finally:
                 try:
-                    os.remove(tmp_path)
+                    FileSystemTools.delete_file(tmp_path)
                 except OSError:
                     pass
             return result
-        
-
-    def count_files_in_dir(self, dir) -> int:
-        return len([name for name in os.listdir(dir) if os.path.isfile(os.path.join(dir, name))])
     
 
-    # TODO: clear_saved_msgs_pictures()
+    def clear_saved_msgs_pictures(self, DIR: str) -> None:
+        FileSystemTools.delete_directory(DIR)
 
 
-    async def save_image_localy(self, image) -> None:
+    async def save_image_localy(self, IMAGE: Image) -> None:
         if self.save_receive_imgs:
-            image.save(f"recived_images/image{self.count_files_in_dir(self.save_imgs_dir)}.jpg")
+            IMAGE.save(f"recived_images/image{FileSystemTools.count_files_in_dir(self.save_imgs_dir)}.jpg")
 
 
-    def _convert_bytes_to_img(self, bytes):
+    def _convert_bytes_to_img(self, bytes: str) -> Image:
         return Image.open(BytesIO(bytes.image))
         
             
     @logger.catch
-    def recognize_expression(self, request_picture) -> str:
+    def recognize_expression(self, REQUEST_PICTURE: str) -> str:
         '''returns recognized LaTeX on picture.'''
-        if not hasattr(request_picture, "image"):
+        if not hasattr(REQUEST_PICTURE, "image"):
             return ""
         try:
-            img_to_recognize = self._convert_bytes_to_img(request_picture)
+            img_to_recognize = self._convert_bytes_to_img(REQUEST_PICTURE)
             img_to_recognize = self.img_processing.preprocess_image(img_to_recognize)
 
             asyncio.run(self.save_image_localy(img_to_recognize))

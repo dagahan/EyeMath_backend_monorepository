@@ -11,7 +11,7 @@ from src.core.utils import MethodTools
 
 
 class InterceptHandler(logging.Handler):
-    def emit(self, record):
+    def emit(self, record) -> None:
         try:
             level = logger.level(record.levelname).name
         except ValueError:
@@ -24,12 +24,13 @@ class InterceptHandler(logging.Handler):
             frame = frame.f_back
 
         logger.opt(depth=depth, exception=record.exc_info, record=True).log(
-            level, record.getMessage())
+            level, record.getMessage()
+        )
 
 
 class LogSetup:
     @staticmethod
-    def configure():
+    def configure() -> None:
         logger.remove()
         logger.add(
             "debug/debug.json",
@@ -45,14 +46,14 @@ class LogSetup:
         logger.add(
             sys.stdout,
             format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | "
-                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - {message}",
+            "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - {message}",
             level="DEBUG",
             catch=True,
         )
 
 
 class LogAPI:
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = ConfigLoader()
         self.log_requests = self.config.get("grpc_server", "log_requests")
         self.log_responses = self.config.get("grpc_server", "log_responses")
@@ -75,7 +76,7 @@ class LogAPI:
 
 
     @logger.catch
-    def _logrequest(self, request, context) -> None:
+    def _logrequest(self, request: str, context) -> None:
         if not self.log_requests:
             return
 
@@ -89,7 +90,7 @@ class LogAPI:
 
 
     @logger.catch
-    def _logresponse(self, response, context) -> None:
+    def _logresponse(self, response: str, context) -> None:
         if not self.log_responses:
             return
 
@@ -108,4 +109,4 @@ class LogAPI:
 
 class LogBenchmark:
     # TODO: Create decorator to check how many time takes an executing function.
-    ()
+    pass

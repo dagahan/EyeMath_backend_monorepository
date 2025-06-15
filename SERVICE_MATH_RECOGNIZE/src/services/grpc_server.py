@@ -13,7 +13,7 @@ from src.services.math_recognizer import MathRecognizer
 
 
 class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = ConfigLoader()
         self.mathrecognizer = MathRecognizer()
         self.env_tools = EnvTools()
@@ -23,7 +23,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
 
 
     @logger.catch
-    def meta_data(self, request: sevice_math_recognize_pb.meta_data_recognize_request, context) -> sevice_math_recognize_pb.meta_data_recognize_response:
+    def meta_data_recognize(self, request: sevice_math_recognize_pb.meta_data_recognize_request, context) -> sevice_math_recognize_pb.meta_data_recognize_response:
         '''
         This endpoint just returns metadata of service.
         Look at service's protobuf file to get more info.
@@ -73,7 +73,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
 
 
 class GRPCServerRunner:
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = ConfigLoader()
         self.grpc_math_recognize = GRPCMathRecognize()
         self.max_workers = self.config.get("grpc_server", "max_workers")
@@ -85,16 +85,7 @@ class GRPCServerRunner:
 
     def run_grpc_server(self) -> None:
         sevice_math_recognize_rpc.add_GRPCMathRecognizeServicer_to_server(GRPCMathRecognize(), self.grpc_server)
-
         self.grpc_server.add_insecure_port(self.addr)
-
-        # Enable gRPC reflection for the service
-        # SERVICE_NAMES = (
-        #     sevice_math_recognize_pb.DESCRIPTOR.services_by_name['GRPCMathRecognize'].full_name,
-        #     reflection.SERVICE_NAME,
-        # )
-        # reflection.enable_server_reflection(SERVICE_NAMES, server)
-
         logger.info(f"{colorama.Fore.GREEN}gRPC server of {self.grpc_math_recognize.project_name} has been started on {colorama.Fore.YELLOW}({self.addr})")
         self.grpc_server.start()
         self.grpc_server.wait_for_termination()
