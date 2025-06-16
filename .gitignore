@@ -204,6 +204,7 @@ go.work.sum
 **/uv.lock
 **/.ruff_cache
 **/recived_images
+**/rendered_images
 
 
 
