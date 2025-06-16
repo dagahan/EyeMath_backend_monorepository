@@ -54,7 +54,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
         self.log_api._logrequest(request, context)
 
         try:
-            solver_answer = self.mathsolver.solve_math_expression(request.expression, request.step_by_step_solving)
+            solver_answer = self.mathsolver.solve_math_expression(request.latex_expression, request.step_by_step_solving)
             response = sevice_math_solve_pb.solve_response(
                 results=solver_answer['results'],
                 solving_steps=solver_answer['solving_steps'],

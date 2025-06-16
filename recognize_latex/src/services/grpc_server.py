@@ -11,6 +11,7 @@ from src.core.logging import LogAPI
 from src.core.utils import EnvTools
 from src.services.math_recognizer import MathRecognizer
 from src.services.math_recognizer_normalizer import LatexNormalizer
+from src.services.math_latex_render import LatexRenderTool
 
 
 class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
@@ -20,6 +21,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.env_tools = EnvTools()
         self.log_api = LogAPI()
         self.latex_parser = LatexNormalizer()
+        self.latex_render_tool = LatexRenderTool()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
 
@@ -84,7 +86,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.log_api._logrequest(request, context)
 
         try:
-            normalizer_answer = self.latex_parser.parse_latex_to_sympylatex(request.expression)
+            normalizer_answer = self.latex_parser.parse_latex_to_sympylatex(request.latex_expression)
 
             response = sevice_math_recognize_pb.normalize_for_sympy_response(
                 result=normalizer_answer,
@@ -97,6 +99,32 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
             logger.error(f"Recognize error: {error}")
             return sevice_math_recognize_pb.normalize_for_sympy_response(
                 result="None",
+                )
+        
+
+    @logger.catch
+    def render_latex(self, request: sevice_math_recognize_pb.render_latex_request, context) -> sevice_math_recognize_pb.render_latex_response:
+        '''
+        Endpoint returns a rendered jpg picture of latex-expression
+        in base64 format.
+        Look at service's protobuf file to get more info.
+        '''
+        self.log_api._logrequest(request, context)
+
+        try:
+            renderer_answer = self.latex_parser.parse_latex_to_sympylatex(request.latex_expression)
+
+            response = sevice_math_recognize_pb.render_latex_response(
+                render_image=renderer_answer,
+            )
+
+            self.log_api._logresponse(response, context)
+            return response
+
+        except Exception as error:
+            logger.error(f"Render error: {error}")
+            return sevice_math_recognize_pb.render_latex_response(
+                render_image="None",
                 )
 
 
