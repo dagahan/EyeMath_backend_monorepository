@@ -10,6 +10,7 @@ from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools
 from src.services.math_recognizer import MathRecognizer
+from src.services.math_recognizer_parser import LatexParser
 
 
 class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
@@ -18,6 +19,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.mathrecognizer = MathRecognizer()
         self.env_tools = EnvTools()
         self.log_api = LogAPI()
+        self.latex_parser = LatexParser()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
 
@@ -53,10 +55,10 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.log_api._logrequest(request, context)
 
         try:
-            if self.env_tools.is_debug_mode() == "1":
-                recognizer_answer = self.mathrecognizer.recognize_expression(request)
-            else:
-                recognizer_answer = self.mathrecognizer.recognize_expression(request)
+            recognizer_answer = self.mathrecognizer.recognize_expression(request.image_in_bytes)
+
+            if request.normalize_for_sympy:
+                recognizer_answer = self.latex_parser.parse_latex_to_sympylatex(recognizer_answer)
 
             response = sevice_math_recognize_pb.recognize_response(
                 result=recognizer_answer,
@@ -68,6 +70,32 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         except Exception as error:
             logger.error(f"Recognize error: {error}")
             return sevice_math_recognize_pb.recognize_response(
+                result="None",
+                )
+        
+
+    @logger.catch
+    def normalize_for_sympy(self, request: sevice_math_recognize_pb.normalize_for_sympy_request, context) -> sevice_math_recognize_pb.normalize_for_sympy_response:
+        '''
+        Endpoint returns a normalized latex-string for using by latex2sympy library.
+        Example: 6x^{2}\\,-\\,17x\\ +\\ 12\\,=\\,0 ----------> 6x^{2} - 17x + 12 = 0.
+        Look at service's protobuf file to get more info.
+        '''
+        self.log_api._logrequest(request, context)
+
+        try:
+            normalizer_answer = self.latex_parser.parse_latex_to_sympylatex(request.expression)
+
+            response = sevice_math_recognize_pb.normalize_for_sympy_response(
+                result=normalizer_answer,
+            )
+
+            self.log_api._logresponse(response, context)
+            return response
+
+        except Exception as error:
+            logger.error(f"Recognize error: {error}")
+            return sevice_math_recognize_pb.normalize_for_sympy_response(
                 result="None",
                 )
 

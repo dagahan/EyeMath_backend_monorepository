@@ -25,7 +25,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
     @logger.catch
     def meta_data_solve(self, request: sevice_math_solve_pb.meta_data_solve_request, context) -> sevice_math_solve_pb.meta_data_solve_response:
         '''
-        This endpoint just returns metadata of service.
+        Endpoint just returns metadata of service.
         Look at service's protobuf file to get more info.
         '''
         self.log_api._logrequest(request, context)
