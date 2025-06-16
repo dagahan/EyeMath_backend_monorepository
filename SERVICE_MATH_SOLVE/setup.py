@@ -5,8 +5,8 @@ from loguru import logger
 
 sys.path.insert(0, "./gen")  # Fix of relative import in generated stubs
 from src.core.config import ConfigLoader
-from src.services.grpc_server import GRPCServerRunner
 from src.core.logging import InterceptHandler, LogSetup
+from src.services.grpc_server import GRPCServerRunner
 
 
 class Service:

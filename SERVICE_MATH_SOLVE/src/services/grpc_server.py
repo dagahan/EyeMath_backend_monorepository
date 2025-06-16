@@ -7,8 +7,8 @@ from loguru import logger
 import gen.service_math_solve_pb2 as sevice_math_solve_pb
 import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
 from src.core.config import ConfigLoader
-from src.core.utils import EnvTools
 from src.core.logging import LogAPI
+from src.core.utils import EnvTools
 from src.services.math_solver import MathSolver
 
 
@@ -57,7 +57,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
             solver_answer = self.mathsolver.solve_math_expression(request.expression, request.step_by_step_solving)
             response = sevice_math_solve_pb.solve_response(
                 results=solver_answer['results'],
-                solving_steps=solver_answer['solving_steps'], 
+                solving_steps=solver_answer['solving_steps'],
             )
 
             self.log_api._logresponse(response, context)

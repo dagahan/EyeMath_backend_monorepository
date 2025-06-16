@@ -4,12 +4,11 @@ import colorama
 import sympy
 from loguru import logger
 from mpmath import mp
-from sympy import Eq, Symbol, preorder_traversal, Poly
+from sympy import Eq, Poly, Symbol, preorder_traversal
 from sympy.parsing.latex import parse_latex as parse_string_to_latex
 
 from src.core.config import ConfigLoader
 from src.core.utils import MethodTools
-
 from src.services.alghoritms.quadratic_equations import QuadraticEquationSolver
 
 
@@ -130,16 +129,15 @@ class MathSolver:
             }
         
         # Here an adaptive one
+        if self._is_equation(parsed):
+            result = sympy.solve(parsed)
         else:
-            if self._is_equation(parsed):
-                result = sympy.solve(parsed)
-            else:
-                result = parsed.evalf()
+            result = parsed.evalf()
 
-            str_results = [str(root) for root in result]
-            
-            return {
-                    "results": self.remove_extra_zeroes_for_answer(str_results),
-                    "solving_steps": ["None"]
-                }
+        str_results = [str(root) for root in result]
+
+        return {
+                "results": self.remove_extra_zeroes_for_answer(str_results),
+                "solving_steps": ["None"]
+            }
          

@@ -1,7 +1,8 @@
-from loguru import logger
-import sympy
-from sympy import Eq, Poly, sqrt, simplify, Symbol
 from typing import Dict, List, Tuple, Union
+
+import sympy
+from loguru import logger
+from sympy import Eq, Poly, Symbol, sqrt
 
 
 class QuadraticEquationSolver:
@@ -38,7 +39,7 @@ class QuadraticEquationSolver:
             logger.error(f"Error solving quadratic equation: {error}")
             return {
                 'results': ['None'],
-                'solving_steps': [f"Error solving quadratic equation"]
+                'solving_steps': ["Error solving quadratic equation"]
             }
 
 
@@ -122,8 +123,8 @@ class QuadraticEquationSolver:
 
     @staticmethod
     def _calculate_roots(
-        a: float, 
-        b: float, 
+        a: float,
+        b: float,
         discriminant: float
     ) -> Tuple[Union[float, complex], Union[float, complex]]:
         """Calculates the roots of the quadratic equation."""
