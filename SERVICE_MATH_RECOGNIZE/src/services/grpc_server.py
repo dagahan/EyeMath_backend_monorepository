@@ -10,7 +10,7 @@ from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools
 from src.services.math_recognizer import MathRecognizer
-from src.services.math_recognizer_parser import LatexParser
+from src.services.math_recognizer_normalizer import LatexNormalizer
 
 
 class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
@@ -19,7 +19,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.mathrecognizer = MathRecognizer()
         self.env_tools = EnvTools()
         self.log_api = LogAPI()
-        self.latex_parser = LatexParser()
+        self.latex_parser = LatexNormalizer()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
 

@@ -1,12 +1,12 @@
-import colorama
 import re
+
+import colorama
 from loguru import logger
 
 from src.core.config import ConfigLoader
 
 
-
-class LatexParser:
+class LatexNormalizer:
     def __init__(self) -> None:
         self.config = ConfigLoader()
 

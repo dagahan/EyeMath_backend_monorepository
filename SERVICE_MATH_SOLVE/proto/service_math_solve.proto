@@ -14,10 +14,12 @@ message meta_data_solve_response {
 
 message solve_request {
   string expression = 1;
+  bool step_by_step_solving = 2;
 }
 
 message solve_response {
-  string result = 1; 
+  repeated string results = 1; 
+  repeated string solving_steps = 2;
 }
 
 

@@ -1,7 +1,6 @@
 import asyncio
 import tempfile
 from io import BytesIO
-from typing import Any
 
 import colorama
 from loguru import logger

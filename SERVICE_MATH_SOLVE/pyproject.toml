@@ -28,9 +28,10 @@ extend-select = ["W", "N", "R", "I"]
 ignore = ["W293"]
 
 
-[MaL]
+[math]
 precision = 32
 default_precision = 64
+using_alghoritms_solving = true
 
 
 [grpc_server]
@@ -40,6 +41,6 @@ port = 8001
 reload = true
 log_requests = true
 log_responses = true
-log_huge_reqs_and_resps = true
-replace_huge_logs_by_small_msgs = false
+log_huge_reqs_and_resps = false
+replace_huge_logs_by_small_msgs = true
 count_of_chars_in_huge_logs = 200

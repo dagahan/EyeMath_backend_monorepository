@@ -24,7 +24,7 @@ class Service:
             case True:
                 from tabulate import tabulate
 
-                table = self.config["MaL"]
+                table = self.config["math"]
                 table.update(self.config["grpc_server"])
 
                 logger.info(f"""{colorama.Fore.CYAN}{self.service_name} started with configuration parameters:\n
