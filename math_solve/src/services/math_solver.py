@@ -95,7 +95,10 @@ class MathSolver:
 
 
     @logger.catch
-    def solve_math_expression(self, expression: str, step_by_step_solving: bool) -> Union[float, Dict, List[Any]]:
+    def solve_math_expression(self, expression: str,
+                              show_solving_steps: bool,
+                              render_latex_expressions: bool
+                              ) -> Union[float, Dict, List[Any]]:
         '''
         solving any math expressions,
         equations and returns the result.
@@ -115,7 +118,7 @@ class MathSolver:
             answer = QuadraticEquationSolver.solve_quadratic_equation(parsed)
 
             results = answer['results']
-            if step_by_step_solving:
+            if show_solving_steps:
                 solving_steps = answer['solving_steps']
             else:
                 solving_steps = ["None"]

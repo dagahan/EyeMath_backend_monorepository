@@ -14,7 +14,8 @@ message meta_data_solve_response {
 
 message solve_request {
   string latex_expression = 1;
-  bool step_by_step_solving = 2;
+  bool show_solving_steps = 2;
+  bool render_latex_expressions = 3;
 }
 
 message solve_response {

@@ -48,13 +48,18 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
     @logger.catch
     def solve(self, request: sevice_math_solve_pb.solve_request, context) -> sevice_math_solve_pb.solve_response:
         '''
-        Endpoint returns a result of recognizing latex from picture.
+        Endpoint returns a result of solving latex expression.
         Look at service's protobuf file to get more info.
         '''
         self.log_api._logrequest(request, context)
 
         try:
-            solver_answer = self.mathsolver.solve_math_expression(request.latex_expression, request.step_by_step_solving)
+            solver_answer = self.mathsolver.solve_math_expression(
+                request.latex_expression,
+                request.show_solving_steps,
+                request.render_latex_expressions,
+                )
+            
             response = sevice_math_solve_pb.solve_response(
                 results=solver_answer['results'],
                 solving_steps=solver_answer['solving_steps'],
