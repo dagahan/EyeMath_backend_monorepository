@@ -82,7 +82,7 @@ class LogAPI:
 
         payload = self._format_payload(request)
 
-        method_name = self.method_tools.name_of_method(9, 3)
+        method_name = self.method_tools.name_of_method(3, 3)
         peer_info = context.peer()  # формат вида 'ipv4:127.0.0.1:54321'
         payload_json = json.dumps(payload, indent=4, ensure_ascii=False)
 
@@ -100,7 +100,7 @@ class LogAPI:
             else:
                 payload = MessageToDict(response)
 
-            method_name = self.method_tools.name_of_method(9, 3)
+            method_name = self.method_tools.name_of_method(3, 3)
             peer_info = context.peer()  # формат вида 'ipv4:127.0.0.1:54321'
             payload_json = json.dumps(payload, indent=4, ensure_ascii=False)
 

@@ -12,6 +12,7 @@ dependencies = [
     "python-dotenv==1.1.0",
     "pix2tex==0.1.4",
     "opencv-python==4.11.0.86",
+    "matplotlib==3.10.3",
 ]
 show_params_on_run = true
 # debug_mode parameter is declaring in .env file!
@@ -28,9 +29,15 @@ ignore = ["W293"]
 
 
 [recognizer]
-save_receive_imgs = true
-save_imgs_dir = "recived_images"
+save_receive_img = true
+recieved_img_dir = "recived_images"
 preprocess_imgs = true
+
+
+[latex_render]
+save_render_img = true
+render_dpi = 300
+rendered_img_dir = "rendered_images"
 
 
 [grpc_server]

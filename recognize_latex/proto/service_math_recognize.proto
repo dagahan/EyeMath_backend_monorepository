@@ -37,7 +37,7 @@ message render_latex_request {
 }
 
 message render_latex_response {
-  bytes render_image = 1; 
+  string render_image = 1; 
 }
 
 

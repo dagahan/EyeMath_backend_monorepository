@@ -17,8 +17,8 @@ class MathRecognizer:
         self.config = ConfigLoader()
         self.img_processing = ImgProcessing()
         self.model = cli.LatexOCR()
-        self.save_receive_imgs = self.config.get("recognizer", "save_receive_imgs")
-        self.save_imgs_dir = self.config.get("recognizer", "save_imgs_dir")
+        self.save_receive_img = self.config.get("recognizer", "save_receive_img")
+        self.recieved_img_dir = self.config.get("recognizer", "recieved_img_dir")
 
 
     def image_to_latex(self, image: Image.Image) -> str:
@@ -44,8 +44,8 @@ class MathRecognizer:
 
 
     async def save_image_localy(self, image: Image.Image) -> None:
-        if self.save_receive_imgs:
-            image.save(f"recived_images/image{FileSystemTools.count_files_in_dir(self.save_imgs_dir)}.jpg")
+        if self.save_receive_img:
+            image.save(f"{self.recieved_img_dir}/image{FileSystemTools.count_files_in_dir(self.recieved_img_dir)}.jpg")
 
 
     def _convert_bytes_to_img(self, img_bytes: bytes) -> Image.Image:

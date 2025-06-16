@@ -24,6 +24,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.latex_render_tool = LatexRenderTool()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
+        self.render_dpi = self.config.get("latex_render", "render_dpi")
 
 
     @logger.catch
@@ -112,7 +113,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.log_api._logrequest(request, context)
 
         try:
-            renderer_answer = self.latex_parser.parse_latex_to_sympylatex(request.latex_expression)
+            renderer_answer = self.latex_render_tool.render_latex_jpg_base64(request.latex_expression, self.render_dpi)
 
             response = sevice_math_recognize_pb.render_latex_response(
                 render_image=renderer_answer,
