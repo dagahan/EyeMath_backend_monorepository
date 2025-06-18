@@ -28,13 +28,17 @@ ignore = ["W293"]
 
 
 [fastapi_server]
+fastapi_host = "0.0.0.0"
+fastapi_port = 8080
+
+
+[grpc_server]
+max_workers = 15
 host = "0.0.0.0"
-port = 8080
-
-
-[grpc_client]
+port = 8081
+reload = true
 log_requests = true
-log_responses = true
+log_responses = false
 log_huge_reqs_and_resps = false
 replace_huge_logs_by_small_msgs = true
 count_of_chars_in_huge_logs = 200
