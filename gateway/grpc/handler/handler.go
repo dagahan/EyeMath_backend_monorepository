@@ -3,16 +3,17 @@ package handler
 import (
 	"context"
 	"os"
+	"strings"
 
-	exapigate "github.com/dagahan/EyeMath_protos/exapigate"
+	exapigate "github.com/dagahan/EyeMath_protos/go/exapigate"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
-	mathrecognize "github.com/dagahan/EyeMath_protos/mathrecognize"
-	mathsolve "github.com/dagahan/EyeMath_protos/mathsolve"
+	mathrecognize "github.com/dagahan/EyeMath_protos/go/math_recognize"
+	mathsolve "github.com/dagahan/EyeMath_protos/go/math_solve"
 )
 
 type ServerAPI struct {
@@ -23,7 +24,7 @@ func isRunningInDocker() bool {
 	return os.Getenv("RUNNING_INSIDE_DOCKER") != "1"
 }
 
-func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) {
+func SendRequestMathSolver(expression string, show_solving_steps bool, render_latex_expressions bool) (*mathsolve.SolveResponse, error) {
 	var address string
 	// TODO: данную проверку нужно проводить всего один раз, значение вынести в константу.
 	if isRunningInDocker() {
@@ -48,7 +49,9 @@ func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) 
 	client := mathsolve.NewGRPCMathSolveClient(conn)
 
 	req := &mathsolve.SolveRequest{
-		Expression: expression,
+		LatexExpression:        expression,
+		ShowSolvingSteps:       show_solving_steps,
+		RenderLatexExpressions: render_latex_expressions,
 	}
 
 	res, err := client.Solve(context.Background(), req)
@@ -60,7 +63,7 @@ func SendRequestMathSolver(expression string) (*mathsolve.SolveResponse, error) 
 
 }
 
-func SendRequestMathRecognizer(expression []byte) (*mathrecognize.RecognizeResponse, error) {
+func SendRequestMathRecognizer(normalize_for_sympy bool, image_in_bytes []byte) (*mathrecognize.RecognizeResponse, error) {
 	var address string
 	// TODO: данную проверку нужно проводить всего один раз, значение вынести в константу.
 	if isRunningInDocker() {
@@ -85,7 +88,8 @@ func SendRequestMathRecognizer(expression []byte) (*mathrecognize.RecognizeRespo
 	client := mathrecognize.NewGRPCMathRecognizeClient(conn)
 
 	req := &mathrecognize.RecognizeRequest{
-		Image: expression,
+		NormalizeForSympy: normalize_for_sympy,
+		ImageInBytes:      image_in_bytes,
 	}
 
 	res, err := client.Recognize(context.Background(), req)
@@ -137,17 +141,29 @@ func (s *ServerAPI) IsAdmin(ctx context.Context, req *exapigate.IsAdminRequest) 
 }
 
 func (s *ServerAPI) MathSolver(ctx context.Context, req *exapigate.MathSolverRequest) (*exapigate.MathSolverResponse, error) {
-	response, err := SendRequestMathSolver(req.Expression)
+	response, err := SendRequestMathSolver(req.LatexExpression, req.ShowSolvingSteps, req.RenderLatexExpressions)
 
 	if err != nil {
-		// В случае ошибки возвращаем ответ с статусом ERROR
 		return &exapigate.MathSolverResponse{
 			Result: "Failed to contact math service: " + err.Error(),
 		}, nil
 	}
 
+	// Собираем все результаты в одну строку
+	var combinedResults string
+	if len(response.Results) > 0 {
+		combinedResults = strings.Join(response.Results, "; ")
+	}
+
+	// Собираем шаги решения (если есть)
+	var solvingSteps string
+	if len(response.SolvingSteps) > 0 {
+		solvingSteps = strings.Join(response.SolvingSteps, "\n\n")
+	}
+
 	return &exapigate.MathSolverResponse{
-		Result: response.Result,
+		Result:       combinedResults,
+		SolvingSteps: solvingSteps,
 	}, nil
 }
 

@@ -3,10 +3,10 @@ import sys
 import colorama
 from loguru import logger
 
-sys.path.insert(0, './gen') #Fix of relative import in generated stubs
+sys.path.insert(0, "./gen")  # Fix of relative import in generated stubs
 from src.core.config import ConfigLoader
 from src.core.logging import InterceptHandler, LogSetup
-from src.grpc.grpc_server import GRPCServerRunner
+from src.fastapi_gateway.gateway import GatewayServer
 
 
 class Service:
@@ -14,17 +14,18 @@ class Service:
         self.config = ConfigLoader()
         self.intercept_handler = InterceptHandler()
         self.logger_setup = LogSetup()
-        self.grpc_server_runner = GRPCServerRunner()
+        self.gateway = GatewayServer()
         self.service_name = self.config.get("project", "name")
         self.show_params_on_start = self.config.get("project", "show_params_on_run")
 
 
-    def service_start_message(self) -> None:
+    def service_start_message(self):
         match self.show_params_on_start:
             case True:
                 from tabulate import tabulate
-                table = self.config["math"]
-                table.update(self.config["grpc_server"])
+
+                table = self.config["fastapi_server"]
+                table.update(self.config["grpc_client"])
 
                 logger.info(f"""{colorama.Fore.CYAN}{self.service_name} started with configuration parameters:\n
                 {colorama.Fore.GREEN}{tabulate([table], headers="keys", tablefmt="grid")}""")
@@ -33,17 +34,16 @@ class Service:
                 (logger.info(f"{colorama.Fore.CYAN}{self.service_name} starting..."))
 
 
-    def run_service(self) -> None:
+    def run_service(self):
         self.logger_setup.configure()
         self.service_start_message()
-        self.grpc_server_runner.run_grpc_server()
-
+        self.gateway.run_gateway()
 
 
 if __name__ == "__main__":
     try:
-        math_recognizer = Service()
-        math_recognizer.run_service()
+        mathsolve = Service()
+        mathsolve.run_service()
     except KeyboardInterrupt:
         logger.info(f"{colorama.Fore.CYAN}Service stopped by user")
     except Exception as error:
