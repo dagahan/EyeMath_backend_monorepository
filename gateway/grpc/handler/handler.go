@@ -4,15 +4,15 @@ import (
 	"context"
 	"os"
 
-	exapigate "github.com/dagahan/EyeMath_backend_monorepository/gateway/gen/exapigate"
+	exapigate "github.com/dagahan/EyeMath_protos/exapigate"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 
-	mathrecognize "github.com/dagahan/EyeMath_backend_monorepository/gateway/gen/mathrecognize"
-	mathsolve "github.com/dagahan/EyeMath_backend_monorepository/gateway/gen/mathsolve"
+	mathrecognize "github.com/dagahan/EyeMath_protos/mathrecognize"
+	mathsolve "github.com/dagahan/EyeMath_protos/mathsolve"
 )
 
 type ServerAPI struct {

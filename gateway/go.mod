@@ -8,6 +8,8 @@ require (
 )
 
 require (
+	github.com/dagahan/EyeMath_backend_monorepository v0.0.0-20250602120121-dbad3a8007f4 // indirect
+	github.com/dagahan/EyeMath_protos v0.0.0-20250610183109-87408ac27b57 // indirect
 	golang.org/x/net v0.38.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect

@@ -6,11 +6,11 @@ services:
     container_name: external_api_gateway
     environment:
       TZ: ${SYSTEM_TIME_ZONE}
-      HOST: ${EXTERNAL_API_GATEWAY_HOST}
-      PORT: ${EXTERNAL_API_GATEWAY_APP_PORT}
+      HOST: ${GATEWAY_HOST}
+      PORT: ${GATEWAY_APP_PORT}
       RUNNING_INSIDE_DOCKER: 1
     ports:
-      - ${EXTERNAL_API_GATEWAY_PORT}
+      - ${GATEWAY_PORT}
     networks:
       - eye_math_network
     depends_on:

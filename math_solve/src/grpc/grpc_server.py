@@ -10,6 +10,7 @@ from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools
 from src.services.math_solver import MathSolver
+from src.grpc.grpc_client_for_gateway import GatewayClientGRPC
 
 
 class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
@@ -18,6 +19,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
         self.mathsolver = MathSolver()
         self.env_tools = EnvTools()
         self.log_api = LogAPI()
+        self.gateway_client = GatewayClientGRPC()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
 
@@ -35,6 +37,8 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
                 name = self.project_name,
                 version = self.project_version,
             )
+
+            print(self.gateway_client.call_rpc_method('id_admin'))
 
             self.log_api._logresponse(response, context)
             return response

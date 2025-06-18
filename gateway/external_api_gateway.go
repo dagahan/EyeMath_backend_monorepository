@@ -9,9 +9,9 @@ import (
 
 	"log/slog"
 
-	handler "github.com/dagahan/EyeMath_backend_monorepository/gateway/grpc/handler"
+	handler "github.com/dagahan/EyeMath_protos/handler"
 
-	exapigate "github.com/dagahan/EyeMath_backend_monorepository/gateway/gen/exapigate"
+	exapigate "github.com/dagahan/EyeMath_protos/exapigate"
 
 	"github.com/BurntSushi/toml"
 	"google.golang.org/grpc"

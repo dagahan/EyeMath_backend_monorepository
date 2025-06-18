@@ -1,5 +1,9 @@
 github.com/BurntSushi/toml v1.5.0 h1:W5quZX/G/csjUnuI8SUYlsHs9M38FC7znL0lIO+DvMg=
 github.com/BurntSushi/toml v1.5.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
+github.com/dagahan/EyeMath_backend_monorepository v0.0.0-20250602120121-dbad3a8007f4 h1:hbGW19Y7DS2A/nja7/YkOl/nnFqx8g6bW684xNMhPMk=
+github.com/dagahan/EyeMath_backend_monorepository v0.0.0-20250602120121-dbad3a8007f4/go.mod h1:OgbkE+XHeSt42AMKu4oTwZdKtjrcsunmH/fpFff/Xrw=
+github.com/dagahan/EyeMath_protos v0.0.0-20250610183109-87408ac27b57 h1:U2Kr6FdJtGG1OVisHfIygycQl+e2Z490rNf1KtCVw7U=
+github.com/dagahan/EyeMath_protos v0.0.0-20250610183109-87408ac27b57/go.mod h1:NAiLMNA6rYJ6gEewq6DGru3lfDCwcXRjMRyQ82FMm/w=
 github.com/go-logr/logr v1.4.2 h1:6pFjapn8bFcIbiKo3XT4j/BhANplGihG6tvd+8rYgrY=
 github.com/go-logr/logr v1.4.2/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
 github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
