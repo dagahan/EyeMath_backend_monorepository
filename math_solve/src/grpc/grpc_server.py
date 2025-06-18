@@ -36,14 +36,14 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
                 version = self.project_version,
             )
 
-            # RegistryGrpcMethods.register_service_with_methods()
+            RegistryGrpcMethods.register_service_with_methods()
             
-            # response_test = GRPCClientFactory.rpc_call(
-            # service_name="gateway",
-            # method_name="is_admin",
-            # user_id=123214234
-            # )
-            # logger.success(f"Is admin: {response_test.is_admin}")
+            response_test = GRPCClientFactory.rpc_call(
+            service_name="gateway",
+            method_name="is_admin",
+            user_id=123214234
+            )
+            logger.success(f"Is admin: {response_test.is_admin}")
 
 
 

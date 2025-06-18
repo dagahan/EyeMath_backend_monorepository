@@ -35,6 +35,10 @@ default_precision = 64
 using_alghoritms_solving = true
 
 
+# [grpc_client]
+
+
+
 [grpc_server]
 max_workers = 15
 host = "0.0.0.0"
