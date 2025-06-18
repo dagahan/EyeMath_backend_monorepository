@@ -8,18 +8,16 @@ import gen.service_math_solve_pb2 as sevice_math_solve_pb
 import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
-from src.core.utils import EnvTools
 from src.services.math_solver import MathSolver
-from src.grpc.grpc_client_for_gateway import GatewayClientGRPC
+from src.grpc.client.factory_grpc_client import GRPCClientFactory
+from src.grpc.client.registry_grpc_clients import RegistryGrpcMethods
 
 
 class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
     def __init__(self) -> None:
         self.config = ConfigLoader()
         self.mathsolver = MathSolver()
-        self.env_tools = EnvTools()
         self.log_api = LogAPI()
-        self.gateway_client = GatewayClientGRPC()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
 
@@ -38,7 +36,16 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
                 version = self.project_version,
             )
 
-            print(self.gateway_client.call_grpc_endpoint('is_admin', user_id=3961443575))
+            RegistryGrpcMethods.register_service_with_methods()
+            
+            response_test = GRPCClientFactory.rpc_call(
+            service_name="gateway",
+            method_name="is_admin",
+            user_id=123214234
+            )
+            logger.success(f"Is admin: {response_test.is_admin}")
+
+
 
             self.log_api._logresponse(response, context)
             return response

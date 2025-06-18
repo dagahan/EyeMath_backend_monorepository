@@ -44,7 +44,6 @@ class Service:
         pending = set()
         
         try:
-            # Создаем задачи для серверов
             gateway_task = asyncio.create_task(self.gateway.run_external_gateway(), name="FastAPI")
             grpc_task = asyncio.create_task(self.grpc_server_runner.run_grpc_server(), name="gRPC")
             pending = {gateway_task, grpc_task}

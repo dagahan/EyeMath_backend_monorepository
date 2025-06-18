@@ -60,14 +60,11 @@ class FileSystemTools:
 
 
 class EnvTools:
-    def __init__(self) -> None:
-        load_dotenv()
-
-
     @staticmethod
-    def load_env_var(variable_name: str) -> str:
+    def load_env_var(variable_name: str) -> Any:
         try:
-            return str(os.getenv(variable_name))
+            load_dotenv()
+            return os.getenv(variable_name)
         except Exception as ex:
             logger.critical(f"Error with loading env variable\n{ex}")
             return ""
