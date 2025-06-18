@@ -10,11 +10,11 @@ class FastApiHandler():
         self.router = APIRouter()
 
 
-    def register_routes(self):
+    def register_routes(self) -> None:
         self.router.add_api_route("/", self.root, methods=["GET"])
 
         self.app.include_router(self.router)
 
 
-    async def root(self):
+    async def root(self) -> None:
         return "Hello World!"

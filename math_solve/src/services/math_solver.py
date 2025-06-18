@@ -90,7 +90,7 @@ class MathSolver:
 
             return answer
         except Exception as ex:
-            logger.error(f"error with {MethodTools.name_of_method(1)}: {ex}")
+            logger.error(f"error with removing extra zeroes: {ex}")
             return input_value
 
 

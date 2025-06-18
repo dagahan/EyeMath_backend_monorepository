@@ -1,10 +1,11 @@
-import inspect
+from inspect import getframeinfo, stack
 import json
 import os
 import os.path
 import shutil
-from typing import Any, List
+from typing import Any, List, Tuple
 
+import inspect
 import chardet
 from dotenv import load_dotenv
 from loguru import logger
@@ -16,12 +17,23 @@ class MethodTools:
 
 
     @staticmethod
-    def name_of_method(one: int =+ 1, two: int = 3) -> str:
+    def get_method_info(stack_level: int =+ 1) -> Tuple[str, str, int]:
         try:
-            return inspect.stack()[one][two]
+            current_stack = stack()
+            if not len(current_stack) > stack_level:
+                return ("Unknown File", "Unknown Method", 0)
+            
+            frame = current_stack[stack_level][0]
+            frame_info = getframeinfo(frame)
+            return (
+                frame_info.filename,
+                frame_info.function,
+                frame_info.lineno
+            )
+        
         except Exception as ex:
             logger.error(f"There is an error with checking your method's name: {ex}")
-            return "Unknown Method"
+            return ("Unknown File", "Unknown Method", 0)
         
     
     @staticmethod
@@ -58,7 +70,7 @@ class EnvTools:
         try:
             return str(os.getenv(variable_name))
         except Exception as ex:
-            logger.critical(f"Error with {inspect.stack()[0][3]}\n{ex}")
+            logger.critical(f"Error with loading env variable\n{ex}")
             return ""
         
     
@@ -78,7 +90,7 @@ class EnvTools:
             return EnvTools.load_env_var("RUNNING_INSIDE_DOCKER")
         except KeyError as ex:
             logger.error(
-                f"Error with {inspect.stack()[0][3]}. Returns default '0'\n{ex}"
+                f"Error with checking if programm running inside docker. Returns default '0'\n{ex}"
             )
         return ""
 
@@ -96,7 +108,7 @@ class EnvTools:
                 newfile.write("")
         except Exception as ex:
             logger.error(
-                f"Error with {inspect.stack()[0][3]}. Returns default 'False'\n{ex}"
+                f"Error with creating {dir}{file}\n{ex}"
             )
 
 

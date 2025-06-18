@@ -82,11 +82,11 @@ class LogAPI:
 
         payload = self._format_payload(request)
 
-        method_name = self.method_tools.name_of_method(3, 3)
+        called_file, called_method, called_line = self.method_tools.get_method_info(3)
         peer_info = context.peer()  # формат вида 'ipv4:127.0.0.1:54321'
         payload_json = json.dumps(payload, indent=4, ensure_ascii=False)
 
-        logger.info(f"Method {method_name} has been called from {peer_info}\nWith data: {payload_json}")
+        logger.info(f"Method {called_method} has been called from {peer_info}\nWith data: {payload_json}")
 
 
     @logger.catch
@@ -100,11 +100,11 @@ class LogAPI:
             else:
                 payload = MessageToDict(response)
 
-            method_name = self.method_tools.name_of_method(3, 3)
+            called_file, called_method, called_line = self.method_tools.get_method_info(3, 3)
             peer_info = context.peer()  # формат вида 'ipv4:127.0.0.1:54321'
             payload_json = json.dumps(payload, indent=4, ensure_ascii=False)
 
-            logger.info(f"Method {method_name} responsing to {peer_info}\nWith data: {payload_json}")
+            logger.info(f"Method {called_method} responsing to {peer_info}\nWith data: {payload_json}")
 
 
 class LogBenchmark:

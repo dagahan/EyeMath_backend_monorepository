@@ -1,9 +1,11 @@
 import tomllib
+import colorama
 from typing import Any
 
 from loguru import logger
 
 from src.core.utils import EnvTools
+from src.core.utils import MethodTools
 
 
 class ConfigLoader:
@@ -31,9 +33,16 @@ class ConfigLoader:
 
     @classmethod
     def get(cls, section: str, key: str = "") -> Any:
-        if key == "":
-            return cls.__config.get(section, {})
-        return cls.__config[section][key]
+        try:
+            if key == "":
+                return cls.__config.get(section, {})
+            return cls.__config[section][key]
+        
+        except Exception as ex:
+            called_file, called_method, called_line = MethodTools.get_method_info(2)
+            logger.critical(f"Cannot get {colorama.Fore.YELLOW}[{section}][{key}] {colorama.Fore.WHITE}on the line {colorama.Fore.YELLOW}{called_line} {colorama.Fore.WHITE}in method {colorama.Fore.YELLOW}{called_method} {colorama.Fore.RED}{ex}")
+            logger.critical(f"{called_file}")
+            raise
 
 
     def __getitem__(self, section: str) -> Any:
