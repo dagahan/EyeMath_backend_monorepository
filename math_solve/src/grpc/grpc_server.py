@@ -38,7 +38,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
                 version = self.project_version,
             )
 
-            print(self.gateway_client.call_rpc_method('is_admin', user_id=3961443575))
+            print(self.gateway_client.call_grpc_endpoint('is_admin', user_id=3961443575))
 
             self.log_api._logresponse(response, context)
             return response
