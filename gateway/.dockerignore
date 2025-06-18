@@ -1,6 +1,8 @@
-**/*.log
-**/*.pb.go
-gen/ 
 proto/
-tmp/
-binary/
+debug/
+gen/ 
+**/__pycache__
+**/.venv
+**/*.pyc
+**/uv.lock
+**/.ruff_cache
