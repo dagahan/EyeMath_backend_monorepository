@@ -1,0 +1,28 @@
+syntax = "proto3";
+package mathrender;
+option go_package = "github.com/dagahan/EyeMath_protos/go/mathrender;mathrender";
+
+
+
+message meta_data_render_request {
+}
+
+message meta_data_render_response {
+  string name = 1;
+  string version = 2;
+}
+
+
+message render_latex_request {
+  string latex_expression = 1; 
+}
+
+message render_latex_response {
+  string render_image = 1; 
+}
+
+
+service GRPCMathRender {
+    rpc meta_data_render (meta_data_render_request) returns (meta_data_render_response);
+    rpc render_latex (render_latex_request) returns (render_latex_response);
+}

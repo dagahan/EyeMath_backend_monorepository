@@ -1,0 +1,32 @@
+syntax = "proto3";
+package mathsolve;
+option go_package = "github.com/dagahan/EyeMath_protos/go/mathsolve;mathsolve";
+
+
+message meta_data_solve_request {
+}
+
+message meta_data_solve_response {
+  string name = 1;
+  string version = 2;
+}
+
+
+message solve_request {
+  string latex_expression = 1;
+  bool show_solving_steps = 2;
+  bool render_latex_expressions = 3;
+}
+
+message solve_response {
+  repeated string results = 1; 
+  repeated string renders = 2;
+  repeated string solving_steps = 3;
+}
+
+
+
+service GRPCMathSolve {
+  rpc meta_data_solve (meta_data_solve_request) returns (meta_data_solve_response);
+  rpc solve (solve_request) returns (solve_response);
+}
