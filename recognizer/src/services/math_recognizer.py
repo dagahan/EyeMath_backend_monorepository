@@ -2,6 +2,7 @@ import asyncio
 import base64
 import tempfile
 from io import BytesIO
+import os
 
 import colorama
 from loguru import logger
@@ -45,8 +46,22 @@ class MathRecognizer:
 
 
     async def save_image_localy(self, image: Image.Image) -> None:
-        if self.save_receive_img:
-            image.save(f"{self.recieved_img_dir}/image{FileSystemTools.count_files_in_dir(self.recieved_img_dir)}.jpg")
+        if not self.save_receive_img:
+            return
+        
+        FileSystemTools.ensure_directory_exists(self.recieved_img_dir)
+        file_name = f"image{FileSystemTools.count_files_in_dir(self.recieved_img_dir)}.jpg"
+        file_path = os.path.join(self.recieved_img_dir, file_name)
+        
+        img_bytes = self.image_to_bytes(image)
+        FileSystemTools.save_file(file_path, img_bytes)
+
+    
+    def image_to_bytes(self, image: Image.Image, format: str = 'JPEG') -> bytes:
+        from io import BytesIO
+        img_byte_arr = BytesIO()
+        image.save(img_byte_arr, format=format)
+        return img_byte_arr.getvalue()
 
 
     def _convert_base64_to_img(self, img_base64: str) -> Image.Image:
