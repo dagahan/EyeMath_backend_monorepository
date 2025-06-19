@@ -10,7 +10,6 @@ from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.services.math_solver import MathSolver
 from src.grpc.client.factory_grpc_client import GRPCClientFactory
-from src.grpc.client.registry_grpc_clients import RegistryGrpcMethods
 
 
 class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
@@ -35,17 +34,6 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
                 name = self.project_name,
                 version = self.project_version,
             )
-
-            RegistryGrpcMethods.register_service_with_methods()
-            
-            response_test = GRPCClientFactory.rpc_call(
-            service_name="gateway",
-            method_name="is_admin",
-            user_id=123214234
-            )
-            logger.success(f"Is admin: {response_test.is_admin}")
-
-
 
             self.log_api._logresponse(response, context)
             return response

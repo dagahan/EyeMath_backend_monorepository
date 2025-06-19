@@ -1,5 +1,6 @@
 import asyncio
 import tempfile
+import base64
 from io import BytesIO
 
 import colorama
@@ -48,15 +49,16 @@ class MathRecognizer:
             image.save(f"{self.recieved_img_dir}/image{FileSystemTools.count_files_in_dir(self.recieved_img_dir)}.jpg")
 
 
-    def _convert_bytes_to_img(self, img_bytes: bytes) -> Image.Image:
-        return Image.open(BytesIO(img_bytes))
+    def _convert_base64_to_img(self, img_base64: str) -> Image.Image:
+        img_data = base64.b64decode(img_base64)
+        return Image.open(BytesIO(img_data))
         
             
     @logger.catch
-    def recognize_expression(self, request_picture: bytes) -> str:
+    def recognize_expression(self, request_picture: str) -> str:
         '''returns recognized LaTeX on picture.'''
         try:
-            img_to_recognize = self._convert_bytes_to_img(request_picture)
+            img_to_recognize = self._convert_base64_to_img(request_picture)
             img_to_recognize = self.img_processing.preprocess_image(img_to_recognize)
 
             asyncio.run(self.save_image_localy(img_to_recognize))

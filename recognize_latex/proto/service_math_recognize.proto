@@ -15,7 +15,7 @@ message meta_data_recognize_response {
 
 message recognize_request {
   bool normalize_for_sympy = 1;
-  bytes image_in_bytes = 2;
+  string image_in_bytes = 2;
 }
 
 message recognize_response {

@@ -58,7 +58,7 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.log_api._logrequest(request, context)
 
         try:
-            recognizer_answer = self.mathrecognizer.recognize_expression(request.image_in_bytes)
+            recognizer_answer = self.mathrecognizer.recognize_expression(request.image)
 
             if request.normalize_for_sympy:
                 recognizer_answer = self.latex_parser.parse_latex_to_sympylatex(recognizer_answer)
