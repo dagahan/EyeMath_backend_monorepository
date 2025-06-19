@@ -47,8 +47,8 @@ class GRPCServerRunner:
         self.config = ConfigLoader()
         self.grpc_math_recognize = GRPCGateway()
         self.max_workers = self.config.get("grpc_server", "max_workers")
-        self.host = self.config.get("grpc_server", "host")
-        self.port = int(self.config.get("grpc_server", "port"))
+        self.host = EnvTools.load_env_var("GATEWAY_GRPC_HOST")
+        self.port = EnvTools.load_env_var("GATEWAY_GRPC_APP_PORT")
         self.addr = f"{self.host}:{self.port}"
         self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=self.max_workers))
         self._stop_event = asyncio.Event()

@@ -1,6 +1,7 @@
 import asyncio
 import base64
 from io import BytesIO
+import os
 
 import matplotlib.pyplot as plt
 
@@ -25,10 +26,13 @@ class LatexRenderTool:
         '''
         saves image localy in rendered images directory.
         '''
-        if self.save_render_img:
-            directory = f"{self.rendered_img_dir}/image{FileSystemTools.count_files_in_dir(self.rendered_img_dir)}.jpg"
-            with open(directory, "wb") as f:
-                f.write(jpg_bytes)
+        if not self.save_render_img:
+            return
+        
+        FileSystemTools.ensure_directory_exists(self.rendered_img_dir)
+        filename = f"image{FileSystemTools.count_files_in_dir(self.rendered_img_dir)}.jpg"
+        file_path = os.path.join(self.rendered_img_dir, filename)
+        FileSystemTools.save_file(file_path, jpg_bytes)
 
 
     def convert_jpg_to_base64(self, jpg_bytes: bytes) -> str:
