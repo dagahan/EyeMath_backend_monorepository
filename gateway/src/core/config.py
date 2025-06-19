@@ -1,11 +1,10 @@
 import tomllib
 from typing import Any
 
-from loguru import logger
 import colorama
+from loguru import logger
 
-from src.core.utils import EnvTools
-from src.core.utils import MethodTools
+from src.core.utils import EnvTools, MethodTools
 
 
 class ConfigLoader:

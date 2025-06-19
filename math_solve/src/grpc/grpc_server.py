@@ -1,11 +1,11 @@
 from concurrent import futures
 
 import colorama
-import grpc
 from loguru import logger
 
 import gen.service_math_solve_pb2 as sevice_math_solve_pb
 import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
+import grpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.services.math_solver import MathSolver

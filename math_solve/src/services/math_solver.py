@@ -9,8 +9,8 @@ from sympy.parsing.latex import parse_latex as parse_string_to_latex
 
 from src.core.config import ConfigLoader
 from src.core.utils import MethodTools
-from src.services.alghoritms.quadratic_equations import QuadraticEquationSolver
 from src.grpc.client.factory_grpc_client import GRPCClientFactory
+from src.services.alghoritms.quadratic_equations import QuadraticEquationSolver
 
 
 class MathSolver:
@@ -109,19 +109,18 @@ class MathSolver:
         
         if self.using_algorithms and self._is_quadratic_equation(parsed_expression):
             return self._handle_quadratic_case(
-                parsed_expression, 
-                show_solving_steps, 
+                parsed_expression,
+                show_solving_steps,
                 render_latex_expressions
             )
-        else:
-            return self._handle_general_case(
-                parsed_expression, 
-                render_latex_expressions
-            )
+        return self._handle_general_case(
+            parsed_expression,
+            render_latex_expressions
+        )
 
 
     def _handle_quadratic_case(
-        self, 
+        self,
         parsed_expr,
         show_steps,
         render_latex
@@ -141,7 +140,7 @@ class MathSolver:
 
 
     def _handle_general_case(
-        self, 
+        self,
         parsed_expr,
         render_latex
     ) -> Dict[str, List]:

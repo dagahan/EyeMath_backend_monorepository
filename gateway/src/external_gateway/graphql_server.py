@@ -1,13 +1,12 @@
-from src.core.config import ConfigLoader
-
-from loguru import logger
-from fastapi import FastAPI
-
-from src.external_gateway.graphql.schema import Shema
-
-import uvicorn
-import colorama
 import asyncio
+
+import colorama
+import uvicorn
+from fastapi import FastAPI
+from loguru import logger
+
+from src.core.config import ConfigLoader
+from src.external_gateway.graphql.schema import Shema
 
 
 class ExternalGatewayServer:

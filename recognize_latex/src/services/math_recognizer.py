@@ -1,6 +1,6 @@
 import asyncio
-import tempfile
 import base64
+import tempfile
 from io import BytesIO
 
 import colorama

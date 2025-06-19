@@ -1,15 +1,11 @@
-from loguru import logger
-from sympy import preview
-import tempfile
-from PIL import Image
-import base64
 import asyncio
+import base64
 from io import BytesIO
+
 import matplotlib.pyplot as plt
 
 from src.core.config import ConfigLoader
 from src.core.utils import FileSystemTools
-
 
 
 class LatexRenderTool:
@@ -33,28 +29,27 @@ class LatexRenderTool:
 
 
     def convert_jpg_base64(self, jpg_bytes: bytes) -> str:
-        base64_encoded = base64.b64encode(jpg_bytes).decode('utf-8')
-        return base64_encoded
+        return base64.b64encode(jpg_bytes).decode('utf-8')
 
 
     def render_latex_jpg(self, latex_expression: str, dpi: int) -> str:
         fig = plt.figure(figsize=(0.1, 0.1), dpi=dpi)
-        plt.text(0.5, 0.5, f"${latex_expression}$", 
-                 fontsize=12, 
-                 ha='center', 
+        plt.text(0.5, 0.5, f"${latex_expression}$",
+                 fontsize=12,
+                 ha='center',
                  va='center')
         plt.axis('off')
         
         buf = BytesIO()
-        plt.savefig(buf, format='jpg', 
-                    bbox_inches='tight', 
+        plt.savefig(buf, format='jpg',
+                    bbox_inches='tight',
                     pad_inches=0.05,
                     transparent=False,
                     dpi=dpi)
         plt.close(fig)
         
         buf.seek(0)
-        return buf.getvalue()
+        return str(buf.getvalue())
 
 
     def render_latex_jpg_base64(self, latex_expression: str, dpi: int) -> str:

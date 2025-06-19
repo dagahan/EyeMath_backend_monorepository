@@ -1,12 +1,12 @@
+import asyncio
 from concurrent import futures
 
 import colorama
-import grpc
-import asyncio
 from loguru import logger
 
 import gen.gateway_pb2 as gateway_pb
 import gen.gateway_pb2_grpc as gateway_rpc
+import grpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools

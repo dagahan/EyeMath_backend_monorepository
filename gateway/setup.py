@@ -1,15 +1,15 @@
-import sys
 import asyncio
-import colorama
+import sys
 
+import colorama
 from loguru import logger
 
 sys.path.insert(0, "./gen")  # Fix of relative import in generated stubs
 from src.core.config import ConfigLoader
 from src.core.logging import InterceptHandler, LogSetup
 from src.external_gateway.graphql_server import ExternalGatewayServer
-from src.grpc.grpc_server import GRPCServerRunner
 from src.grpc.client.registry_grpc_clients import RegistryGrpcMethods
+from src.grpc.grpc_server import GRPCServerRunner
 
 
 class Service:

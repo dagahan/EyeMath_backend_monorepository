@@ -1,6 +1,8 @@
-import grpc
+from typing import Any, Dict, Type
+
 from loguru import logger
-from typing import Any, Dict, Type, Callable, Optional
+
+import grpc
 
 
 class GRPCClient:
@@ -10,8 +12,8 @@ class GRPCClient:
     _instances = {}
     
     def __init__(
-        self, 
-        host: str, 
+        self,
+        host: str,
         port: int,
         stub_class: Type,
         method_map: Dict[str, Type]

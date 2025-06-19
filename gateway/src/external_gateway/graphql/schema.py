@@ -1,11 +1,9 @@
-from loguru import logger
 from typing import List
+
+import strawberry
 from strawberry.fastapi import GraphQLRouter
 
 from src.grpc.client.factory_grpc_client import GRPCClientFactory
-
-import strawberry
-
 
 
 @strawberry.type
@@ -19,7 +17,7 @@ class Shema:
     @strawberry.type
     class Query:
         @strawberry.field(description="Solve math expression in latex format.")
-        def solve_math(self, 
+        def solve_math(self,
         latex_expression: str = "2x = 10",
         show_solving_steps: bool = True,
         render_latex_expressions: bool = False,

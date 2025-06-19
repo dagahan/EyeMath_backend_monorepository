@@ -1,17 +1,17 @@
 from concurrent import futures
 
 import colorama
-import grpc
 from loguru import logger
 
 import gen.service_math_recognize_pb2 as sevice_math_recognize_pb
 import gen.service_math_recognize_pb2_grpc as sevice_math_recognize_rpc
+import grpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools
+from src.services.math_latex_render import LatexRenderTool
 from src.services.math_recognizer import MathRecognizer
 from src.services.math_recognizer_normalizer import LatexNormalizer
-from src.services.math_latex_render import LatexRenderTool
 
 
 class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):

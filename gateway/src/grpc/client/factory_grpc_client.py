@@ -1,11 +1,10 @@
-from typing import Dict, Type, Any, Callable
+from typing import Any, Dict, Type
+
 from loguru import logger
-from grpc import StatusCode
 
 import grpc
-
+from grpc import StatusCode
 from src.grpc.client.base_grpc_client import GRPCClient
-from src.core.config import ConfigLoader
 
 
 class GRPCClientFactory:
@@ -30,7 +29,7 @@ class GRPCClientFactory:
     
     @classmethod
     def register_service(
-        cls, 
+        cls,
         service_name: str,
         host: str,
         port: int,
