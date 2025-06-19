@@ -7,7 +7,7 @@ class GrpcRequests:
     def _render_latex(expression: str) -> str:
         try:
             response = GRPCClientFactory.rpc_call(
-                service_name="math_render",
+                service_name="renderer",
                 method_name="render_latex",
                 latex_expression=expression,
             )
@@ -20,7 +20,7 @@ class GrpcRequests:
     def _recognize(image2recognize: str) -> str:
         try:
             response = GRPCClientFactory.rpc_call(
-                service_name="math_recognize",
+                service_name="recognizer",
                 method_name="recognize",
                 normalize_for_sympy=True,
                 image=image2recognize

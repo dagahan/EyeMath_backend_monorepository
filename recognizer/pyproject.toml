@@ -1,5 +1,5 @@
 [project]
-name = "service_mathrender"
+name = "recognizer"
 version = "0.0.1"
 requires-python = "==3.13.2"
 dependencies = [
@@ -10,8 +10,8 @@ dependencies = [
     "tabulate==0.9.0",
     "chardet==5.2.0",
     "python-dotenv==1.1.0",
+    "pix2tex==0.1.4",
     "opencv-python==4.11.0.86",
-    "matplotlib==3.10.3",
 ]
 show_params_on_run = true
 # debug_mode parameter is declaring in .env file!
@@ -27,16 +27,16 @@ extend-select = ["W", "N", "R", "I"]
 ignore = ["W293"]
 
 
-[latex_render]
-save_render_img = true
-render_dpi = 300
-rendered_img_dir = "rendered_images"
+[recognizer]
+save_receive_img = true
+recieved_img_dir = "recived_images"
+preprocess_imgs = true
 
 
 [grpc_server]
 max_workers = 15
 host = "0.0.0.0"
-port = 8003
+port = 8002
 reload = true
 log_requests = true
 log_responses = false

@@ -23,7 +23,7 @@ class Shema:
     @strawberry.type
     class Query:
         @strawberry.field(description="Solve math expression in latex format.")
-        def solve_math(
+        def solve(
         self,
         latex_expression: str = "2x = 10",
         show_solving_steps: bool = True,
@@ -47,7 +47,7 @@ class Shema:
             
             response = GrpcRequests.recognize(image, normalize_for_sympy)
             return MathRecognizeGraphQLResponse(
-                result=response.result,
+                result=response,
             )
         
 
