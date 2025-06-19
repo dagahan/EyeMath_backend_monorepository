@@ -67,7 +67,7 @@ class EnvTools:
             return os.getenv(variable_name)
         except Exception as ex:
             logger.critical(f"Error with loading env variable\n{ex}")
-            return ""
+            return None
         
     
     @staticmethod
@@ -81,14 +81,14 @@ class EnvTools:
 
 
     @staticmethod
-    def is_running_inside_docker() -> str:
+    def is_running_inside_docker() -> bool:
         try:
-            return EnvTools.load_env_var("RUNNING_INSIDE_DOCKER")
+            return EnvTools.load_env_var("RUNNING_INSIDE_DOCKER") == "1"
         except KeyError as ex:
             logger.error(
-                f"Error with checking if programm running inside docker. Returns default '0'\n{ex}"
+                f"Error with checking if programm running inside docker. Returns default False\n{ex}"
             )
-        return ""
+        return False
 
 
     @staticmethod
