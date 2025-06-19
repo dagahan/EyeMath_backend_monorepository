@@ -10,6 +10,7 @@ from sympy.parsing.latex import parse_latex as parse_string_to_latex
 from src.core.config import ConfigLoader
 from src.core.utils import MethodTools
 from src.services.alghoritms.quadratic_equations import QuadraticEquationSolver
+from src.grpc.client.factory_grpc_client import GRPCClientFactory
 
 
 class MathSolver:
@@ -69,7 +70,10 @@ class MathSolver:
     
 
     @logger.catch
-    def remove_extra_zeroes_for_answer(self, input_value: Union[float, Dict, List[Any]]) -> Union[float, Dict, List[Any]]:
+    def remove_extra_zeroes_for_answer(
+        self,
+        input_value: Union[float, Dict, List[Any]]
+        ) -> Union[float, Dict, List[Any]]:
         '''
         automaticly checks type of input value and trying
         to remove extra zeroes from all of values.
@@ -95,10 +99,38 @@ class MathSolver:
 
 
     @logger.catch
-    def solve_math_expression(self, expression: str,
-                              show_solving_steps: bool,
-                              render_latex_expressions: bool
-                              ) -> Union[float, Dict, List[Any]]:
+    def _create_result_item(
+        self, 
+        expression: str, 
+        render: bool
+    ) -> Dict[str, str]:
+        '''
+        Create a standardized result item with text and optional image
+        '''
+        item = {"string": expression, "image": ""}
+        
+        if render:
+            try:
+                response = GRPCClientFactory.rpc_call(
+                    service_name="math_recognize",
+                    method_name="render_latex",
+                    latex_expression=expression,
+                )
+                item["image"] = response.render_image
+            except Exception as e:
+                logger.error(f"LaTeX rendering failed: {e}")
+                item["image"] = ""
+        
+        return item
+
+
+    @logger.catch
+    def solve_math_expression(
+        self,
+        expression: str,
+        show_solving_steps: bool,
+        render_latex_expressions: bool
+        ) -> Union[float, Dict, List[Any]]:
         '''
         solving any math expressions,
         equations and returns the result.
@@ -126,6 +158,20 @@ class MathSolver:
             str_results = [str(root) for root in results]
             str_steps = [str(step) for step in solving_steps]
 
+            if render_latex_expressions:
+                rendered_results = []
+
+                for str_step in str_results:
+                    response = GRPCClientFactory.rpc_call(
+                        service_name="math_recognize",
+                        method_name="render_latex",
+                        latex_expression=str_step,
+                    )
+
+                    rendered_results.append(response.render_image)
+                str_results = rendered_results
+                
+
             return {
                 "results": str_results,
                 "solving_steps": str_steps
@@ -138,6 +184,16 @@ class MathSolver:
             result = parsed.evalf()
 
         str_results = [str(root) for root in result]
+
+        if render_latex_expressions:
+            for str_step in str_results:
+                response = GRPCClientFactory.rpc_call(
+                    service_name="math_recognize",
+                    method_name="render_latex",
+                    latex_expression=str_step,
+                )
+
+                str_step=response.render_image
 
         return {
                 "results": self.remove_extra_zeroes_for_answer(str_results),

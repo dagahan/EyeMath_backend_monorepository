@@ -11,15 +11,15 @@ import strawberry
 @strawberry.type
 class MathSolution:
     results: List[str]
-    solving_steps: List[str] | None = strawberry.field(description="Шаги решения")
+    solving_steps: List[str] | None = strawberry.field(description="Solving steps")
 
 
 class Shema:
     @strawberry.type
     class Query:
-        @strawberry.field(description="Решить математическое выражение")
+        @strawberry.field(description="Solve math expression in latex format.")
         def solve_math(self, 
-        latex_expression: str = "6x^{2} - 17x + 12 = 0",
+        latex_expression: str = "2x = 10",
         show_solving_steps: bool = True,
         render_latex_expressions: bool = False,
         ) -> MathSolution:
@@ -38,7 +38,6 @@ class Shema:
                 solving_steps=response.solving_steps
             )
         
-
 
     def create_graphql_router(self) -> GraphQLRouter:
         schema = strawberry.Schema(
