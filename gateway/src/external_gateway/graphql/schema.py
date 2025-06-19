@@ -4,6 +4,7 @@ import strawberry
 from strawberry.fastapi import GraphQLRouter
 
 from src.grpc.client.factory_grpc_client import GRPCClientFactory
+from src.grpc.grpc_requests import GrpcRequests
 
 
 @strawberry.type
@@ -29,14 +30,7 @@ class Shema:
         render_latex_expressions: bool = False,
         ) -> MathSolveGraphQLResponse:
             
-            response = GRPCClientFactory.rpc_call(
-                service_name="math_solve",
-                method_name="solve",
-                latex_expression=latex_expression,
-                show_solving_steps=show_solving_steps,
-                render_latex_expressions=render_latex_expressions,
-            )
-            
+            response = GrpcRequests.solve(latex_expression, show_solving_steps, render_latex_expressions)
             return MathSolveGraphQLResponse(
                 results=response.results,
                 renders=response.renders,
@@ -45,19 +39,13 @@ class Shema:
 
 
         @strawberry.field(description="Recognize math expression in latex format from image.")
-        def recognize_latex(
+        def recognize(
         self,
         image: str,
         normalize_for_sympy: bool = True,
         ) -> MathRecognizeGraphQLResponse:
             
-            response = GRPCClientFactory.rpc_call(
-                service_name="math_recognize",
-                method_name="recognize",
-                image=image,
-                normalize_for_sympy=normalize_for_sympy,
-            )
-            
+            response = GrpcRequests.recognize(image, normalize_for_sympy)
             return MathRecognizeGraphQLResponse(
                 result=response.result,
             )

@@ -9,8 +9,8 @@ from sympy.parsing.latex import parse_latex as parse_string_to_latex
 
 from src.core.config import ConfigLoader
 from src.core.utils import MethodTools
-from src.grpc.client.factory_grpc_client import GRPCClientFactory
 from src.services.alghoritms.quadratic_equations import QuadraticEquationSolver
+from src.grpc.grpc_requests import GrpcRequests
 
 
 class MathSolver:
@@ -96,6 +96,10 @@ class MathSolver:
         except Exception as ex:
             logger.error(f"error with removing extra zeroes: {ex}")
             return input_value
+        
+
+    def _is_expression_base64_image(self, expression):
+        return expression.startswith('data:image::')
 
 
     @logger.catch
@@ -105,8 +109,14 @@ class MathSolver:
         show_solving_steps: bool,
         render_latex_expressions: bool
     ) -> Dict[str, List]:
+        if self._is_expression_base64_image(expression):
+            expression.replace('data:image::', '')
+            expression = GrpcRequests._recognize(expression)
+
+        logger.success(expression)
+
         parsed_expression = parse_string_to_latex(expression)
-        
+
         if self.using_algorithms and self._is_quadratic_equation(parsed_expression):
             return self._handle_quadratic_case(
                 parsed_expression,
@@ -186,16 +196,10 @@ class MathSolver:
             return ["None"] * len(str_results)
         
         return [
-            self._render_latex(expr)
+            GrpcRequests._render_latex(expr)
             for expr in str_results
         ]
 
 
-    def _render_latex(self, expression: str) -> str:
-        response = GRPCClientFactory.rpc_call(
-            service_name="math_render",
-            method_name="render_latex",
-            latex_expression=expression,
-        )
-        return response.render_image
+    
                 

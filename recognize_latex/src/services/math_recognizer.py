@@ -51,6 +51,8 @@ class MathRecognizer:
 
     def _convert_base64_to_img(self, img_base64: str) -> Image.Image:
         try:
+            if img_base64.startswith('data:image::'):
+                img_base64 = img_base64.replace('data:image::', '')
             img_data = base64.b64decode(img_base64)
             return Image.open(BytesIO(img_data))
         except (base64.binascii.Error, UnidentifiedImageError) as e:
