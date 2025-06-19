@@ -4,12 +4,13 @@ EyeMath is a mobile app that helps users solve math equations. Instead of enteri
 
 EyeMath backend use:
 * Python 3.13.2 with UV (package manager), Ruff (lint and format tool) and TY (static typing tool)
-* Golang 1.24.2
 * PosgreSQL
 * Redis
 * PgAdmin
 * Docker
 * gRPC
+* GraphQL
+* FastAPI
 
 ## How to run the backend?
 

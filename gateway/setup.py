@@ -7,7 +7,7 @@ from loguru import logger
 sys.path.insert(0, "./gen")  # Fix of relative import in generated stubs
 from src.core.config import ConfigLoader
 from src.core.logging import InterceptHandler, LogSetup
-from src.fastapi_gateway.external_gateway import GatewayServer
+from src.external_gateway.graphql_server import ExternalGatewayServer
 from src.grpc.grpc_server import GRPCServerRunner
 from src.grpc.client.registry_grpc_clients import RegistryGrpcMethods
 
@@ -17,7 +17,7 @@ class Service:
         self.config = ConfigLoader()
         self.intercept_handler = InterceptHandler()
         self.logger_setup = LogSetup()
-        self.gateway = GatewayServer()
+        self.gateway = ExternalGatewayServer()
         self.grpc_server_runner = GRPCServerRunner()
         self.service_name = self.config.get("project", "name")
         self.show_params_on_start = self.config.get("project", "show_params_on_run")

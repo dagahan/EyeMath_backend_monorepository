@@ -75,6 +75,20 @@ class GRPCClientFactory:
         return client
     
 
+    # @classmethod
+    # def get_response_type(cls, service_name: str, method_name: str) -> Type:
+    #     '''
+    #     Get response type for specific gRPC method.
+    #     '''
+    #     if not cls._is_service_registered(service_name):
+    #         raise ValueError(f"Service {service_name} not registered")
+        
+    #     if method_name not in cls._configs[service_name]['method_map']:
+    #         raise ValueError(f"Method {method_name} not found in service {service_name}")
+        
+    #     return cls._configs[service_name]['method_map'][method_name]["response_type"]
+    
+
     @classmethod
     def _handle_client_error(cls, service_name: str, error: Exception):
         '''
