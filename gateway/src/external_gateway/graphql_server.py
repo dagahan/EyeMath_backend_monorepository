@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from loguru import logger
 
 from src.core.config import ConfigLoader
+from src.core.utils import EnvTools
 from src.external_gateway.graphql.schema import Shema
 
 
@@ -13,6 +14,8 @@ class ExternalGatewayServer:
     def __init__(self) -> None:
         self.config = ConfigLoader()
         self.gateway_app = FastAPI()
+        self.host = EnvTools.load_env_var("GATEWAY_HOST")
+        self.port = EnvTools.load_env_var("GATEWAY_APP_PORT")
         self.shema = Shema()
         self.gateway_app.include_router(self.shema.create_graphql_router(), prefix="/graphql")
         self.server = None
@@ -20,13 +23,10 @@ class ExternalGatewayServer:
 
 
     async def run_external_gateway(self):
-        host = self.config.get("fastapi_server", "fastapi_host")
-        port = int(self.config.get("fastapi_server", "fastapi_port"))
-        
         config = uvicorn.Config(
             app=self.gateway_app,
-            host=host,
-            port=port,
+            host=self.host,
+            port=self.port,
             log_config={
                 "version": 1,
                 "disable_existing_loggers": False,
@@ -57,7 +57,7 @@ class ExternalGatewayServer:
         self.server = uvicorn.Server(config)
         
         try:
-            logger.info(f"{colorama.Fore.GREEN}Starting FastAPI on {colorama.Fore.YELLOW}http://{host}:{port}/graphql")
+            logger.info(f"{colorama.Fore.GREEN}Starting FastAPI on {colorama.Fore.YELLOW}http://{self.host}:{self.port}/graphql")
             await self.server.serve()
 
         except asyncio.CancelledError:

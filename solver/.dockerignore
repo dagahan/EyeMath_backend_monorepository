@@ -1,6 +1,6 @@
 proto/
 debug/
-gen/ 
+# gen/ 
 **/__pycache__
 **/.venv
 **/*.pyc

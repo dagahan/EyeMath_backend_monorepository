@@ -4,6 +4,7 @@ import os.path
 import shutil
 from inspect import getframeinfo, stack
 from typing import Any, List, Tuple
+from pathlib import Path
 
 import chardet
 from dotenv import load_dotenv
@@ -45,8 +46,23 @@ class FileSystemTools:
         pass
 
     @staticmethod
+    def ensure_directory_exists(directory: str) -> None:
+        path = Path(directory)
+        if not path.exists():
+            path.mkdir(parents=True, exist_ok=True)
+
+
+    @staticmethod
     def count_files_in_dir(dir: str) -> int:
         return len([name for name in os.listdir(dir) if os.path.isfile(os.path.join(dir, name))])
+    
+
+    @staticmethod
+    def save_file(file_path: str, data: bytes) -> None:
+        path = Path(file_path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with open(path, 'wb') as f:
+            f.write(data)
     
 
     @staticmethod
@@ -67,7 +83,7 @@ class EnvTools:
             return os.getenv(variable_name)
         except Exception as ex:
             logger.critical(f"Error with loading env variable\n{ex}")
-            return ""
+            return None
         
     
     @staticmethod
@@ -81,14 +97,14 @@ class EnvTools:
 
 
     @staticmethod
-    def is_running_inside_docker() -> str:
+    def is_running_inside_docker() -> bool:
         try:
-            return EnvTools.load_env_var("RUNNING_INSIDE_DOCKER")
+            return EnvTools.load_env_var("RUNNING_INSIDE_DOCKER") == "1"
         except KeyError as ex:
             logger.error(
-                f"Error with checking if programm running inside docker. Returns default '0'\n{ex}"
+                f"Error with checking if programm running inside docker. Returns default False\n{ex}"
             )
-        return ""
+        return False
 
 
     @staticmethod

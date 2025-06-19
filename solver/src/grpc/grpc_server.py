@@ -8,6 +8,7 @@ import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
 import grpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
+from src.core.utils import EnvTools
 from src.services.math_solver import MathSolver
 
 
@@ -80,8 +81,8 @@ class GRPCServerRunner:
         self.config = ConfigLoader()
         self.grpc_math_solve = GRPCMathSolve()
         self.max_workers = self.config.get("grpc_server", "max_workers")
-        self.host = self.config.get("grpc_server", "host")
-        self.port = int(self.config.get("grpc_server", "port"))
+        self.host = EnvTools.load_env_var("SOLVER_HOST")
+        self.port = EnvTools.load_env_var("SOLVER_APP_PORT")
         self.addr = f"{self.host}:{self.port}"
         self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=self.max_workers))
 
