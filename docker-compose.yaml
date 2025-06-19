@@ -1,9 +1,9 @@
 version: '3.9'
 
 services:
-  external_api_gateway:
+  gateway:
     build: gateway
-    container_name: external_api_gateway
+    container_name: gateway
     environment:
       TZ: ${SYSTEM_TIME_ZONE}
       HOST: ${GATEWAY_HOST}
@@ -13,52 +13,50 @@ services:
       - ${GATEWAY_PORT}
     networks:
       - eye_math_network
-    depends_on:
-      - service_math_solve
     restart: ${DOCKER_CONTAINERS_RESTART}
 
-  service_math_solve:
-    build: math_solve
-    container_name: service_math_solve
-    environment:
-      TZ: ${SYSTEM_TIME_ZONE}
-      HOST: ${MATH_SOLVE_HOST}
-      PORT: ${MATH_SOLVE_APP_PORT}
-      RUNNING_INSIDE_DOCKER: 1
-    ports:
-      - ${MATH_SOLVE_PORT}
-    networks:
-      - eye_math_network
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # service_math_solve:
+  #   build: math_solve
+  #   container_name: service_math_solve
+  #   environment:
+  #     TZ: ${SYSTEM_TIME_ZONE}
+  #     HOST: ${MATH_SOLVE_HOST}
+  #     PORT: ${MATH_SOLVE_APP_PORT}
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - ${MATH_SOLVE_PORT}
+  #   networks:
+  #     - eye_math_network
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
-  service_recognize_latex:
-    build: recognize_latex
-    container_name: service_recognize_latex
-    environment:
-      TZ: ${SYSTEM_TIME_ZONE}
-      HOST: ${RECOGNIZE_LATEX_HOST}
-      PORT: ${RECOGNIZE_LATEX_APP_PORT}
-      RUNNING_INSIDE_DOCKER: 1
-    ports:
-      - ${RECOGNIZE_LATEX_PORT}
-    networks:
-      - eye_math_network
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # service_recognize_latex:
+  #   build: recognize_latex
+  #   container_name: service_recognize_latex
+  #   environment:
+  #     TZ: ${SYSTEM_TIME_ZONE}
+  #     HOST: ${RECOGNIZE_LATEX_HOST}
+  #     PORT: ${RECOGNIZE_LATEX_APP_PORT}
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - ${RECOGNIZE_LATEX_PORT}
+  #   networks:
+  #     - eye_math_network
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
-  postgres:
-    image: postgres:14
-    environment:
-      TZ: ${SYSTEM_TIME_ZONE}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB_NAME}
-    ports:
-      - ${POSTGRES_PORT}
-    networks:
-      - eye_math_network
-    # volumes:
-    #   - postgres_data:/var/lib/postgresql/data
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # postgres:
+  #   image: postgres:14
+  #   environment:
+  #     TZ: ${SYSTEM_TIME_ZONE}
+  #     POSTGRES_USER: ${POSTGRES_USER}
+  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  #     POSTGRES_DB: ${POSTGRES_DB_NAME}
+  #   ports:
+  #     - ${POSTGRES_PORT}
+  #   networks:
+  #     - eye_math_network
+  #   # volumes:
+  #   #   - postgres_data:/var/lib/postgresql/data
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
   # pgadmin:
   #   image: dpage/pgadmin4
