@@ -12,6 +12,7 @@ dependencies = [
     "python-dotenv==1.1.0",
     "opencv-python==4.11.0.86",
     "matplotlib==3.10.3",
+    "numpy==2.3.0",
 ]
 show_params_on_run = true
 # debug_mode parameter is declaring in .env file!
@@ -35,8 +36,6 @@ rendered_img_dir = "rendered_images"
 
 [grpc_server]
 max_workers = 15
-host = "0.0.0.0"
-port = 8003
 reload = true
 log_requests = true
 log_responses = false

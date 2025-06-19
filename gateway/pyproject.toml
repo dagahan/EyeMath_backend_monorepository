@@ -27,15 +27,8 @@ extend-select = ["W", "N", "R", "I"]
 ignore = ["W293"]
 
 
-[fastapi_server]
-fastapi_host = "0.0.0.0"
-fastapi_port = 8080
-
-
 [grpc_server]
 max_workers = 15
-host = "0.0.0.0"
-port = 8081
 reload = true
 log_requests = true
 log_responses = false

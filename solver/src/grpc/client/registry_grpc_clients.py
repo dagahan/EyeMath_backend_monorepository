@@ -20,8 +20,12 @@ class RegistryGrpcMethods:
     @classmethod
     def register_service_with_methods(cls):
         service_name="gateway"
-        host=EnvTools.load_env_var("GATEWAY_GRPC_HOST")
-        port=EnvTools.load_env_var("GATEWAY_GRPC_APP_PORT")
+        if EnvTools.is_running_inside_docker():
+            host=service_name
+            port=EnvTools.load_env_var("GATEWAY_GRPC_APP_PORT")
+        else:
+            host=EnvTools.load_env_var("GATEWAY_GRPC_HOST")
+            port=EnvTools.load_env_var("GATEWAY_GRPC_APP_PORT")
         stub_class=gateway_rpc.ExternalApiGatewayStub
         method_map={
                 "is_admin": gateway_pb.is_admin_request,
@@ -39,8 +43,12 @@ class RegistryGrpcMethods:
 
 
         service_name="solver"
-        host=EnvTools.load_env_var("SOLVER_HOST")
-        port=EnvTools.load_env_var("SOLVER_APP_PORT")
+        if EnvTools.is_running_inside_docker():
+            host=service_name
+            port=EnvTools.load_env_var("SOLVER_APP_PORT")
+        else:
+            host=EnvTools.load_env_var("SOLVER_HOST")
+            port=EnvTools.load_env_var("SOLVER_APP_PORT")
         stub_class=math_solve_rpc.GRPCMathSolveStub
         method_map={
                 "meta_data_solve": math_solve_pb.meta_data_solve_request,
@@ -57,8 +65,12 @@ class RegistryGrpcMethods:
 
 
         service_name="recognizer"
-        host=EnvTools.load_env_var("RECOGNIZER_HOST")
-        port=EnvTools.load_env_var("RECOGNIZER_APP_PORT")
+        if EnvTools.is_running_inside_docker():
+            host=service_name
+            port=EnvTools.load_env_var("RECOGNIZER_APP_PORT")
+        else:
+            host=EnvTools.load_env_var("RECOGNIZER_HOST")
+            port=EnvTools.load_env_var("RECOGNIZER_APP_PORT")
         stub_class=math_recognize_rpc.GRPCMathRecognizeStub
         method_map={
                 "meta_data_recognize": math_recognize_pb.meta_data_recognize_request,
@@ -76,8 +88,12 @@ class RegistryGrpcMethods:
 
 
         service_name="renderer"
-        host=EnvTools.load_env_var("RENDERER_HOST")
-        port=EnvTools.load_env_var("RENDERER_APP_PORT")
+        if EnvTools.is_running_inside_docker():
+            host=service_name
+            port=EnvTools.load_env_var("RENDERER_APP_PORT")
+        else:
+            host=EnvTools.load_env_var("RENDERER_HOST")
+            port=EnvTools.load_env_var("RENDERER_APP_PORT")
         stub_class=math_render_rpc.GRPCMathRenderStub
         method_map={
                 "meta_data_render": math_render_pb.meta_data_render_request,

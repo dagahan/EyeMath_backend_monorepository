@@ -76,8 +76,8 @@ class GRPCServerRunner:
         self.config = ConfigLoader()
         self.grpc_math_recognize = GRPCMathRender()
         self.max_workers = self.config.get("grpc_server", "max_workers")
-        self.host = self.config.get("grpc_server", "host")
-        self.port = int(self.config.get("grpc_server", "port"))
+        self.host = EnvTools.load_env_var("RENDERER_HOST")
+        self.port = EnvTools.load_env_var("RENDERER_APP_PORT")
         self.addr = f"{self.host}:{self.port}"
         self.grpc_server = grpc.server(futures.ThreadPoolExecutor(max_workers=self.max_workers))
 
