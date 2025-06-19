@@ -32,7 +32,7 @@ ignore = ["W293"]
 [math]
 precision = 32
 default_precision = 64
-using_alghoritms_solving = true
+using_algorithms_solving = true
 
 
 # [grpc_client]

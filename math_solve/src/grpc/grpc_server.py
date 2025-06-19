@@ -60,6 +60,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
             
             response = sevice_math_solve_pb.solve_response(
                 results=solver_answer['results'],
+                renders=solver_answer['renders'],
                 solving_steps=solver_answer['solving_steps'],
             )
 

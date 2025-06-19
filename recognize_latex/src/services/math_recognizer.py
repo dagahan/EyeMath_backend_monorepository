@@ -5,7 +5,7 @@ from io import BytesIO
 
 import colorama
 from loguru import logger
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from pix2tex import cli
 
 from src.core.config import ConfigLoader
@@ -50,8 +50,12 @@ class MathRecognizer:
 
 
     def _convert_base64_to_img(self, img_base64: str) -> Image.Image:
-        img_data = base64.b64decode(img_base64)
-        return Image.open(BytesIO(img_data))
+        try:
+            img_data = base64.b64decode(img_base64)
+            return Image.open(BytesIO(img_data))
+        except (base64.binascii.Error, UnidentifiedImageError) as e:
+            logger.error(f"Base64 decoding error: {e}")
+            raise ValueError("Invalid image data") from e
         
             
     @logger.catch

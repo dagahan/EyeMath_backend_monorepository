@@ -17,7 +17,7 @@ class MathSolver:
     def __init__(self) -> None:
         self.config = ConfigLoader()
         mp.dps = self.config.get("math", "precision")
-        self.using_alghoritms = self.config.get("math", "using_alghoritms_solving")
+        self.using_algorithms = self.config.get("math", "using_algorithms_solving")
 
 
     @logger.catch
@@ -99,104 +99,104 @@ class MathSolver:
 
 
     @logger.catch
-    def _create_result_item(
-        self, 
-        expression: str, 
-        render: bool
-    ) -> Dict[str, str]:
-        '''
-        Create a standardized result item with text and optional image
-        '''
-        item = {"string": expression, "image": ""}
-        
-        if render:
-            try:
-                response = GRPCClientFactory.rpc_call(
-                    service_name="math_recognize",
-                    method_name="render_latex",
-                    latex_expression=expression,
-                )
-                item["image"] = response.render_image
-            except Exception as e:
-                logger.error(f"LaTeX rendering failed: {e}")
-                item["image"] = ""
-        
-        return item
-
-
-    @logger.catch
     def solve_math_expression(
         self,
         expression: str,
         show_solving_steps: bool,
         render_latex_expressions: bool
-        ) -> Union[float, Dict, List[Any]]:
-        '''
-        solving any math expressions,
-        equations and returns the result.
-        --------------------------------
-        there is two ways of solving:
-        1. a unique solution algorithm has
-        been written for a specific type
-        of expression/equation
-        2. an adaptive solution algorithm that
-        does not provide the output of each
-        step in the solution.
-        '''
-        parsed = parse_string_to_latex(expression)
-
-        # Here we using unique alghoritms to solve specific type of expression
-        if self.using_alghoritms and self._is_quadratic_equation(parsed):
-            answer = QuadraticEquationSolver.solve_quadratic_equation(parsed)
-
-            results = answer['results']
-            if show_solving_steps:
-                solving_steps = answer['solving_steps']
-            else:
-                solving_steps = ["None"]
-
-            str_results = [str(root) for root in results]
-            str_steps = [str(step) for step in solving_steps]
-
-            if render_latex_expressions:
-                rendered_results = []
-
-                for str_step in str_results:
-                    response = GRPCClientFactory.rpc_call(
-                        service_name="math_recognize",
-                        method_name="render_latex",
-                        latex_expression=str_step,
-                    )
-
-                    rendered_results.append(response.render_image)
-                str_results = rendered_results
-                
-
-            return {
-                "results": str_results,
-                "solving_steps": str_steps
-            }
+    ) -> Dict[str, List]:
+        parsed_expression = parse_string_to_latex(expression)
         
-        # Here an adaptive one
-        if self._is_equation(parsed):
-            result = sympy.solve(parsed)
+        if self.using_algorithms and self._is_quadratic_equation(parsed_expression):
+            return self._handle_quadratic_case(
+                parsed_expression, 
+                show_solving_steps, 
+                render_latex_expressions
+            )
         else:
-            result = parsed.evalf()
+            return self._handle_general_case(
+                parsed_expression, 
+                render_latex_expressions
+            )
 
-        str_results = [str(root) for root in result]
 
-        if render_latex_expressions:
-            for str_step in str_results:
-                response = GRPCClientFactory.rpc_call(
-                    service_name="math_recognize",
-                    method_name="render_latex",
-                    latex_expression=str_step,
-                )
-
-                str_step=response.render_image
-
+    def _handle_quadratic_case(
+        self, 
+        parsed_expr,
+        show_steps,
+        render_latex
+    ) -> Dict[str, List]:
+        answer = QuadraticEquationSolver.solve_quadratic_equation(parsed_expr)
+        results = answer['results']
+        solving_steps = answer['solving_steps'] if show_steps else ["None"]
+        
+        str_results = self._convert_results_to_strings(results, clean_zeros=False)
+        renders = self._generate_renders(str_results, render_latex)
+        
         return {
-                "results": self.remove_extra_zeroes_for_answer(str_results),
-                "solving_steps": ["None"]
-            }
-         
+            "results": str_results,
+            "renders": renders,
+            "solving_steps": [str(step) for step in solving_steps]
+        }
+
+
+    def _handle_general_case(
+        self, 
+        parsed_expr,
+        render_latex
+    ) -> Dict[str, List]:
+        if self._is_equation(parsed_expr):
+            result = sympy.solve(parsed_expr)
+            solutions = list(result.values()) if isinstance(result, dict) else result
+            solutions = solutions if isinstance(solutions, list) else [solutions]
+        else:
+            solutions = [parsed_expr.evalf()]
+        
+        str_results = self._convert_results_to_strings(solutions, clean_zeros=True)
+        renders = self._generate_renders(str_results, render_latex)
+        
+        return {
+            "results": str_results,
+            "renders": renders,
+            "solving_steps": ["None"]
+        }
+
+
+    def _convert_results_to_strings(
+        self,
+        results: Union[List, Any],
+        clean_zeros: bool = False
+    ) -> List[str]:
+        if not isinstance(results, list):
+            results = [results]
+        
+        str_results = [str(item) for item in results]
+        
+        if clean_zeros:
+            str_results = self.remove_extra_zeroes_for_answer(str_results)
+        
+        return str_results
+
+
+    def _generate_renders(
+        self,
+        str_results: List[str],
+        render_latex: bool
+    ) -> List[str]:
+        if not render_latex:
+            return ["None"] * len(str_results)
+        
+        return [
+            self._render_latex(expr)
+            for expr in str_results
+        ]
+
+
+    def _render_latex(self, expression: str) -> str:
+        response = GRPCClientFactory.rpc_call(
+            service_name="math_recognize",
+            method_name="render_latex",
+            latex_expression=expression,
+        )
+        return response.render_image
+                

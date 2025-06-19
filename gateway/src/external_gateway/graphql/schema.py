@@ -11,6 +11,7 @@ import strawberry
 @strawberry.type
 class MathSolution:
     results: List[str]
+    renders: List[str]
     solving_steps: List[str] | None = strawberry.field(description="Solving steps")
 
 
@@ -35,6 +36,7 @@ class Shema:
             # Преобразование gRPC ответа в GraphQL тип
             return MathSolution(
                 results=response.results,
+                renders=response.renders,
                 solving_steps=response.solving_steps
             )
         

@@ -34,7 +34,7 @@ class LatexRenderTool:
 
     def convert_jpg_base64(self, jpg_bytes: bytes) -> str:
         base64_encoded = base64.b64encode(jpg_bytes).decode('utf-8')
-        return f"data:image/jpeg;base64,{base64_encoded}"
+        return base64_encoded
 
 
     def render_latex_jpg(self, latex_expression: str, dpi: int) -> str:
