@@ -1,9 +1,11 @@
 from src.core.config import ConfigLoader
 
 from loguru import logger
-from typing import List
+from typing import List, Any
 from fastapi import FastAPI
 from strawberry.fastapi import GraphQLRouter
+
+from src.grpc.client.factory_grpc_client import GRPCClientFactory
 
 import uvicorn
 import strawberry
@@ -11,21 +13,13 @@ import colorama
 import asyncio
 
 
+# TODO: gRPC responce type auto-convertor to graphql type.
 
-# Выносим типы GraphQL из класса
-@strawberry.type
-class Book:
-    id: int
-    title: str
-    author: str
 
 @strawberry.type
-class Car:
-    id: int
-    brand: str
-    model: str
-    year: int = strawberry.field(description="Год выпуска")
-
+class MathSolution:
+    results: List[str]
+    solving_steps: List[str] | None = strawberry.field(description="Шаги решения")
 
 
 class GatewayServer:
@@ -37,44 +31,33 @@ class GatewayServer:
         self._stop_requested = False
 
 
-    # Основной класс запросов
     @strawberry.type
     class Query:
-        @strawberry.field(description="Получить список книг")
-        def books(self) -> List[Book]:
-            return [
-                Book(id=1, title="Гарри Поттер", author="Дж. К. Роулинг"),
-                Book(id=2, title="Властелин Колец", author="Дж. Р. Р. Толкин"),
-                Book(id=3, title="Test Test", author="Usov Nikita"),
-            ]
-        
-        @strawberry.field(description="Получить автомобиль по ID")
-        def car(self, id: int) -> Car:
-            return Car(
-                id=id,
-                brand="Tesla",
-                model="Model S",
-                year=2023
+        @strawberry.field(description="Решить математическое выражение")
+        def solve_math(self, 
+        latex_expression: str = "6x^{2} - 17x + 12 = 0",
+        show_solving_steps: bool = True,
+        render_latex_expressions: bool = False,
+        ) -> MathSolution:
+            
+            response = GRPCClientFactory.rpc_call(
+                service_name="math_solve",
+                method_name="solve",
+                latex_expression=latex_expression,
+                show_solving_steps=show_solving_steps,
+                render_latex_expressions=render_latex_expressions
+            )
+            
+            # Преобразование gRPC ответа в GraphQL тип
+            return MathSolution(
+                results=response.results,
+                solving_steps=response.solving_steps
             )
 
 
-    # Класс мутаций
-    @strawberry.type
-    class Mutation:
-        @strawberry.mutation(description="Добавить новую книгу")
-        async def add_book(self, title: str, author: str) -> Book:
-            return await Book(id=3, title=title, author=author)
-        
-        @strawberry.mutation(description="Добавить автомобиль")
-        async def add_car(self, brand: str, model: str, year: int) -> Car:
-            return await Car(id=4, brand=brand, model=model, year=year)
-
-
     def create_graphql_router(self) -> GraphQLRouter:
-        # Объединяем Query и Mutation в одну схему
         schema = strawberry.Schema(
-            query=self.Query, 
-            mutation=self.Mutation
+            query=self.Query
         )
         return GraphQLRouter(schema)
     

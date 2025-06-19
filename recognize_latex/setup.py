@@ -7,6 +7,7 @@ sys.path.insert(0, './gen') #Fix of relative import in generated stubs
 from src.core.config import ConfigLoader
 from src.core.logging import InterceptHandler, LogSetup
 from src.grpc.grpc_server import GRPCServerRunner
+from src.grpc.client.registry_grpc_clients import RegistryGrpcMethods
 
 
 class Service:
@@ -34,6 +35,7 @@ class Service:
 
 
     def run_service(self) -> None:
+        RegistryGrpcMethods.register_service_with_methods()
         self.logger_setup.configure()
         self.service_start_message()
         self.grpc_server_runner.run_grpc_server()

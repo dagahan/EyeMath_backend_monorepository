@@ -9,7 +9,6 @@ import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.services.math_solver import MathSolver
-from src.grpc.client.factory_grpc_client import GRPCClientFactory
 
 
 class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):

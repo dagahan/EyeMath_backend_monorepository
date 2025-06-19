@@ -69,13 +69,14 @@ class GRPCServerRunner:
 
 
     async def _graceful_stop(self):
-        """Асинхронная остановка gRPC сервера"""
+        '''
+        Graceful async stopp of the gRPC server.
+        '''
         loop = asyncio.get_running_loop()
         await loop.run_in_executor(None, self.grpc_server.stop, 5)
         await loop.run_in_executor(None, self.grpc_server.wait_for_termination, 5)
 
 
     def stop(self):
-        """Инициировать остановку сервера"""
         self._stop_event.set()
 

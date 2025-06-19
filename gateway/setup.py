@@ -9,6 +9,7 @@ from src.core.config import ConfigLoader
 from src.core.logging import InterceptHandler, LogSetup
 from src.fastapi_gateway.external_gateway import GatewayServer
 from src.grpc.grpc_server import GRPCServerRunner
+from src.grpc.client.registry_grpc_clients import RegistryGrpcMethods
 
 
 class Service:
@@ -38,6 +39,7 @@ class Service:
 
 
     async def run_service(self):
+        RegistryGrpcMethods.register_service_with_methods()
         self.logger_setup.configure()
         self.service_start_message()
         
