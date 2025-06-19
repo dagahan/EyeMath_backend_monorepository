@@ -3,6 +3,8 @@ import gen.gateway_pb2 as gateway_pb
 import gen.gateway_pb2_grpc as gateway_rpc
 import gen.service_math_recognize_pb2 as math_recognize_pb
 import gen.service_math_recognize_pb2_grpc as math_recognize_rpc
+import gen.service_math_render_pb2 as math_render_pb
+import gen.service_math_render_pb2_grpc as math_render_rpc
 import gen.service_math_solve_pb2 as math_solve_pb
 import gen.service_math_solve_pb2_grpc as math_solve_rpc
 from src.core.utils import EnvTools
@@ -65,7 +67,25 @@ class RegistryGrpcMethods:
                 "meta_data_recognize": math_recognize_pb.meta_data_recognize_request,
                 "recognize": math_recognize_pb.recognize_request,
                 "normalize_for_sympy": math_recognize_pb.normalize_for_sympy_request,
-                "render_latex": math_recognize_pb.render_latex_request,
+            }
+        
+        GRPCClientFactory.register_service(
+            service_name=service_name,
+            host=host,
+            port=port,
+            stub_class=stub_class,
+            method_map=method_map
+        )
+
+
+        # MATH_RENDER
+        service_name="math_render"
+        host=EnvTools.load_env_var("RENDER_LATEX_HOST")
+        port=EnvTools.load_env_var("RENDER_LATEX_APP_PORT")
+        stub_class=math_render_rpc.GRPCMathRenderStub
+        method_map={
+                "meta_data_render": math_render_pb.meta_data_render_request,
+                "render_latex": math_render_pb.render_latex_request,
             }
         
         GRPCClientFactory.register_service(

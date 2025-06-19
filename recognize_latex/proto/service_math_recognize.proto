@@ -15,7 +15,7 @@ message meta_data_recognize_response {
 
 message recognize_request {
   bool normalize_for_sympy = 1;
-  string image_in_bytes = 2;
+  string image = 2;
 }
 
 message recognize_response {
@@ -32,18 +32,8 @@ message normalize_for_sympy_response {
 }
 
 
-message render_latex_request {
-  string latex_expression = 1; 
-}
-
-message render_latex_response {
-  string render_image = 1; 
-}
-
-
 service GRPCMathRecognize {
     rpc meta_data_recognize (meta_data_recognize_request) returns (meta_data_recognize_response);
     rpc recognize (recognize_request) returns (recognize_response);
     rpc normalize_for_sympy (normalize_for_sympy_request) returns (normalize_for_sympy_response);
-    rpc render_latex (render_latex_request) returns (render_latex_response);
 }

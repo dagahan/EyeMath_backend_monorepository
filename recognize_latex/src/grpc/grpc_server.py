@@ -9,7 +9,6 @@ import grpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools
-from src.services.math_latex_render import LatexRenderTool
 from src.services.math_recognizer import MathRecognizer
 from src.services.math_recognizer_normalizer import LatexNormalizer
 
@@ -21,10 +20,8 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
         self.env_tools = EnvTools()
         self.log_api = LogAPI()
         self.latex_parser = LatexNormalizer()
-        self.latex_render_tool = LatexRenderTool()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
-        self.render_dpi = self.config.get("latex_render", "render_dpi")
 
 
     @logger.catch
@@ -102,32 +99,6 @@ class GRPCMathRecognize(sevice_math_recognize_rpc.GRPCMathRecognize):
                 result="None",
                 )
         
-
-    @logger.catch
-    def render_latex(self, request: sevice_math_recognize_pb.render_latex_request, context) -> sevice_math_recognize_pb.render_latex_response:
-        '''
-        Endpoint returns a rendered jpg picture of latex-expression
-        in base64 format.
-        Look at service's protobuf file to get more info.
-        '''
-        self.log_api._logrequest(request, context)
-
-        try:
-            renderer_answer = self.latex_render_tool.render_latex_jpg_base64(request.latex_expression, self.render_dpi)
-
-            response = sevice_math_recognize_pb.render_latex_response(
-                render_image=renderer_answer,
-            )
-
-            self.log_api._logresponse(response, context)
-            return response
-
-        except Exception as error:
-            logger.error(f"Render error: {error}")
-            return sevice_math_recognize_pb.render_latex_response(
-                render_image="None",
-                )
-
 
 class GRPCServerRunner:
     def __init__(self) -> None:

@@ -193,7 +193,7 @@ class MathSolver:
 
     def _render_latex(self, expression: str) -> str:
         response = GRPCClientFactory.rpc_call(
-            service_name="math_recognize",
+            service_name="math_render",
             method_name="render_latex",
             latex_expression=expression,
         )
