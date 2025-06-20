@@ -4,7 +4,7 @@ import os
 import colorama
 from loguru import logger
 
-GEN_PATH = os.path.join(os.path.dirname(__file__), 'gen')
+GEN_PATH = os.path.join(os.path.dirname(__file__), 'eyemath_protos')
 sys.path.insert(0, GEN_PATH)  # Fix of relative import in generated stubs
 
 from src.core.config import ConfigLoader

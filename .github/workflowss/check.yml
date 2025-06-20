@@ -1,0 +1,51 @@
+name: Python CI/CD Pipeline
+
+on:
+  push:
+    branches: [ ci_cd ]
+  pull_request:
+    branches: [ ci_cd ]
+
+jobs:
+  docker-compose-test:
+    runs-on: ubuntu-latest
+    env:
+      SYSTEM_TIME_ZONE: ${{ secrets.SYSTEM_TIME_ZONE }}
+      RUNNING_INSIDE_DOCKER: 1
+      DOCKER_CONTAINERS_RESTART: ${{ secrets.DOCKER_CONTAINERS_RESTART }}
+      GATEWAY_HOST: ${{ secrets.GATEWAY_HOST }}
+      GATEWAY_APP_PORT: ${{ secrets.GATEWAY_APP_PORT }}
+      GATEWAY_GRPC_HOST: ${{ secrets.GATEWAY_GRPC_HOST }}
+      GATEWAY_GRPC_APP_PORT: ${{ secrets.GATEWAY_GRPC_APP_PORT }}
+      RECOGNIZER_HOST: ${{ secrets.RECOGNIZER_HOST }}
+      RECOGNIZER_APP_PORT: ${{ secrets.RECOGNIZER_APP_PORT }}
+      RENDERER_HOST: ${{ secrets.RENDERER_HOST }}
+      RENDERER_APP_PORT: ${{ secrets.RENDERER_APP_PORT }}
+      SOLVER_HOST: ${{ secrets.SOLVER_HOST }}
+      SOLVER_APP_PORT: ${{ secrets.SOLVER_APP_PORT }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Start services
+      run: docker compose up --build -d
+
+    - name: Wait for services
+      run: |
+        sleep 15
+        docker compose ps
+
+    - name: Run tests
+      run: |
+        # Пример теста для веб-сервиса
+        curl -sSf http://localhost:8080/health
+        # Или запуск тестов внутри контейнера
+        docker compose exec -T service pytest
+
+    - name: Stop services
+      if: always()
+      run: docker compose down

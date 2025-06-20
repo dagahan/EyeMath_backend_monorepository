@@ -3,8 +3,9 @@ from concurrent import futures
 import colorama
 from loguru import logger
 
-import gen.service_math_solve_pb2 as sevice_math_solve_pb
-import gen.service_math_solve_pb2_grpc as sevice_math_solve_rpc
+# import gen.service_math_solve_pb2 as sevice_math_solve_pb
+from stubs import service_math_solve_pb2_grpc as sevice_math_solve_rpc
+from stubs import service_math_solve_pb2 as sevice_math_solve_pb
 import grpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI

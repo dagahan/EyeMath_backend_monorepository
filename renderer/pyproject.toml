@@ -13,6 +13,7 @@ dependencies = [
     "opencv-python==4.11.0.86",
     "matplotlib==3.10.3",
     "numpy==2.3.0",
+    "eyemath-protos @ git+https://github.com/dagahan/EyeMath_protos.git",
 ]
 show_params_on_run = true
 # debug_mode parameter is declaring in .env file!
