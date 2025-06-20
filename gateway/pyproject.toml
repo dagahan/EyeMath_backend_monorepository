@@ -12,6 +12,7 @@ dependencies = [
     "grpcio-tools==1.72.1",
     "uvicorn==0.34.3",
     "strawberry-graphql==0.274.0",
+    "eyemath-protos @ git+https://github.com/dagahan/EyeMath_protos.git",
 ]
 show_params_on_run = true
 # debug_mode parameter is declaring in .env file!

@@ -1,22 +1,17 @@
 
-import gen.gateway_pb2 as gateway_pb
-import gen.gateway_pb2_grpc as gateway_rpc
-import gen.service_math_recognize_pb2 as math_recognize_pb
-import gen.service_math_recognize_pb2_grpc as math_recognize_rpc
-import gen.service_math_render_pb2 as math_render_pb
-import gen.service_math_render_pb2_grpc as math_render_rpc
-import gen.service_math_solve_pb2 as math_solve_pb
-import gen.service_math_solve_pb2_grpc as math_solve_rpc
+from stubs import gateway_pb2 as gateway_pb
+from stubs import gateway_pb2_grpc as gateway_rpc
+from stubs import service_math_recognize_pb2 as math_recognize_pb
+from stubs import service_math_recognize_pb2_grpc as math_recognize_rpc
+from stubs import service_math_render_pb2 as math_render_pb
+from stubs import service_math_render_pb2_grpc as math_render_rpc
+from stubs import service_math_solve_pb2 as math_solve_pb
+from stubs import service_math_solve_pb2_grpc as math_solve_rpc
 from src.core.utils import EnvTools
 from src.grpc.client.factory_grpc_client import GRPCClientFactory
 
 
 class RegistryGrpcMethods:
-    @classmethod
-    def pull_actual_grpc_methods(cls):
-        pass
-
-
     @classmethod
     def register_service_with_methods(cls):
         service_name="gateway"

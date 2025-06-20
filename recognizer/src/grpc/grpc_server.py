@@ -3,8 +3,8 @@ from concurrent import futures
 import colorama
 from loguru import logger
 
-import gen.service_math_recognize_pb2 as sevice_math_recognize_pb
-import gen.service_math_recognize_pb2_grpc as sevice_math_recognize_rpc
+from stubs import service_math_recognize_pb2 as sevice_math_recognize_pb
+from stubs import service_math_recognize_pb2_grpc as sevice_math_recognize_rpc
 import grpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI

@@ -4,8 +4,8 @@ from concurrent import futures
 import colorama
 from loguru import logger
 
-import gen.gateway_pb2 as gateway_pb
-import gen.gateway_pb2_grpc as gateway_rpc
+from stubs import gateway_pb2 as gateway_pb
+from stubs import gateway_pb2_grpc as gateway_rpc
 import grpc
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
