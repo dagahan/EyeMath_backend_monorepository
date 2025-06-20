@@ -1,0 +1,13 @@
+name: Check
+on: push
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name Install deps
+        run: uv sync
+      - name: Lint
+        run: ruff check . --fix
+        
