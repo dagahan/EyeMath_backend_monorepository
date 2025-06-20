@@ -9,6 +9,21 @@ on:
 jobs:
   docker-compose-test:
     runs-on: ubuntu-latest
+    env:
+      SYSTEM_TIME_ZONE: ${{ secrets.SYSTEM_TIME_ZONE }}
+      RUNNING_INSIDE_DOCKER: 1
+      DOCKER_CONTAINERS_RESTART: ${{ secrets.DOCKER_CONTAINERS_RESTART }}
+      # GATEWAY_HOST: ${{ secrets.GATEWAY_HOST }}
+      # GATEWAY_APP_PORT: ${{ secrets.GATEWAY_APP_PORT }}
+
+      # GATEWAY_GRPC_HOST: ${GATEWAY_GRPC_HOST}
+      # GATEWAY_GRPC_APP_PORT: ${GATEWAY_GRPC_APP_PORT}
+      # RECOGNIZER_HOST: ${RECOGNIZER_HOST}
+      # RECOGNIZER_APP_PORT: ${RECOGNIZER_APP_PORT}
+      # RENDERER_HOST: ${RENDERER_HOST}
+      # RENDERER_APP_PORT: ${RENDERER_APP_PORT}
+      # SOLVER_HOST: ${SOLVER_HOST}
+      # SOLVER_APP_PORT: ${SOLVER_APP_PORT}
 
     steps:
     - name: Checkout code
