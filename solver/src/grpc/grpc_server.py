@@ -1,19 +1,21 @@
 from concurrent import futures
+from typing import Any
 
 import colorama
 from loguru import logger
 
-# import gen.service_math_solve_pb2 as sevice_math_solve_pb
-from stubs import service_math_solve_pb2_grpc as sevice_math_solve_rpc
-from stubs import service_math_solve_pb2 as sevice_math_solve_pb
+from stubs import service_math_solve_pb2_grpc as service_math_solve_rpc
+from stubs import service_math_solve_pb2 as service_math_solve_pb
+
 import grpc
+from grpc_reflection.v1alpha import reflection
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools
 from src.services.math_solver import MathSolver
 
 
-class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
+class GRPCMathSolve(service_math_solve_rpc.GRPCMathSolve):
     def __init__(self) -> None:
         self.config = ConfigLoader()
         self.mathsolver = MathSolver()
@@ -23,7 +25,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
 
 
     @logger.catch
-    def meta_data_solve(self, request: sevice_math_solve_pb.meta_data_solve_request, context) -> sevice_math_solve_pb.meta_data_solve_response:
+    def meta_data_solve(self, request: service_math_solve_pb.meta_data_solve_request, context) -> service_math_solve_pb.meta_data_solve_response:
         '''
         Endpoint just returns metadata of service.
         Look at service's protobuf file to get more info.
@@ -31,7 +33,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
         self.log_api._logrequest(request, context)
 
         try:
-            response = sevice_math_solve_pb.meta_data_solve_response(
+            response = service_math_solve_pb.meta_data_solve_response(
                 name = self.project_name,
                 version = self.project_version,
             )
@@ -41,12 +43,12 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
-            return sevice_math_solve_pb.meta_data_solve_response(
+            return service_math_solve_pb.meta_data_solve_response(
                 )
         
 
     @logger.catch
-    def solve(self, request: sevice_math_solve_pb.solve_request, context) -> sevice_math_solve_pb.solve_response:
+    def solve(self, request: service_math_solve_pb.solve_request, context) -> service_math_solve_pb.solve_response:
         '''
         Endpoint returns a result of solving latex expression.
         Look at service's protobuf file to get more info.
@@ -60,7 +62,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
                 request.render_latex_expressions,
                 )
             
-            response = sevice_math_solve_pb.solve_response(
+            response = service_math_solve_pb.solve_response(
                 results=solver_answer['results'],
                 renders=solver_answer['renders'],
                 solving_steps=solver_answer['solving_steps'],
@@ -71,7 +73,7 @@ class GRPCMathSolve(sevice_math_solve_rpc.GRPCMathSolve):
 
         except Exception as error:
             logger.error(f"Solve error: {error}")
-            return sevice_math_solve_pb.solve_response(
+            return service_math_solve_pb.solve_response(
                 results=None,
                 solving_steps=None,
                 )
@@ -89,9 +91,27 @@ class GRPCServerRunner:
 
 
     def run_grpc_server(self) -> None:
-        sevice_math_solve_rpc.add_GRPCMathSolveServicer_to_server(GRPCMathSolve(), self.grpc_server)
+        service_math_solve_rpc.add_GRPCMathSolveServicer_to_server(GRPCMathSolve(), self.grpc_server)
         self.grpc_server.add_insecure_port(self.addr)
+        if EnvTools.load_env_var("SOLVER_GRPC_REFLECTIONS") == "1":
+            self.enable_reflections_grpc_server(service_math_solve_pb, self.grpc_server)
         logger.info(f"{colorama.Fore.GREEN}gRPC server of {self.grpc_math_solve.project_name} has been started on {colorama.Fore.YELLOW}({self.addr})")
         self.grpc_server.start()
         self.grpc_server.wait_for_termination()
+
+
+    def enable_reflections_grpc_server(self, stub: Any, grpc_server: grpc.server) -> None:
+        '''
+        Enable gRPC reflection for the service
+        '''
+        try:
+            service_name = stub.DESCRIPTOR.services_by_name['GRPCMathSolve'].full_name
+            SERVICE_NAMES = (
+                service_name,
+                reflection.SERVICE_NAME,
+            )
+            reflection.enable_server_reflection(SERVICE_NAMES, grpc_server)
+            logger.warning(f"Enabled reflections for the grpc server: '{service_name}'")
+        except Exception as ex:
+            logger.critical(f"Unable to enable reflections for the {grpc_server} with stub {stub}: {ex}")
 

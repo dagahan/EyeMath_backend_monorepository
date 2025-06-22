@@ -1,4 +1,5 @@
 from concurrent import futures
+from typing import Any
 
 import colorama
 from loguru import logger
@@ -6,6 +7,7 @@ from loguru import logger
 from stubs import service_math_recognize_pb2 as sevice_math_recognize_pb
 from stubs import service_math_recognize_pb2_grpc as sevice_math_recognize_rpc
 import grpc
+from grpc_reflection.v1alpha import reflection
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools
@@ -114,7 +116,24 @@ class GRPCServerRunner:
     def run_grpc_server(self) -> None:
         sevice_math_recognize_rpc.add_GRPCMathRecognizeServicer_to_server(GRPCMathRecognize(), self.grpc_server)
         self.grpc_server.add_insecure_port(self.addr)
+        if EnvTools.load_env_var("RECOGNIZER_GRPC_REFLECTIONS") == "1":
+            self.enable_reflections_grpc_server(sevice_math_recognize_pb, self.grpc_server)
         logger.info(f"{colorama.Fore.GREEN}gRPC server of {self.grpc_math_recognize.project_name} has been started on {colorama.Fore.YELLOW}({self.addr})")
         self.grpc_server.start()
         self.grpc_server.wait_for_termination()
 
+
+    def enable_reflections_grpc_server(self, stub: Any, grpc_server: grpc.server) -> None:
+        '''
+        Enable gRPC reflection for the service
+        '''
+        try:
+            service_name = stub.DESCRIPTOR.services_by_name['GRPCMathRecognize'].full_name
+            SERVICE_NAMES = (
+                service_name,
+                reflection.SERVICE_NAME,
+            )
+            reflection.enable_server_reflection(SERVICE_NAMES, grpc_server)
+            logger.warning(f"Enabled reflections for the grpc server: '{service_name}'")
+        except Exception as ex:
+            logger.critical(f"Unable to enable reflections for the {grpc_server} with stub {stub}: {ex}")
