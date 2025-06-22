@@ -204,6 +204,7 @@ go.work.sum
 **/.ruff_cache
 **/recived_images
 **/rendered_images
+**/certs/** */
 
 
 

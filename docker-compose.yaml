@@ -8,6 +8,8 @@ x-env: &env_vars
   GATEWAY_APP_PORT: ${GATEWAY_APP_PORT}
   GATEWAY_GRPC_HOST: ${GATEWAY_GRPC_HOST}
   GATEWAY_GRPC_APP_PORT: ${GATEWAY_GRPC_APP_PORT}
+  AUTHORIZER_HOST: ${AUTHORIZER_HOST}
+  AUTHORIZER_APP_PORT: ${AUTHORIZER_APP_PORT}
   RECOGNIZER_HOST: ${RECOGNIZER_HOST}
   RECOGNIZER_APP_PORT: ${RECOGNIZER_APP_PORT}
   RENDERER_HOST: ${RENDERER_HOST}
@@ -23,6 +25,17 @@ services:
     environment: *env_vars
     ports:
       - "${GATEWAY_APP_PORT}:${GATEWAY_APP_PORT}"
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
+
+
+  authorizer:
+    build: authorizer
+    container_name: authorizer
+    environment: *env_vars
+    ports:
+      - "${AUTHORIZER_APP_PORT}:${AUTHORIZER_APP_PORT}"
     networks:
       - eye_math_network
     restart: ${DOCKER_CONTAINERS_RESTART}

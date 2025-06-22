@@ -1,0 +1,18 @@
+syntax = "proto3";
+package authorizer;
+option go_package = "github.com/dagahan/EyeMath_protos/go/authorizer;authorizer";
+
+
+
+message meta_data_authorizer_request {
+}
+
+message meta_data_authorizer_response {
+  string name = 1;
+  string version = 2;
+}
+
+
+service GRPCAuthorizer {
+    rpc meta_data_authorizer (meta_data_authorizer_request) returns (meta_data_authorizer_response);
+}
