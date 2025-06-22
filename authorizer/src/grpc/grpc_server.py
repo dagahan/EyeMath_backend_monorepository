@@ -5,27 +5,29 @@ from typing import Any
 import colorama
 from loguru import logger
 
-from stubs import gateway_pb2 as gateway_pb
-from stubs import gateway_pb2_grpc as gateway_rpc
+from stubs import authorizer_pb2 as authorizer_pb
+from stubs import authorizer_pb2_grpc as authorizer_rpc
 import grpc
 from grpc_reflection.v1alpha import reflection
 
+from src.services.authorizer import Authorizer
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools
 
 
-class GRPCGateway(gateway_rpc.ExternalApiGateway):
+class GRPCAuthorizer(authorizer_rpc.GRPCAuthorizer):
     def __init__(self) -> None:
         self.config = ConfigLoader()
         self.env_tools = EnvTools()
         self.log_api = LogAPI()
+        self.authorizer = Authorizer()
         self.project_name = self.config.get("project", "name")
         self.project_version = self.config.get("project", "version")
 
 
     @logger.catch
-    def is_admin(self, request: gateway_pb.is_admin_request, context) -> gateway_pb.is_admin_response:
+    def meta_data(self, request: authorizer_pb.meta_data_authorizer_request, context) -> authorizer_pb.meta_data_authorizer_response:
         '''
         This endpoint just returns metadata of service.
         Look at service's protobuf file to get more info.
@@ -33,8 +35,9 @@ class GRPCGateway(gateway_rpc.ExternalApiGateway):
         self.log_api._logrequest(request, context)
 
         try:
-            response = gateway_pb.is_admin_response(
-                is_admin = True,
+            response = authorizer_pb.meta_data_authorizer_response(
+                name = self.project_name,
+                version = self.project_version,
             )
 
             self.log_api._logresponse(response, context)
@@ -42,13 +45,41 @@ class GRPCGateway(gateway_rpc.ExternalApiGateway):
 
         except Exception as error:
             logger.error(f"Checking of metadata error: {error}")
-            return gateway_pb.is_admin_response()
+            return authorizer_pb.meta_data_authorizer_response()
+        
+
+    @logger.catch
+    def register(self, request: authorizer_pb.register_request, context) -> authorizer_pb.register_response:
+        '''
+        This endpoint just returns metadata of service.
+        Look at service's protobuf file to get more info.
+        '''
+        self.log_api._logrequest(request, context)
+
+        try:
+            authorizer_response = self.authorizer.authorize_user(
+                request.user_name,
+                request.password,
+                request.email,
+                )
+            
+            response = authorizer_pb.register_response(
+                result=authorizer_response['result'],
+                description=authorizer_response['description'],
+            )
+
+            self.log_api._logresponse(response, context)
+            return response
+
+        except Exception as error:
+            logger.error(f"Register user error: {error}")
+            return authorizer_pb.register_response()
 
 
 class GRPCServerRunner:
     def __init__(self) -> None:
         self.config = ConfigLoader()
-        self.grpc_math_recognize = GRPCGateway()
+        self.grpc_authorizer = GRPCAuthorizer()
         self.max_workers = self.config.get("grpc_server", "max_workers")
         self.host = EnvTools.load_env_var("AUTHORIZER_HOST")
         self.port = EnvTools.load_env_var("AUTHORIZER_APP_PORT")
@@ -58,11 +89,11 @@ class GRPCServerRunner:
 
 
     async def run_grpc_server(self) -> None:
-        gateway_rpc.add_ExternalApiGatewayServicer_to_server(GRPCGateway(), self.grpc_server)
+        authorizer_rpc.add_GRPCAuthorizerServicer_to_server(GRPCAuthorizer(), self.grpc_server)
         self.grpc_server.add_insecure_port(self.addr)
-        logger.info(f"{colorama.Fore.GREEN}gRPC server of {self.grpc_math_recognize.project_name} has been started on {colorama.Fore.YELLOW}({self.addr})")
-        if EnvTools.load_env_var("GATEWAY_GRPC_REFLECTIONS") == "1":
-            self.enable_reflections_grpc_server(gateway_pb, self.grpc_server)
+        logger.info(f"{colorama.Fore.GREEN}gRPC server of {self.grpc_authorizer.project_name} has been started on {colorama.Fore.YELLOW}({self.addr})")
+        if EnvTools.load_env_var("AUTHORIZER_REFLECTIONS") == "1":
+            self.enable_reflections_grpc_server(authorizer_pb, self.grpc_server)
         self.grpc_server.start()
 
         try:
@@ -78,7 +109,7 @@ class GRPCServerRunner:
         Enable gRPC reflection for the service
         '''
         try:
-            service_name = stub.DESCRIPTOR.services_by_name['ExternalApiGateway'].full_name
+            service_name = stub.DESCRIPTOR.services_by_name['GRPCAuthorizer'].full_name
             SERVICE_NAMES = (
                 service_name,
                 reflection.SERVICE_NAME,

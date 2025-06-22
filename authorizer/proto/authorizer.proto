@@ -13,6 +13,19 @@ message meta_data_authorizer_response {
 }
 
 
+message register_request {
+  string user_name = 1;
+  string password = 2;
+  string email = 3;
+}
+
+message register_response {
+  bool result = 1;
+  string description = 2;
+}
+
+
 service GRPCAuthorizer {
     rpc meta_data_authorizer (meta_data_authorizer_request) returns (meta_data_authorizer_response);
+    rpc register (register_request) returns (register_response);
 }

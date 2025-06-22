@@ -11,6 +11,8 @@ dependencies = [
     "grpcio-tools==1.72.1",
     "grpcio-reflection==1.72.1",
     "pyjwt[crypto]",
+    "psycopg2-binary==2.9.10",
+    "bcrypt==4.3.0",
     "eyemath-protos @ git+https://github.com/dagahan/EyeMath_protos.git",
 ]
 show_params_on_run = true
@@ -25,6 +27,11 @@ show_params_on_run = true
 extend-select = ["W", "N", "R", "I"]
 # Letters means included rules classes from PEP8
 ignore = ["W293"]
+
+
+[jwt]
+private_key_path = "certs/jwt-private.pem"
+public_key_path = "certs/jwt-public.pem"
 
 
 [grpc_server]

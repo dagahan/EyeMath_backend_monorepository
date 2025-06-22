@@ -1,0 +1,39 @@
+syntax = "proto3";
+package mathrecognize;
+option go_package = "github.com/dagahan/EyeMath_protos/go/mathrecognize;mathrecognize";
+
+
+
+message meta_data_recognize_request {
+}
+
+message meta_data_recognize_response {
+  string name = 1;
+  string version = 2;
+}
+
+
+message recognize_request {
+  bool normalize_for_sympy = 1;
+  string image = 2;
+}
+
+message recognize_response {
+  string result = 1; 
+}
+
+
+message normalize_for_sympy_request {
+  string latex_expression = 1; 
+}
+
+message normalize_for_sympy_response {
+  string result = 1; 
+}
+
+
+service GRPCMathRecognize {
+    rpc meta_data_recognize (meta_data_recognize_request) returns (meta_data_recognize_response);
+    rpc recognize (recognize_request) returns (recognize_response);
+    rpc normalize_for_sympy (normalize_for_sympy_request) returns (normalize_for_sympy_response);
+}

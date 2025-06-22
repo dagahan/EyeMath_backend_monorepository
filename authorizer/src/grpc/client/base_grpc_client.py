@@ -46,6 +46,7 @@ class GRPCClient:
         return self._stub
     
     
+    @logger.catch
     def call_method(self, method_name: str, **kwargs) -> Any:
         '''
         calling the rpc method with arguments on specified gRPC server.
