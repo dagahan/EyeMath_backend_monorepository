@@ -7,7 +7,12 @@ RUN apt-get update && \
       protobuf-compiler \
       git \
       curl \
-      ca-certificates && \
+      ca-certificates \
+      libgl1 \
+      libglib2.0-0 \
+      libsm6 \
+      libxrender1 \
+      libxext6 && \
     rm -rf /var/lib/apt/lists/*
 
 # Creating of appuser and group.
