@@ -64,7 +64,23 @@ class ExternalGatewayServer:
             if not self._stop_requested:
                 logger.info(f"{colorama.Fore.YELLOW}Stopping FastAPI server gracefully...")
                 await self.stop()
-                
+
+
+    # def enable_introspection_graphql_server(self, grpc_server: grpc.server) -> None:
+    #     '''
+    #     Enable gRPC reflection for the service
+    #     '''
+    #     try:
+    #         service_name = stub.DESCRIPTOR.services_by_name['ExternalApiGateway'].full_name
+    #         SERVICE_NAMES = (
+    #             service_name,
+    #             reflection.SERVICE_NAME,
+    #         )
+    #         reflection.enable_server_reflection(SERVICE_NAMES, grpc_server)
+    #         logger.warning(f"Enabled reflections for the grpc server: '{service_name}'")
+    #     except Exception as ex:
+    #         logger.critical(f"Unable to enable reflections for the {grpc_server} with stub {stub}: {ex}")
+
 
     async def stop(self):
         self._stop_requested = True

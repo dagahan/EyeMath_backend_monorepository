@@ -1,12 +1,8 @@
 import asyncio
 import sys
-import os
 
 import colorama
 from loguru import logger
-
-GEN_PATH = os.path.join(os.path.dirname(__file__), 'gen')
-sys.path.insert(0, GEN_PATH)  # Fix of relative import in generated stubs
 
 from src.core.config import ConfigLoader
 from src.core.logging import InterceptHandler, LogSetup
@@ -53,13 +49,11 @@ class Service:
             grpc_task = asyncio.create_task(self.grpc_server_runner.run_grpc_server(), name="gRPC")
             pending = {gateway_task, grpc_task}
             
-            # Ожидаем завершения любой из задач
             done, pending = await asyncio.wait(
                 pending,
                 return_when=asyncio.FIRST_COMPLETED
             )
             
-            # Логируем причину остановки
             for task in done:
                 if task.exception():
                     logger.error(f"{colorama.Fore.RED}{task.get_name()} server crashed: {task.exception()}")
