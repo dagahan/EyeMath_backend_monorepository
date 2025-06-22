@@ -51,6 +51,7 @@ class RegistryGrpcMethods:
         method_map={
                 "meta_data_authorizer": authorizer_pb.meta_data_authorizer_request,
                 "register": authorizer_pb.register_request,
+                "authorize": authorizer_pb.authorize_request,
             }
         
         GRPCClientFactory.register_service(

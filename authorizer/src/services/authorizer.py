@@ -1,6 +1,7 @@
 import colorama
 from loguru import logger
 import psycopg2
+import datetime
 import bcrypt
 import re
 from psycopg2 import sql
@@ -10,6 +11,7 @@ from src.core.config import ConfigLoader
 from src.services.jwt_parser import JwtParser
 from src.core.utils import EnvTools
 from src.core.utils import FileSystemTools
+from typing import Any, Optional, Dict
 
 
 class Authorizer:
@@ -65,7 +67,7 @@ class Authorizer:
         return hashed_password.decode('utf-8')
     
     
-    def authorize_user(self, username: str, password: str, email: str) -> dict:
+    def register_user(self, username: str, password: str, email: str) -> dict:
         """Регистрация нового пользователя"""
         try:
             # Валидация входных данных
@@ -133,3 +135,78 @@ class Authorizer:
                 "result": False,
                 "description": "Внутренняя ошибка сервера"
             }
+        
+
+    def authorize_user(self, username: str, password: str) -> Dict[str, Any]:
+        """Аутентификация пользователя и выдача JWT токена"""
+        try:
+            with self._get_db_connection() as conn:
+                with conn.cursor() as cursor:
+                    # Поиск пользователя по имени
+                    cursor.execute(
+                        sql.SQL("""
+                            SELECT id, username, password_hash 
+                            FROM users 
+                            WHERE username = %s
+                        """), 
+                        (username,)
+                    )
+                    user = cursor.fetchone()
+                    
+                    if not user:
+                        logger.warning(f"Пользователь не найден: {username}")
+                        return {
+                            "result": False,
+                            "description": "Неверное имя пользователя или пароль"
+                        }
+                    
+                    # Проверка пароля
+                    if not self._verify_password(password, user["password_hash"]):
+                        logger.warning(f"Неверный пароль для пользователя: {username}")
+                        return {
+                            "result": False,
+                            "description": "Неверное имя пользователя или пароль"
+                        }
+                    
+                    # Генерация JWT токена
+                    jwt_token = self._generate_jwt_token(user["id"], user["username"])
+                    
+                    logger.info(f"Успешная аутентификация: {username}")
+                    return {
+                        "result": True,
+                        "jwt_token": jwt_token,
+                        "user_id": user["id"],
+                        "username": user["username"]
+                    }
+        
+        except psycopg2.Error as e:
+            logger.error(f"Ошибка БД при аутентификации: {e}")
+            return {"result": False, "description": f"Ошибка базы данных: {e.pgerror}"}
+        
+        except Exception as e:
+            logger.critical(f"Ошибка аутентификации: {e}")
+            return {"result": False, "description": "Внутренняя ошибка сервера"}
+    
+
+    def _verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        """Проверка пароля против хеша"""
+        return bcrypt.checkpw(
+            plain_password.encode('utf-8'),
+            hashed_password.encode('utf-8')
+        )
+    
+    
+    def _generate_jwt_token(self, user_id: int, username: str) -> str:
+        """Генерация JWT токена"""
+        # Время жизни токена (30 минут)
+        expires_delta = datetime.timedelta(minutes=30)
+        expire = datetime.datetime.utcnow() + expires_delta
+        
+        payload = {
+            "sub": str(user_id),       # Subject (идентификатор пользователя)
+            "username": username,      # Имя пользователя
+            "exp": expire,             # Время истечения
+            "iat": datetime.datetime.utcnow()  # Время создания
+        }
+        
+        return self.jwt_parser.encode_jwt(payload)

@@ -57,7 +57,7 @@ class GRPCAuthorizer(authorizer_rpc.GRPCAuthorizer):
         self.log_api._logrequest(request, context)
 
         try:
-            authorizer_response = self.authorizer.authorize_user(
+            authorizer_response = self.authorizer.register_user(
                 request.user_name,
                 request.password,
                 request.email,
@@ -74,6 +74,33 @@ class GRPCAuthorizer(authorizer_rpc.GRPCAuthorizer):
         except Exception as error:
             logger.error(f"Register user error: {error}")
             return authorizer_pb.register_response()
+        
+
+    @logger.catch
+    def authorize(self, request: authorizer_pb.authorize_request, context) -> authorizer_pb.authorize_response:
+        '''
+        This endpoint just returns metadata of service.
+        Look at service's protobuf file to get more info.
+        '''
+        self.log_api._logrequest(request, context)
+
+        try:
+            authorizer_response = self.authorizer.authorize_user(
+                request.user_name,
+                request.password,
+                )
+            
+            response = authorizer_pb.authorize_response(
+                result=authorizer_response['result'],
+                token=authorizer_response['token'],
+            )
+
+            self.log_api._logresponse(response, context)
+            return response
+
+        except Exception as error:
+            logger.error(f"Authorize user error: {error}")
+            return authorizer_pb.authorize_response()
 
 
 class GRPCServerRunner:

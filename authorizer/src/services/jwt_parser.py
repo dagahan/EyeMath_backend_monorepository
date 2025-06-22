@@ -1,9 +1,11 @@
 import colorama
 from loguru import logger
 import jwt
+import bcrypt
 from typing import Any
 
 from src.core.config import ConfigLoader
+from typing import Any, Optional, Dict
 
 
 class JwtParser:
@@ -14,18 +16,57 @@ class JwtParser:
         self.algoritm = "RS256"
 
 
-    def encode_jwt(self, payload: dict) -> Any:
-        return jwt.encode(
-                payload,
-                private_key=self.jwt_private.read_text(),
-                algorithm=self.algoritm
-            )
+    def _read_key(self, key_type: str) -> str:
+        """Чтение ключа из файла"""
+        path = self.config.get("jwt", key_type)
+        try:
+            with open(path, "r") as key_file:
+                return key_file.read()
+        except Exception as e:
+            logger.critical(f"Ошибка чтения JWT ключа: {e}")
+            raise
     
 
-    def decode_jwt(self, token: str | bytes) -> Any:
-        return jwt.decode(
+    def encode_jwt(self, payload: dict) -> str:
+        """Кодирование JWT токена"""
+        return jwt.encode(
+            payload,
+            self.private_key,
+            algorithm=self.algorithm
+        )
+    
+
+    def decode_jwt(self, token: str) -> Dict[str, Any]:
+        """Декодирование и верификация JWT токена"""
+        try:
+            return jwt.decode(
                 token,
-                public_key=self.jwt_public.read_text(),
-                algorithms=[self.algoritm]
+                self.public_key,
+                algorithms=[self.algorithm]
             )
+        except jwt.ExpiredSignatureError:
+            logger.warning("JWT токен истек")
+            raise
+        except jwt.InvalidTokenError as e:
+            logger.warning(f"Невалидный JWT токен: {e}")
+            raise
+    
+
+    def verify_jwt(self, token: str) -> Dict[str, Any]:
+        """Проверка JWT токена с обработкой ошибок"""
+        try:
+            payload = self.decode_jwt(token)
+            return {
+                "valid": True,
+                "user_id": int(payload["sub"]),
+                "username": payload["username"],
+                "expires": payload["exp"]
+            }
+        except jwt.ExpiredSignatureError:
+            return {"valid": False, "reason": "Token expired"}
+        except jwt.InvalidTokenError:
+            return {"valid": False, "reason": "Invalid token"}
+        except Exception as e:
+            logger.error(f"Ошибка верификации токена: {e}")
+            return {"valid": False, "reason": "Verification error"}
     

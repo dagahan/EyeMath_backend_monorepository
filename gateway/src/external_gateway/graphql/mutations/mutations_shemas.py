@@ -6,3 +6,9 @@ import strawberry
 class RegisterUserGraphQLResponse:
     result: bool
     description: str
+
+
+@strawberry.type
+class AuthorizeUserGraphQLResponse:
+    result: bool
+    token: str

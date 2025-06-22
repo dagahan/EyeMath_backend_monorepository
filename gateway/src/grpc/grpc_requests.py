@@ -51,3 +51,18 @@ class GrpcRequests:
             return response
         except Exception as ex:
             logger.critical(f"Cannot register user: {ex}")
+
+    
+    @staticmethod
+    def authorize(user_name: str,
+                password: str) -> List:
+        try:
+            response = GRPCClientFactory.rpc_call(
+                service_name="authorizer",
+                method_name="authorize",
+                user_name=user_name,
+                password=password,
+            )
+            return response
+        except Exception as ex:
+            logger.critical(f"Cannot authorize user: {ex}")

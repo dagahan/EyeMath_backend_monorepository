@@ -14,11 +14,22 @@ class Mutation:
     password: str,
     email: str,
     ) -> RegisterUserGraphQLResponse:
-        
-        logger.debug(f"{user_name}, {password}, {email}")
-        
         response = GrpcRequests.register(user_name, password, email)
         return RegisterUserGraphQLResponse(
             result=response.result,
             description=response.description,
         )
+    
+
+    @strawberry.mutation(description="Authorize eye.math account for user.")
+    def authorize(
+    self,
+    user_name: str,
+    password: str,
+    ) -> AuthorizeUserGraphQLResponse:
+        response = GrpcRequests.authorize(user_name, password)
+        return AuthorizeUserGraphQLResponse(
+            result=response.result,
+            token=response.token,
+        )
+    
