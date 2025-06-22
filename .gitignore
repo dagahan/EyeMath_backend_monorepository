@@ -195,7 +195,6 @@ go.work
 go.work.sum
 
 # Directories
-**gen/
 **debug/
 **tmp/
 **/uv.lock

@@ -1,5 +1,6 @@
 import asyncio
 from concurrent import futures
+from typing import Any
 
 import colorama
 from loguru import logger
@@ -7,6 +8,8 @@ from loguru import logger
 from stubs import gateway_pb2 as gateway_pb
 from stubs import gateway_pb2_grpc as gateway_rpc
 import grpc
+from grpc_reflection.v1alpha import reflection
+
 from src.core.config import ConfigLoader
 from src.core.logging import LogAPI
 from src.core.utils import EnvTools
@@ -58,6 +61,8 @@ class GRPCServerRunner:
         gateway_rpc.add_ExternalApiGatewayServicer_to_server(GRPCGateway(), self.grpc_server)
         self.grpc_server.add_insecure_port(self.addr)
         logger.info(f"{colorama.Fore.GREEN}gRPC server of {self.grpc_math_recognize.project_name} has been started on {colorama.Fore.YELLOW}({self.addr})")
+        if EnvTools.load_env_var("GATEWAY_GRPC_REFLECTIONS") == "1":
+            self.enable_reflections_grpc_server(gateway_pb, self.grpc_server)
         self.grpc_server.start()
 
         try:
@@ -67,6 +72,22 @@ class GRPCServerRunner:
             await self._graceful_stop()
             logger.info(f"{colorama.Fore.GREEN}gRPC server stopped")
 
+        
+    def enable_reflections_grpc_server(self, stub: Any, grpc_server: grpc.server) -> None:
+        '''
+        Enable gRPC reflection for the service
+        '''
+        try:
+            service_name = stub.DESCRIPTOR.services_by_name['ExternalApiGateway'].full_name
+            SERVICE_NAMES = (
+                service_name,
+                reflection.SERVICE_NAME,
+            )
+            reflection.enable_server_reflection(SERVICE_NAMES, grpc_server)
+            logger.warning(f"Enabled reflections for the grpc server: '{service_name}'")
+        except Exception as ex:
+            logger.critical(f"Unable to enable reflections for the {grpc_server} with stub {stub}: {ex}")
+        
 
     async def _graceful_stop(self):
         '''
