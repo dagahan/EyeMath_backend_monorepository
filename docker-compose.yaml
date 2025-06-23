@@ -93,7 +93,7 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./postgres/init-scripts:/docker-entrypoint-initdb.d
       - ./postgres-data:/var/lib/postgresql/data
     command: 
       - bash
