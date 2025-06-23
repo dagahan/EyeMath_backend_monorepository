@@ -7,6 +7,8 @@ from stubs import service_math_render_pb2 as math_render_pb
 from stubs import service_math_render_pb2_grpc as math_render_rpc
 from stubs import service_math_solve_pb2 as math_solve_pb
 from stubs import service_math_solve_pb2_grpc as math_solve_rpc
+from stubs import authorizer_pb2 as authorizer_pb
+from stubs import authorizer_pb2_grpc as authorizer_rpc
 from src.core.utils import EnvTools
 from src.grpc.client.factory_grpc_client import GRPCClientFactory
 
@@ -29,6 +31,25 @@ class RegistryGrpcMethods:
                 "is_admin": gateway_pb.is_admin_request,
                 "login": gateway_pb.login_request,
                 "register": gateway_pb.register_request
+            }
+        
+        GRPCClientFactory.register_service(
+            service_name=service_name,
+            host=host,
+            port=port,
+            stub_class=stub_class,
+            method_map=method_map
+        )
+
+
+        service_name="authorizer"
+        host=EnvTools.load_env_var("AUTHORIZER_HOST")
+        port=EnvTools.load_env_var("AUTHORIZER_APP_PORT")
+        if EnvTools.is_running_inside_docker() and cls._is_server_local(host):
+            host=service_name
+        stub_class=authorizer_rpc.GRPCAuthorizer
+        method_map={
+                "meta_data_authorizer": authorizer_pb.meta_data_authorizer_request,
             }
         
         GRPCClientFactory.register_service(
