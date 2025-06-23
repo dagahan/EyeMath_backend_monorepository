@@ -5,9 +5,13 @@ import uvicorn
 from fastapi import FastAPI
 from loguru import logger
 
+from strawberry.fastapi import GraphQLRouter
+from strawberry import Schema
+
 from src.core.config import ConfigLoader
 from src.core.utils import EnvTools
-from src.external_gateway.graphql.schema import Shema
+from src.external_gateway.graphql.queries.queries import Query
+from src.external_gateway.graphql.mutations.mutations import Mutation
 
 
 class ExternalGatewayServer:
@@ -16,8 +20,12 @@ class ExternalGatewayServer:
         self.gateway_app = FastAPI()
         self.host = EnvTools.load_env_var("GATEWAY_HOST")
         self.port = EnvTools.load_env_var("GATEWAY_APP_PORT")
-        self.shema = Shema()
-        self.gateway_app.include_router(self.shema.create_graphql_router(), prefix="/graphql")
+        self.schema = Schema(
+            query=Query,
+            mutation=Mutation
+        )
+        graphql_router = GraphQLRouter(self.schema)
+        self.gateway_app.include_router(graphql_router, prefix="/graphql")
         self.server = None
         self._stop_requested = False
 
