@@ -4,7 +4,7 @@ EyeMath is a mobile app that helps users solve math equations. Instead of enteri
 
 EyeMath backend use:
 * Python 3.13.2 with UV (package manager), Ruff (lint and format tool) and TY (static typing tool)
-* PosgreSQL
+* PostgreSQL
 * Redis
 * PgAdmin
 * Docker

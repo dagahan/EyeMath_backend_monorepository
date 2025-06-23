@@ -7,20 +7,25 @@ from stubs import service_math_render_pb2 as math_render_pb
 from stubs import service_math_render_pb2_grpc as math_render_rpc
 from stubs import service_math_solve_pb2 as math_solve_pb
 from stubs import service_math_solve_pb2_grpc as math_solve_rpc
+from stubs import authorizer_pb2 as authorizer_pb
+from stubs import authorizer_pb2_grpc as authorizer_rpc
 from src.core.utils import EnvTools
 from src.grpc.client.factory_grpc_client import GRPCClientFactory
 
 
 class RegistryGrpcMethods:
     @classmethod
+    def _is_server_local(cls, server_adress: str) -> bool:
+        return server_adress == "0.0.0.0"
+
+
+    @classmethod
     def register_service_with_methods(cls):
         service_name="gateway"
-        if EnvTools.is_running_inside_docker():
+        host=EnvTools.load_env_var("GATEWAY_GRPC_HOST")
+        port=EnvTools.load_env_var("GATEWAY_GRPC_APP_PORT")
+        if EnvTools.is_running_inside_docker() and cls._is_server_local(host):
             host=service_name
-            port=EnvTools.load_env_var("GATEWAY_GRPC_APP_PORT")
-        else:
-            host=EnvTools.load_env_var("GATEWAY_GRPC_HOST")
-            port=EnvTools.load_env_var("GATEWAY_GRPC_APP_PORT")
         stub_class=gateway_rpc.ExternalApiGatewayStub
         method_map={
                 "is_admin": gateway_pb.is_admin_request,
@@ -37,13 +42,30 @@ class RegistryGrpcMethods:
         )
 
 
-        service_name="solver"
-        if EnvTools.is_running_inside_docker():
+        service_name="authorizer"
+        host=EnvTools.load_env_var("AUTHORIZER_HOST")
+        port=EnvTools.load_env_var("AUTHORIZER_APP_PORT")
+        if EnvTools.is_running_inside_docker() and cls._is_server_local(host):
             host=service_name
-            port=EnvTools.load_env_var("SOLVER_APP_PORT")
-        else:
-            host=EnvTools.load_env_var("SOLVER_HOST")
-            port=EnvTools.load_env_var("SOLVER_APP_PORT")
+        stub_class=authorizer_rpc.GRPCAuthorizer
+        method_map={
+                "meta_data_authorizer": authorizer_pb.meta_data_authorizer_request,
+            }
+        
+        GRPCClientFactory.register_service(
+            service_name=service_name,
+            host=host,
+            port=port,
+            stub_class=stub_class,
+            method_map=method_map
+        )
+
+
+        service_name="solver"
+        host=EnvTools.load_env_var("SOLVER_HOST")
+        port=EnvTools.load_env_var("SOLVER_APP_PORT")
+        if EnvTools.is_running_inside_docker() and cls._is_server_local(host):
+            host=service_name
         stub_class=math_solve_rpc.GRPCMathSolveStub
         method_map={
                 "meta_data_solve": math_solve_pb.meta_data_solve_request,
@@ -60,12 +82,10 @@ class RegistryGrpcMethods:
 
 
         service_name="recognizer"
-        if EnvTools.is_running_inside_docker():
+        host=EnvTools.load_env_var("RECOGNIZER_HOST")
+        port=EnvTools.load_env_var("RECOGNIZER_APP_PORT")
+        if EnvTools.is_running_inside_docker() and cls._is_server_local(host):
             host=service_name
-            port=EnvTools.load_env_var("RECOGNIZER_APP_PORT")
-        else:
-            host=EnvTools.load_env_var("RECOGNIZER_HOST")
-            port=EnvTools.load_env_var("RECOGNIZER_APP_PORT")
         stub_class=math_recognize_rpc.GRPCMathRecognizeStub
         method_map={
                 "meta_data_recognize": math_recognize_pb.meta_data_recognize_request,
@@ -83,12 +103,10 @@ class RegistryGrpcMethods:
 
 
         service_name="renderer"
-        if EnvTools.is_running_inside_docker():
+        host=EnvTools.load_env_var("RENDERER_HOST")
+        port=EnvTools.load_env_var("RENDERER_APP_PORT")
+        if EnvTools.is_running_inside_docker() and cls._is_server_local(host):
             host=service_name
-            port=EnvTools.load_env_var("RENDERER_APP_PORT")
-        else:
-            host=EnvTools.load_env_var("RENDERER_HOST")
-            port=EnvTools.load_env_var("RENDERER_APP_PORT")
         stub_class=math_render_rpc.GRPCMathRenderStub
         method_map={
                 "meta_data_render": math_render_pb.meta_data_render_request,
