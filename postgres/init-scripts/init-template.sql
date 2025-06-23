@@ -1,6 +1,7 @@
 SELECT 'CREATE DATABASE "${POSTGRES_DB}"'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = '${POSTGRES_DB}')\gexec
 
+-- TODO: Need to run this script every time of reloading postgres. Not only for first setup, because we'l create new database structure in future.
 
 \c "${POSTGRES_DB}"
 

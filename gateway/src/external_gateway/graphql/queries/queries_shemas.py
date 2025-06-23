@@ -1,7 +1,6 @@
 from typing import List
 import strawberry
 
-
 @strawberry.type
 class MathSolveGraphQLResponse:
     results: List[str]
@@ -12,8 +11,3 @@ class MathSolveGraphQLResponse:
 @strawberry.type
 class MathRecognizeGraphQLResponse:
     result: str
-
-
-@strawberry.type
-class ValidateJwtGraphQLResponse:
-    result: bool
