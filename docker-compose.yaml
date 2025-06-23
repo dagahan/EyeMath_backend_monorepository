@@ -46,37 +46,37 @@ services:
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  # recognizer:
-  #   build: recognizer
-  #   container_name: recognizer
-  #   environment: *env_vars
-  #   ports:
-  #     - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
-  #   networks:
-  #     - eye_math_network
-  #   restart: ${DOCKER_CONTAINERS_RESTART}
+  recognizer:
+    build: recognizer
+    container_name: recognizer
+    environment: *env_vars
+    ports:
+      - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  # renderer:
-  #   build: renderer
-  #   container_name: renderer
-  #   environment: *env_vars
-  #   ports:
-  #     - "${RENDERER_APP_PORT}:${RENDERER_APP_PORT}"
-  #   networks:
-  #     - eye_math_network
-  #   restart: ${DOCKER_CONTAINERS_RESTART}
+  renderer:
+    build: renderer
+    container_name: renderer
+    environment: *env_vars
+    ports:
+      - "${RENDERER_APP_PORT}:${RENDERER_APP_PORT}"
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  # solver:
-  #   build: solver
-  #   container_name: solver
-  #   environment: *env_vars
-  #   ports:
-  #     - "${SOLVER_APP_PORT}:${SOLVER_APP_PORT}"
-  #   networks:
-  #     - eye_math_network
-  #   restart: ${DOCKER_CONTAINERS_RESTART}
+  solver:
+    build: solver
+    container_name: solver
+    environment: *env_vars
+    ports:
+      - "${SOLVER_APP_PORT}:${SOLVER_APP_PORT}"
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
 
   
   postgres:
