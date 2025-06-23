@@ -66,3 +66,18 @@ class GrpcRequests:
             return response
         except Exception as ex:
             logger.critical(f"Cannot authorize user: {ex}")
+
+
+    @staticmethod
+    def validate_jwt(token: str,
+                     ) -> List:
+        try:
+            response = GRPCClientFactory.rpc_call(
+                service_name="authorizer",
+                method_name="validate_jwt",
+                token=token,
+            )
+            return response
+        except Exception as ex:
+            logger.critical(f"Cannot validate jwt: {ex}")
+

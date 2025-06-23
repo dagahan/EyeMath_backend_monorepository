@@ -1,7 +1,6 @@
 import colorama
 from loguru import logger
 import psycopg2
-import datetime
 import bcrypt
 import re
 from psycopg2 import sql
@@ -10,8 +9,7 @@ from psycopg2.extras import DictCursor
 from src.core.config import ConfigLoader
 from src.services.jwt_parser import JwtParser
 from src.core.utils import EnvTools
-from src.core.utils import FileSystemTools
-from typing import Any, Optional, Dict
+from typing import Any, Dict
 
 
 class Authorizer:
@@ -19,15 +17,19 @@ class Authorizer:
         self.config = ConfigLoader()
         self.jwt_parser = JwtParser()
         self.db_config = self._load_db_config()
+        self.db_connection = self._get_db_connection()
         
 
     def _load_db_config(self) -> dict:
-        """Загрузка конфигурации БД из настроек"""
+        if EnvTools.is_running_inside_docker():
+            db_host = "postgres"
+        else:
+            db_host = EnvTools.load_env_var("POSTGRES_HOST")
         return {
-            'dbname': EnvTools.load_env_var("POSTGRES_DB_NAME"),
+            'dbname': EnvTools.load_env_var("POSTGRES_DB"),
             'user': EnvTools.load_env_var("POSTGRES_USER"),
             'password': EnvTools.load_env_var("POSTGRES_PASSWORD"),
-            'host': EnvTools.load_env_var("POSTGRES_HOST"),
+            'host': db_host,
             'port': EnvTools.load_env_var("POSTGRES_APP_PORT")
         }
     
@@ -37,16 +39,13 @@ class Authorizer:
     
 
     def _validate_user_data(self, username: str, password: str, email: str) -> dict:
-        """Валидация входных данных пользователя"""
         errors = {}
         
-        # Проверка имени пользователя
         if not 3 <= len(username) <= 30:
             errors['username'] = "Имя пользователя должно быть от 3 до 30 символов"
         elif not re.match(r"^[a-zA-Z0-9_]+$", username):
             errors['username'] = "Имя пользователя может содержать только буквы, цифры и подчеркивания"
         
-        # Проверка пароля
         if len(password) < 8:
             errors['password'] = "Пароль должен содержать минимум 8 символов"
         elif not any(char.isdigit() for char in password):
@@ -54,23 +53,19 @@ class Authorizer:
         elif not any(char.isupper() for char in password):
             errors['password'] = "Пароль должен содержать хотя бы одну заглавную букву"
         
-        # Проверка email
         if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
             errors['email'] = "Некорректный формат email"
         return errors
     
 
     def _hash_password(self, password: str) -> str:
-        """Хеширование пароля с использованием bcrypt"""
         salt = bcrypt.gensalt()
         hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
         return hashed_password.decode('utf-8')
     
     
     def register_user(self, username: str, password: str, email: str) -> dict:
-        """Регистрация нового пользователя"""
         try:
-            # Валидация входных данных
             validation_errors = self._validate_user_data(username, password, email)
             if validation_errors:
                 return {
@@ -78,49 +73,44 @@ class Authorizer:
                     "description": "; ".join(validation_errors.values())
                 }
             
-            # Хеширование пароля
             hashed_password = self._hash_password(password)
             
-            # Подключение к БД и сохранение пользователя
-            with self._get_db_connection() as conn:
-                with conn.cursor() as cursor:
-                    # Проверка уникальности username и email
-                    cursor.execute(
-                        sql.SQL("""
-                            SELECT EXISTS(
-                                SELECT 1 FROM users 
-                                WHERE username = %s OR email = %s
-                            )
-                        """), 
-                        (username, email)
-                    )
-                    exists = cursor.fetchone()[0]
-                    
-                    if exists:
-                        return {
-                            "result": False,
-                            "description": "Пользователь с таким именем или email уже существует"
-                        }
-                    
-                    # Создание нового пользователя
-                    cursor.execute(
-                        sql.SQL("""
-                            INSERT INTO users (username, email, password_hash, created_at)
-                            VALUES (%s, %s, %s, NOW())
-                            RETURNING id
-                        """), 
-                        (username, email, hashed_password)
-                    )
-                    
-                    user_id = cursor.fetchone()[0]
-                    conn.commit()
-                    
-                    logger.success(f"Зарегистрирован новый пользователь: ID={user_id}, username={username}")
+            with self.db_connection.cursor() as cursor:
+                cursor.execute(
+                    sql.SQL("""
+                        SELECT EXISTS(
+                            SELECT 1 FROM users 
+                            WHERE username = %s OR email = %s
+                        )
+                    """), 
+                    (username, email)
+                )
+                exists = cursor.fetchone()[0]
+                
+                if exists:
                     return {
-                        "result": True,
-                        "description": "Пользователь успешно зарегистрирован",
-                        "user_id": user_id
+                        "result": False,
+                        "description": "Пользователь с таким именем или email уже существует"
                     }
+                
+                cursor.execute(
+                    sql.SQL("""
+                        INSERT INTO users (username, email, password_hash, created_at)
+                        VALUES (%s, %s, %s, NOW())
+                        RETURNING id
+                    """), 
+                    (username, email, hashed_password)
+                )
+                
+                user_id = cursor.fetchone()[0]
+                self.db_connection.commit()
+                
+                logger.success(f"Зарегистрирован новый пользователь: ID={user_id}, username={username}")
+                return {
+                    "result": True,
+                    "description": "Пользователь успешно зарегистрирован",
+                    "user_id": user_id
+                }
         
         except psycopg2.Error as e:
             logger.error(f"Ошибка базы данных при регистрации пользователя: {e}")
@@ -138,75 +128,97 @@ class Authorizer:
         
 
     def authorize_user(self, username: str, password: str) -> Dict[str, Any]:
-        """Аутентификация пользователя и выдача JWT токена"""
         try:
-            with self._get_db_connection() as conn:
-                with conn.cursor() as cursor:
-                    # Поиск пользователя по имени
-                    cursor.execute(
-                        sql.SQL("""
-                            SELECT id, username, password_hash 
-                            FROM users 
-                            WHERE username = %s
-                        """), 
-                        (username,)
-                    )
-                    user = cursor.fetchone()
-                    
-                    if not user:
-                        logger.warning(f"Пользователь не найден: {username}")
-                        return {
-                            "result": False,
-                            "description": "Неверное имя пользователя или пароль"
-                        }
-                    
-                    # Проверка пароля
-                    if not self._verify_password(password, user["password_hash"]):
-                        logger.warning(f"Неверный пароль для пользователя: {username}")
-                        return {
-                            "result": False,
-                            "description": "Неверное имя пользователя или пароль"
-                        }
-                    
-                    # Генерация JWT токена
-                    jwt_token = self._generate_jwt_token(user["id"], user["username"])
-                    
-                    logger.info(f"Успешная аутентификация: {username}")
+            with self.db_connection.cursor() as cursor:
+                cursor.execute(
+                    sql.SQL("""
+                        SELECT id, username, password_hash 
+                        FROM users 
+                        WHERE username = %s
+                    """), 
+                    (username,)
+                )
+                user = cursor.fetchone()
+                
+                if not user:
+                    logger.warning(f"Пользователь не найден: {username}")
                     return {
-                        "result": True,
-                        "jwt_token": jwt_token,
-                        "user_id": user["id"],
-                        "username": user["username"]
+                        "result": False,
+                        "description": "Неверное имя пользователя или пароль"
                     }
+                
+                if not self._verify_password(password, user["password_hash"]):
+                    logger.warning(f"Неверный пароль для пользователя: {username}")
+                    return {
+                        "result": False,
+                        "description": "Неверное имя пользователя или пароль"
+                    }
+                
+                token = self._generate_jwt_token(user["id"], user["username"])
+                
+                logger.info(f"Успешная аутентификация: {username}")
+                return {
+                    "result": True,
+                    "token": token,
+                }
         
         except psycopg2.Error as e:
             logger.error(f"Ошибка БД при аутентификации: {e}")
-            return {"result": False, "description": f"Ошибка базы данных: {e.pgerror}"}
+            return {"result": False, "token": f"None"}
         
         except Exception as e:
             logger.critical(f"Ошибка аутентификации: {e}")
-            return {"result": False, "description": "Внутренняя ошибка сервера"}
+            return {"result": False, "token": "None"}
     
 
     def _verify_password(self, plain_password: str, hashed_password: str) -> bool:
-        """Проверка пароля против хеша"""
         return bcrypt.checkpw(
             plain_password.encode('utf-8'),
             hashed_password.encode('utf-8')
         )
     
-    
+
     def _generate_jwt_token(self, user_id: int, username: str) -> str:
-        """Генерация JWT токена"""
-        # Время жизни токена (30 минут)
-        expires_delta = datetime.timedelta(minutes=30)
-        expire = datetime.datetime.utcnow() + expires_delta
-        
         payload = {
-            "sub": str(user_id),       # Subject (идентификатор пользователя)
-            "username": username,      # Имя пользователя
-            "exp": expire,             # Время истечения
-            "iat": datetime.datetime.utcnow()  # Время создания
+            "sub": str(user_id),
+            "username": username,
         }
         
         return self.jwt_parser.encode_jwt(payload)
+    
+
+    def token_validation(self, token: str) -> Dict:
+        try:
+            verification = self.jwt_parser.verify_jwt(token)
+            
+            if not verification["result"]:
+                logger.debug(f"jwt validation unsuccess. reason: {verification["reason"]}")
+                return {
+                    "result": False,
+                }
+            
+            user_id = verification["user_id"]
+            
+            with self.db_connection.cursor() as cursor:
+                cursor.execute(
+                    sql.SQL("SELECT id, username FROM users WHERE id = %s"),
+                    (user_id,)
+                )
+                user = cursor.fetchone()
+                
+                if not user:
+                    logger.debug(f"jwt validation unsuccess. reason: {verification["reason"]}")
+                    return {
+                        "result": False,
+                    }
+            
+            return {
+                "result": True,
+                "user_id": user["id"],
+            }
+        
+        except Exception as e:
+            logger.error(f"Token validation error: {e}")
+            return {
+                "result": False,
+            }

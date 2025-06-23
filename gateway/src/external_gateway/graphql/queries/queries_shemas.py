@@ -12,3 +12,8 @@ class MathSolveGraphQLResponse:
 @strawberry.type
 class MathRecognizeGraphQLResponse:
     result: str
+
+
+@strawberry.type
+class ValidateJwtGraphQLResponse:
+    result: bool

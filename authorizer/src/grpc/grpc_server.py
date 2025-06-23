@@ -51,7 +51,7 @@ class GRPCAuthorizer(authorizer_rpc.GRPCAuthorizer):
     @logger.catch
     def register(self, request: authorizer_pb.register_request, context) -> authorizer_pb.register_response:
         '''
-        This endpoint just returns metadata of service.
+        This endpoint register a new user.
         Look at service's protobuf file to get more info.
         '''
         self.log_api._logrequest(request, context)
@@ -79,7 +79,7 @@ class GRPCAuthorizer(authorizer_rpc.GRPCAuthorizer):
     @logger.catch
     def authorize(self, request: authorizer_pb.authorize_request, context) -> authorizer_pb.authorize_response:
         '''
-        This endpoint just returns metadata of service.
+        This endpoint authorize through with credits.
         Look at service's protobuf file to get more info.
         '''
         self.log_api._logrequest(request, context)
@@ -101,6 +101,31 @@ class GRPCAuthorizer(authorizer_rpc.GRPCAuthorizer):
         except Exception as error:
             logger.error(f"Authorize user error: {error}")
             return authorizer_pb.authorize_response()
+        
+
+    @logger.catch
+    def validate_jwt(self, request: authorizer_pb.validate_jwt_request, context) -> authorizer_pb.validate_jwt_response:
+        '''
+        This endpoint validates jwt token.
+        Look at service's protobuf file to get more info.
+        '''
+        self.log_api._logrequest(request, context)
+
+        try:
+            authorizer_response = self.authorizer.token_validation(
+                request.token,
+                )
+            
+            response = authorizer_pb.validate_jwt_response(
+                result=authorizer_response['result'],
+            )
+
+            self.log_api._logresponse(response, context)
+            return response
+
+        except Exception as error:
+            logger.error(f"Token validation error: {error}")
+            return authorizer_pb.validate_jwt_response()
 
 
 class GRPCServerRunner:

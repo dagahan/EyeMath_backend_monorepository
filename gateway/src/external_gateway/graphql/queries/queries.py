@@ -35,3 +35,14 @@ class Query:
             result=response,
         )
     
+    
+    @strawberry.field(description="Validate jwt token.")
+    def validate_jwt(
+    self,
+    token: str,
+    ) -> ValidateJwtGraphQLResponse:
+        
+        response = GrpcRequests.validate_jwt(token)
+        return ValidateJwtGraphQLResponse(
+            result=response.result,
+        )

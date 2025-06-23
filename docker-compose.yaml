@@ -1,6 +1,3 @@
-version: '3.9'
-
-
 x-env: &env_vars
   TZ: ${SYSTEM_TIME_ZONE}
   RUNNING_INSIDE_DOCKER: 1
@@ -16,6 +13,11 @@ x-env: &env_vars
   RENDERER_APP_PORT: ${RENDERER_APP_PORT}
   SOLVER_HOST: ${SOLVER_HOST}
   SOLVER_APP_PORT: ${SOLVER_APP_PORT}
+  POSTGRES_HOST: ${POSTGRES_HOST}
+  POSTGRES_APP_PORT: ${POSTGRES_APP_PORT}
+  POSTGRES_USER: ${POSTGRES_USER}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+  POSTGRES_DB: ${POSTGRES_DB}
 
 
 services:
@@ -38,71 +40,73 @@ services:
       - "${AUTHORIZER_APP_PORT}:${AUTHORIZER_APP_PORT}"
     networks:
       - eye_math_network
+    depends_on:
+      postgres:
+        condition: service_healthy
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  recognizer:
-    build: recognizer
-    container_name: recognizer
-    environment: *env_vars
-    ports:
-      - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
-    networks:
-      - eye_math_network
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # recognizer:
+  #   build: recognizer
+  #   container_name: recognizer
+  #   environment: *env_vars
+  #   ports:
+  #     - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  renderer:
-    build: renderer
-    container_name: renderer
-    environment: *env_vars
-    ports:
-      - "${RENDERER_APP_PORT}:${RENDERER_APP_PORT}"
-    networks:
-      - eye_math_network
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # renderer:
+  #   build: renderer
+  #   container_name: renderer
+  #   environment: *env_vars
+  #   ports:
+  #     - "${RENDERER_APP_PORT}:${RENDERER_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  solver:
-    build: solver
-    container_name: solver
-    environment: *env_vars
-    ports:
-      - "${SOLVER_APP_PORT}:${SOLVER_APP_PORT}"
-    networks:
-      - eye_math_network
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # solver:
+  #   build: solver
+  #   container_name: solver
+  #   environment: *env_vars
+  #   ports:
+  #     - "${SOLVER_APP_PORT}:${SOLVER_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
   
+  postgres:
+    build: postgres
+    container_name: postgres
+    environment: *env_vars
+    ports:
+      - "${POSTGRES_APP_PORT}:${POSTGRES_APP_PORT}"
+    networks:
+      - eye_math_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - ./init-scripts:/docker-entrypoint-initdb.d
+      - ./postgres-data:/var/lib/postgresql/data
+    command: 
+      - bash
+      - -c
+      - |
+        SQL_CONTENT=$$(cat /docker-entrypoint-initdb.d/init-template.sql)
+        SQL_PROCESSED=$$(echo "$$SQL_CONTENT" | envsubst)
+        echo "$$SQL_PROCESSED" > /docker-entrypoint-initdb.d/init.sql
+        echo "Generated init.sql:"
+        cat /docker-entrypoint-initdb.d/init.sql
+        exec docker-entrypoint.sh postgres
+    restart: ${DOCKER_CONTAINERS_RESTART}
 
-  # postgres:
-  #   image: postgres:14
-  #   environment:
-  #     TZ: ${SYSTEM_TIME_ZONE}
-  #     POSTGRES_USER: ${POSTGRES_USER}
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #     POSTGRES_DB: ${POSTGRES_DB_NAME}
-  #   ports:
-  #     - ${POSTGRES_PORT}
-  #   networks:
-  #     - eye_math_network
-  #   # volumes:
-  #   #   - postgres_data:/var/lib/postgresql/data
-  #   restart: ${DOCKER_CONTAINERS_RESTART}
-
-  # pgadmin:
-  #   image: dpage/pgadmin4
-  #   environment:
-  #     TZ: ${SYSTEM_TIME_ZONE}
-  #     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-  #     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
-  #   ports:
-  #     - ${PGADMIN_PORT}
-  #   networks:
-  #     - eye_math_network
-  #   restart: ${DOCKER_CONTAINERS_RESTART}
-  #   volumes:
-  #     - pgadmin_data:/var/lib/pgadmin
 
   # redis:
   #   image: redis:alpine

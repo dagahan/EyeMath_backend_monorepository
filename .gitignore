@@ -195,6 +195,7 @@ go.work
 go.work.sum
 
 # Directories
+**postgres-data/
 **debug/
 **tmp/
 **/uv.lock

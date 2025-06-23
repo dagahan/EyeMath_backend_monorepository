@@ -36,11 +36,11 @@ message authorize_response {
 }
 
 
-message authorize_jwt_request {
+message validate_jwt_request {
   string token = 1;
 }
 
-message authorize_jwt_response {
+message validate_jwt_response {
   bool result = 1;
 }
 
@@ -49,5 +49,5 @@ service GRPCAuthorizer {
     rpc meta_data_authorizer (meta_data_authorizer_request) returns (meta_data_authorizer_response);
     rpc register (register_request) returns (register_response);
     rpc authorize (authorize_request) returns (authorize_response);
-    rpc authorize_jwt (authorize_jwt_request) returns (authorize_jwt_response);
+    rpc validate_jwt (validate_jwt_request) returns (validate_jwt_response);
 }
