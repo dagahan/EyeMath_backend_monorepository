@@ -11,7 +11,7 @@ dependencies = [
     "chardet==5.2.0",
     "python-dotenv==1.1.0",
     "pix2tex==0.1.4",
-    "opencv-python==4.11.0.86",
+    "opencv-python-headless==4.11.0.86",
     "eyemath-protos @ git+https://github.com/dagahan/EyeMath_protos.git",
 ]
 show_params_on_run = true
