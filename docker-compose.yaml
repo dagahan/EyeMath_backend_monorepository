@@ -118,8 +118,6 @@ services:
 volumes:
   postgres_data:
     driver: local
-  pgadmin_data:
-    driver: local
 
 networks:
   eye_math_network:
