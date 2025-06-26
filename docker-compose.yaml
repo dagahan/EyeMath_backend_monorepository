@@ -1,30 +1,32 @@
-x-env: &env_vars
-  TZ: ${SYSTEM_TIME_ZONE}
-  RUNNING_INSIDE_DOCKER: 1
-  GATEWAY_HOST: ${GATEWAY_HOST}
-  GATEWAY_APP_PORT: ${GATEWAY_APP_PORT}
-  GATEWAY_GRPC_HOST: ${GATEWAY_GRPC_HOST}
-  GATEWAY_GRPC_APP_PORT: ${GATEWAY_GRPC_APP_PORT}
-  AUTHORIZER_HOST: ${AUTHORIZER_HOST}
-  AUTHORIZER_APP_PORT: ${AUTHORIZER_APP_PORT}
-  RECOGNIZER_HOST: ${RECOGNIZER_HOST}
-  RECOGNIZER_APP_PORT: ${RECOGNIZER_APP_PORT}
-  RENDERER_HOST: ${RENDERER_HOST}
-  RENDERER_APP_PORT: ${RENDERER_APP_PORT}
-  SOLVER_HOST: ${SOLVER_HOST}
-  SOLVER_APP_PORT: ${SOLVER_APP_PORT}
-  POSTGRES_HOST: ${POSTGRES_HOST}
-  POSTGRES_APP_PORT: ${POSTGRES_APP_PORT}
-  POSTGRES_USER: ${POSTGRES_USER}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  POSTGRES_DB: ${POSTGRES_DB}
+name: eye-math
 
 
 services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: dockerfile
+    image: nginx
+    container_name: nginx
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
+    ports:
+      - "${NGINX_APP_PORT}:${NGINX_APP_PORT}"
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
+
+
   gateway:
-    build: gateway
+    build:
+      context: ./gateway
+      dockerfile: dockerfile
+    image: gateway
     container_name: gateway
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${GATEWAY_APP_PORT}:${GATEWAY_APP_PORT}"
     networks:
@@ -33,9 +35,14 @@ services:
 
 
   authorizer:
-    build: authorizer
+    build: 
+      context: ./authorizer
+      dockerfile: dockerfile
+    image: authorizer
     container_name: authorizer
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${AUTHORIZER_APP_PORT}:${AUTHORIZER_APP_PORT}"
     networks:
@@ -46,21 +53,32 @@ services:
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  recognizer:
-    build: recognizer
-    container_name: recognizer
-    environment: *env_vars
-    ports:
-      - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
-    networks:
-      - eye_math_network
-    restart: ${DOCKER_CONTAINERS_RESTART}
+# TODO: Recognizer is takes just too long time to download python dependensies, so it must be downloaded on image building stage in own dockerfile.
+  # recognizer:
+  #   build: 
+  #     context: ./recognizer
+  #     dockerfile: dockerfile
+  #   image: recognizer
+  #   container_name: recognizer
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
 
   renderer:
-    build: renderer
+    build: 
+      context: ./renderer
+      dockerfile: dockerfile
+    image: renderer
     container_name: renderer
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${RENDERER_APP_PORT}:${RENDERER_APP_PORT}"
     networks:
@@ -69,9 +87,14 @@ services:
 
 
   solver:
-    build: solver
+    build:
+      context: ./solver
+      dockerfile: dockerfile
+    image: solver
     container_name: solver
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${SOLVER_APP_PORT}:${SOLVER_APP_PORT}"
     networks:
@@ -80,9 +103,14 @@ services:
 
   
   postgres:
-    build: postgres
+    build:
+      context: ./postgres
+      dockerfile: dockerfile
+    image: postgres
     container_name: postgres
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${POSTGRES_APP_PORT}:${POSTGRES_APP_PORT}"
     networks:
@@ -93,32 +121,51 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - ./postgres/init-scripts:/docker-entrypoint-initdb.d
       - ./postgres-data:/var/lib/postgresql/data
-    command: 
-      - bash
-      - -c
-      - |
-        SQL_CONTENT=$$(cat /docker-entrypoint-initdb.d/init-template.sql)
-        SQL_PROCESSED=$$(echo "$$SQL_CONTENT" | envsubst)
-        echo "$$SQL_PROCESSED" > /docker-entrypoint-initdb.d/init.sql
-        echo "Generated init.sql:"
-        cat /docker-entrypoint-initdb.d/init.sql
-        exec docker-entrypoint.sh postgres
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  # redis:
-  #   image: redis:alpine
+  # prometheus:
+  #   build:
+  #     context: ./prometheus
+  #     dockerfile: dockerfile
+  #   image: prometheus
+  #   container_name: prometheus
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
   #   ports:
-  #     - "6379:6379"
-  #   restart: on-failure
+  #     - "${PROMETHEUS_APP_PORT}:${PROMETHEUS_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   volumes:
+  #     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - ./prometheus-data:/prometheus
+  #   command:
+  #     - --config.file=/etc/prometheus/prometheus.yml
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
+
+  # grafana:
+  #   build:
+  #     context: ./grafana
+  #     dockerfile: dockerfile
+  #   image: grafana
+  #   container_name: grafana
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - "${GRAFANA_APP_PORT}:${GRAFANA_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   volumes:
+  #     - ./grafana-data:/var/lib/grafana
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
+    
 
 volumes:
   postgres_data:
-    driver: local
-  pgadmin_data:
     driver: local
 
 networks:
