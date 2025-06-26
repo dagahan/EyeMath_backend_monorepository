@@ -15,9 +15,6 @@ services:
       - "${NGINX_APP_PORT}:${NGINX_APP_PORT}"
     networks:
       - eye_math_network
-    # depends_on:
-    #   gateway:
-    #     condition: service_healthy
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
@@ -34,22 +31,6 @@ services:
       - "${GATEWAY_APP_PORT}:${GATEWAY_APP_PORT}"
     networks:
       - eye_math_network
-    # healthcheck:
-    #   test: 
-    #     [
-    #       "CMD", 
-    #       "curl", 
-    #       "-f", 
-    #       "http://localhost:${GATEWAY_APP_PORT}/graphql", 
-    #       "-H", 
-    #       "Content-Type: application/json", 
-    #       "--data-raw", 
-    #       "{\"query\":\"{__typename}\"}"
-    #     ]
-    #   interval: 5s
-    #   timeout: 5s
-    #   retries: 20
-    #   start_interval: 10s
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
@@ -73,20 +54,20 @@ services:
 
 
 # TODO: Recognizer is takes just too long time to download python dependensies, so it must be downloaded on image building stage in own dockerfile.
-  recognizer:
-    build: 
-      context: ./recognizer
-      dockerfile: dockerfile
-    image: recognizer
-    container_name: recognizer
-    env_file: .env
-    environment:
-      RUNNING_INSIDE_DOCKER: 1
-    ports:
-      - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
-    networks:
-      - eye_math_network
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # recognizer:
+  #   build: 
+  #     context: ./recognizer
+  #     dockerfile: dockerfile
+  #   image: recognizer
+  #   container_name: recognizer
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
 
   renderer:
@@ -140,21 +121,8 @@ services:
       timeout: 5s
       retries: 10
     volumes:
-      - ./postgres/init-scripts:/docker-entrypoint-initdb.d
       - ./postgres-data:/var/lib/postgresql/data
-    command: 
-      - bash
-      - -c
-      - |
-        SQL_CONTENT=$$(cat /docker-entrypoint-initdb.d/init-template.sql)
-        SQL_PROCESSED=$$(echo "$$SQL_CONTENT" | envsubst)
-        echo "$$SQL_PROCESSED" > /docker-entrypoint-initdb.d/init.sql
-        echo "Generated init.sql:"
-        cat /docker-entrypoint-initdb.d/init.sql
-        exec docker-entrypoint.sh postgres
     restart: ${DOCKER_CONTAINERS_RESTART}
-
-  # TODO: command for stating postgres must be placed in dockerfile, not in docker compose!
 
 
   # redis:
