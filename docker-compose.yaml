@@ -1,41 +1,67 @@
-x-env: &env_vars
-  TZ: ${SYSTEM_TIME_ZONE}
-  RUNNING_INSIDE_DOCKER: 1
-  GATEWAY_HOST: ${GATEWAY_HOST}
-  GATEWAY_APP_PORT: ${GATEWAY_APP_PORT}
-  GATEWAY_GRPC_HOST: ${GATEWAY_GRPC_HOST}
-  GATEWAY_GRPC_APP_PORT: ${GATEWAY_GRPC_APP_PORT}
-  AUTHORIZER_HOST: ${AUTHORIZER_HOST}
-  AUTHORIZER_APP_PORT: ${AUTHORIZER_APP_PORT}
-  RECOGNIZER_HOST: ${RECOGNIZER_HOST}
-  RECOGNIZER_APP_PORT: ${RECOGNIZER_APP_PORT}
-  RENDERER_HOST: ${RENDERER_HOST}
-  RENDERER_APP_PORT: ${RENDERER_APP_PORT}
-  SOLVER_HOST: ${SOLVER_HOST}
-  SOLVER_APP_PORT: ${SOLVER_APP_PORT}
-  POSTGRES_HOST: ${POSTGRES_HOST}
-  POSTGRES_APP_PORT: ${POSTGRES_APP_PORT}
-  POSTGRES_USER: ${POSTGRES_USER}
-  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  POSTGRES_DB: ${POSTGRES_DB}
+name: eye-math
 
 
 services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: dockerfile
+    image: nginx
+    container_name: nginx
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
+    ports:
+      - "${NGINX_APP_PORT}:${NGINX_APP_PORT}"
+    networks:
+      - eye_math_network
+    # depends_on:
+    #   gateway:
+    #     condition: service_healthy
+    restart: ${DOCKER_CONTAINERS_RESTART}
+
+
   gateway:
-    build: gateway
+    build:
+      context: ./gateway
+      dockerfile: dockerfile
+    image: gateway
     container_name: gateway
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${GATEWAY_APP_PORT}:${GATEWAY_APP_PORT}"
     networks:
       - eye_math_network
+    # healthcheck:
+    #   test: 
+    #     [
+    #       "CMD", 
+    #       "curl", 
+    #       "-f", 
+    #       "http://localhost:${GATEWAY_APP_PORT}/graphql", 
+    #       "-H", 
+    #       "Content-Type: application/json", 
+    #       "--data-raw", 
+    #       "{\"query\":\"{__typename}\"}"
+    #     ]
+    #   interval: 5s
+    #   timeout: 5s
+    #   retries: 20
+    #   start_interval: 10s
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
   authorizer:
-    build: authorizer
+    build: 
+      context: ./authorizer
+      dockerfile: dockerfile
+    image: authorizer
     container_name: authorizer
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${AUTHORIZER_APP_PORT}:${AUTHORIZER_APP_PORT}"
     networks:
@@ -46,10 +72,16 @@ services:
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
+# TODO: Recognizer is takes just too long time to download python dependensies, so it must be downloaded on image building stage in own dockerfile.
   recognizer:
-    build: recognizer
+    build: 
+      context: ./recognizer
+      dockerfile: dockerfile
+    image: recognizer
     container_name: recognizer
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
     networks:
@@ -58,9 +90,14 @@ services:
 
 
   renderer:
-    build: renderer
+    build: 
+      context: ./renderer
+      dockerfile: dockerfile
+    image: renderer
     container_name: renderer
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${RENDERER_APP_PORT}:${RENDERER_APP_PORT}"
     networks:
@@ -69,9 +106,14 @@ services:
 
 
   solver:
-    build: solver
+    build:
+      context: ./solver
+      dockerfile: dockerfile
+    image: solver
     container_name: solver
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${SOLVER_APP_PORT}:${SOLVER_APP_PORT}"
     networks:
@@ -80,9 +122,14 @@ services:
 
   
   postgres:
-    build: postgres
+    build:
+      context: ./postgres
+      dockerfile: dockerfile
+    image: postgres
     container_name: postgres
-    environment: *env_vars
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
     ports:
       - "${POSTGRES_APP_PORT}:${POSTGRES_APP_PORT}"
     networks:
@@ -106,6 +153,8 @@ services:
         cat /docker-entrypoint-initdb.d/init.sql
         exec docker-entrypoint.sh postgres
     restart: ${DOCKER_CONTAINERS_RESTART}
+
+  # TODO: command for stating postgres must be placed in dockerfile, not in docker compose!
 
 
   # redis:
