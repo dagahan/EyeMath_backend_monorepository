@@ -1,0 +1,8 @@
+FROM grafana/grafana-oss:latest
+
+
+# COPY grafana.ini /etc/grafana/
+# COPY provisioning/datasources /etc/grafana/provisioning/datasources
+# COPY provisioning/dashboards /etc/grafana/provisioning/dashboards
+
+EXPOSE ${PORT:-3000}

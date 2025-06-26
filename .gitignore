@@ -186,16 +186,12 @@ cython_debug/
 *.app
 
 
-
-
-
-
-# GOLANG GIT IGNORE
-go.work
-go.work.sum
-
-# Directories
+# volumes
 **postgres-data/
+**prometheus-data/
+**grafana-data/
+
+# directories
 **debug/
 **tmp/
 **/uv.lock
@@ -206,16 +202,6 @@ go.work.sum
 **/recived_images
 **/rendered_images
 
-
-
-
-
-
-
-# ignoring temp_files, renderLaTeX and recognizeLaTeX directories.
-# temp_files/
-# renderLaTeX/
-# recognizeLaTeX/
 
 # IDE files
 .vscode/

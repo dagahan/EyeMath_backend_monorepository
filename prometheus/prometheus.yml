@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+
+scrape:configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['prometheus:9998']
+
+  - job_name: 'gateway'
+    static_configs:
+      - targets: [gateway:8080]

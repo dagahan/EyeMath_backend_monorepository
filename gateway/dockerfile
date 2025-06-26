@@ -15,10 +15,6 @@ RUN useradd -m appuser && \
     mkdir -p /app/gen && \
     chown -R appuser:appuser /app
 
-# Clonning .proto files from owr repo.
-ARG CACHEBUST=1
-# RUN git clone --depth=1 https://github.com/dagahan/EyeMath_protos.git /protos
-
 RUN curl -fsSL https://astral.sh/uv/install.sh -o /tmp/uv-installer.sh
 RUN sh /tmp/uv-installer.sh ~/.local/bin \
     && rm /tmp/uv-installer.sh
@@ -31,13 +27,6 @@ ENV PATH="/usr/local/bin:${PATH}"
 
 # Using uv installing reqs to generate stubs.
 RUN $UV pip install --no-cache-dir grpcio-tools grpcio-reflection
-
-# Generating stubs from cloned .proto files.
-# RUN find /protos -type f -name '*.proto' -exec python -m grpc_tools.protoc \
-#       -I /protos \
-#       --python_out=/app/gen \
-#       --grpc_python_out=/app/gen \
-#       {} \;
 
 # Copying everything (except .dockerignore files) to /app directory.
 COPY . /app
