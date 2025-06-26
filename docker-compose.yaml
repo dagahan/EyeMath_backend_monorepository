@@ -125,12 +125,44 @@ services:
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  # redis:
-  #   image: redis:alpine
+  # prometheus:
+  #   build:
+  #     context: ./prometheus
+  #     dockerfile: dockerfile
+  #   image: prometheus
+  #   container_name: prometheus
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
   #   ports:
-  #     - "6379:6379"
-  #   restart: on-failure
+  #     - "${PROMETHEUS_APP_PORT}:${PROMETHEUS_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   volumes:
+  #     - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+  #     - ./prometheus-data:/prometheus
+  #   command:
+  #     - --config.file=/etc/prometheus/prometheus.yml
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
+
+  # grafana:
+  #   build:
+  #     context: ./grafana
+  #     dockerfile: dockerfile
+  #   image: grafana
+  #   container_name: grafana
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - "${GRAFANA_APP_PORT}:${GRAFANA_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   volumes:
+  #     - ./grafana-data:/var/lib/grafana
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
+    
 
 volumes:
   postgres_data:
