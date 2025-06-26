@@ -54,20 +54,20 @@ services:
 
 
 # TODO: Recognizer is takes just too long time to download python dependensies, so it must be downloaded on image building stage in own dockerfile.
-  # recognizer:
-  #   build: 
-  #     context: ./recognizer
-  #     dockerfile: dockerfile
-  #   image: recognizer
-  #   container_name: recognizer
-  #   env_file: .env
-  #   environment:
-  #     RUNNING_INSIDE_DOCKER: 1
-  #   ports:
-  #     - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
-  #   networks:
-  #     - eye_math_network
-  #   restart: ${DOCKER_CONTAINERS_RESTART}
+  recognizer:
+    build: 
+      context: ./recognizer
+      dockerfile: dockerfile
+    image: recognizer
+    container_name: recognizer
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
+    ports:
+      - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
 
 
   renderer:
