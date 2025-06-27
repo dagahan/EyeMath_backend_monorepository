@@ -1,15 +1,22 @@
-FROM python:3.13.5-alpine3.21
+FROM python:3.13.5-slim
 
 
-RUN apk update && \
-    apk add --no-cache \
-    build-base \
-    git \
-    curl \
-    rm -rf /var/cache/apk/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+      build-essential \
+      protobuf-compiler \
+      git \
+      curl \
+      ca-certificates \
+      libgl1 \
+      libglib2.0-0 \
+      libsm6 \
+      libxrender1 \
+      libxext6 && \
+    rm -rf /var/lib/apt/lists/*
 
 
-RUN adduser -D appuser && \
+RUN useradd -m appuser && \
     mkdir -p /app/gen && \
     chown -R appuser:appuser /app
 
@@ -17,7 +24,6 @@ RUN adduser -D appuser && \
 RUN curl -fsSL https://astral.sh/uv/install.sh -o /tmp/uv-installer.sh
 RUN sh /tmp/uv-installer.sh ~/.local/bin \
     && rm /tmp/uv-installer.sh
-
 
 RUN mv /root/.local/bin/uv /usr/local/bin/uv \
     && mv /root/.local/bin/uvx /usr/local/bin/uvx \
