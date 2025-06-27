@@ -1,54 +1,38 @@
-FROM python:3.13.2-slim
+FROM python:3.13.5-alpine3.21
 
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-      build-essential \
-      protobuf-compiler \
-      git \
-      curl \
-      ca-certificates && \
-    rm -rf /var/lib/apt/lists/*
+RUN apk update && \
+    apk add --no-cache \
+    build-base \
+    git \
+    curl \
+    rm -rf /var/cache/apk/*
 
-# Creating of appuser and group.
-RUN useradd -m appuser && \
+
+RUN adduser -D appuser && \
     mkdir -p /app/gen && \
     chown -R appuser:appuser /app
 
-# Clonning .proto files from owr repo.
-ARG CACHEBUST=1
-# RUN git clone --depth=1 https://github.com/dagahan/EyeMath_protos.git /protos
 
 RUN curl -fsSL https://astral.sh/uv/install.sh -o /tmp/uv-installer.sh
 RUN sh /tmp/uv-installer.sh ~/.local/bin \
     && rm /tmp/uv-installer.sh
 
-# Copying uv binary from ~/.local/bin to /usr/local/bin
-RUN cp /root/.local/bin/uv /usr/local/bin/uv \
-    && cp /root/.local/bin/uvx /usr/local/bin/uvx \
+
+RUN mv /root/.local/bin/uv /usr/local/bin/uv \
+    && mv /root/.local/bin/uvx /usr/local/bin/uvx \
     && chmod +x /usr/local/bin/uv /usr/local/bin/uvx
 ENV PATH="/usr/local/bin:${PATH}"
 
-# Using uv installing reqs to generate stubs.
-RUN $UV pip install --no-cache-dir grpcio-tools grpcio-reflection
 
-# Generating stubs from cloned .proto files.
-# RUN find /protos -type f -name '*.proto' -exec python -m grpc_tools.protoc \
-#       -I /protos \
-#       --python_out=/app/gen \
-#       --grpc_python_out=/app/gen \
-#       {} \;
-
-# Copying everything (except .dockerignore files) to /app directory.
 COPY . /app
 WORKDIR /app
 
-# Apply appuser's previlegies for /app directory and for binary directory.
+
 RUN chown -R appuser:appuser /app
 RUN chmod -R a+rx /usr/local/bin
 
 
-# Executing Math Solve Service!
 EXPOSE ${PORT}
 USER appuser
 CMD ["sh", "-c", "uv sync && uv run setup.py"]

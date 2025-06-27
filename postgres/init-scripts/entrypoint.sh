@@ -1,5 +1,5 @@
 #!/bin/bash
-set -escripts
+set -e
 
 echo "Running initialization script..."
 /init-scripts/init-db.sh

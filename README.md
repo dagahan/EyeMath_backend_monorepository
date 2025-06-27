@@ -3,7 +3,7 @@
 EyeMath is a mobile app that helps users solve math equations. Instead of entering all the text manually to solve an equation, users can point their smartphone's camera at an example and EyeMath will recognize it automatically. After recontition, application make gRPC request to the backend External Api Gateway for getting answer of equation from SERVICE_MATH_SOLVE.
 
 EyeMath backend use:
-* Python 3.13.2 with UV (package manager), Ruff (lint and format tool) and TY (static typing tool)
+* Python 3.13.5 with UV (package manager), Ruff (lint and format tool) and TY (static typing tool)
 * PostgreSQL
 * Nginx
 * PgAdmin

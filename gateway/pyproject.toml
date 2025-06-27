@@ -1,7 +1,7 @@
 [project]
 name = "gateway"
 version = "0.0.1"
-requires-python = "==3.13.2"
+requires-python = "==3.13.5"
 dependencies = [
     "loguru==0.7.3",
     "FastAPI==0.115.13",
