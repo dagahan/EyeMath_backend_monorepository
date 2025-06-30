@@ -1,42 +1,84 @@
-# eye.math backend monorepository
-## This is backend monorepo of eye.math project. 
-EyeMath is a mobile app that helps users solve math equations. Instead of entering all the text manually to solve an equation, users can point their smartphone's camera at an example and EyeMath will recognize it automatically. After recontition, application make gRPC request to the backend External Api Gateway for getting answer of equation from SERVICE_MATH_SOLVE.
+# eye.math
+eye.math is a cutting-edge platform that allows users to solve handwritten mathematical problems at lightning speed.
+using advanced computer vision and machine learning algorithms, the platform analyzes images and converts them into mathematical equations, which are then solved in a step-by-step process.
 
-EyeMath backend use:
-* Python 3.13 with UV (package manager), Ruff (lint and format tool) and TY (static typing tool)
-* PostgreSQL
-* Nginx
-* PgAdmin
-* Docker
-* gRPC
-* GraphQL
-* FastAPI
 
-## How to run the backend?
+## eye.math showcase
 
-First, clone repo and cd into it
+video-content here.
+
+
+### Diagram
+
+<p>
+    <img src="./assets/eye_math.png" alt="Eye Math Diagram" width="900"/>
+</p>
+
+## Architecture
+
+### Diagram
+
+<p>
+    <img src="./assets/architecture.png" alt="Architecture Diagram" width="900"/>
+</p>
+
+
+## Tech Stack
+
+### Diagram
+
+<p>
+    <img src="./assets/tech_stack.png" alt="Tech Stack Diagram" width="900"/>
+</p>
+
+* Python 3.13.x with UV, Ruff, and TY for high-performance execution;
+* PyTorch with CUDA acceleration for computer vision models;
+* OpenCV for advanced image preprocessing pipelines;
+* Nginx as reverse proxy;
+* Docker for containerization;
+* Kubernetes for production orchestration;
+* gRPC for lightning speed of microservices communication;
+* GraphQL with FastAPI as client-api;
+* PostgreSQL;
+* Prometheus and Grafana for observability monitoring.
+
+## How to run the backend on signle node?
+
+First, clone repo and cd into it.
 
 ```bash
 git clone https://github.com/dagahan/EyeMath_backend_monorepository
 cd EyeMath_backend_monorepository
 ```
 
-Then, install docker uv to your system
+Then, install docker and docker-compose (or minikube) to your system.
 
 ```bash
-sudo apt update
-sudo apt install apt-transport-https ca-certificates curl software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
-sudo apt install docker-ce
-sudo systemctl status docker
+sudo apt-get update
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 ```
 
 You also need to create .env or pass env variables directly.
-Please, see .env.example file!
 
 ```bash
 cp .env.example .env
+```
+
+Edit your environment variables with nano.
+
+```bash
+nano .env
 ```
 
 Finally, run the docker compose.
@@ -45,24 +87,15 @@ Finally, run the docker compose.
 sudo docker-compose --env-file .env  up --build
 ```
 
+Or run minikube.
+
+```bash
+kubectl run engine=docker
+kubectl apply -f ./minikube
+```
+
 Now your backend is online!
-
-## Development stage.
-Now let's talk about developing your own fork-project.
-
-## How to develop and testing backend correctly?
-There are a few rules:
-1. Use exactly the same versions of software to interact with code. Use Declared project Python, Golang versions.
-2. Use declared utils for Python: UV, Ruff and TY. Only with that utils project can started correct.
-3. Before commiting changes, please, use Ruff and TY features:
-```bash
-uvx ty check src --ignore unresolved-attribute
-```
-```bash
-ruff check .
-```
-it will help to lint, format and types your code by following rules at pyproject.toml
 
 ## Find a bug? 
 
-If you found an issue or would like to submit an improvement to this project, please submit an issue using the issues tab above. If you would like to submit a PR with fix, reference the issue you created!
+If you found an issue or would like to submit an improvement to this project, please submit it using the issues tab above.
