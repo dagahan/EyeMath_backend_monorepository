@@ -3,15 +3,15 @@ EyeMath is a web service that provides solving math equations from the image fea
 Instead of entering all the text manually to solve an equation, users can point their smartphone's camera at handsrited math expression and solve it!
 
 EyeMath backend use:
-* Python 3.13 with UV (package manager), Ruff (lint and format tool) and TY (static typing tool)
-* PostgreSQL
+* Python 3.13.x with UV, Ruff and TY.
 * Nginx
 * Docker
+* Docker-Compose (or minikube)
 * gRPC
-* GraphQL
-* FastAPI
+* GraphQL with FastAPI
+* PostgreSQL
 
-## How to run the backend?
+## How to run the backend on signle node?
 
 First, clone repo and cd into it
 
@@ -20,7 +20,7 @@ git clone https://github.com/dagahan/EyeMath_backend_monorepository
 cd EyeMath_backend_monorepository
 ```
 
-Then, install docker uv to your system
+Then, install docker and docker-compose (or minikube) to your system.
 
 ```bash
 sudo apt update
@@ -32,7 +32,6 @@ sudo systemctl status docker
 ```
 
 You also need to create .env or pass env variables directly.
-Please, see .env.example file!
 
 ```bash
 cp .env.example .env
@@ -44,24 +43,15 @@ Finally, run the docker compose.
 sudo docker-compose --env-file .env  up --build
 ```
 
+Or run minikube
+
+```bash
+kubectl run engine=docker
+kubectl apply -f ./minikube
+```
+
 Now your backend is online!
-
-## Development stage.
-Now let's talk about developing your own fork-project.
-
-## How to develop and testing backend correctly?
-There are a few rules:
-1. Use exactly the same versions of software to interact with code. Use Declared project Python, Golang versions.
-2. Use declared utils for Python: UV, Ruff and TY. Only with that utils project can started correct.
-3. Before commiting changes, please, use Ruff and TY features:
-```bash
-uvx ty check src --ignore unresolved-attribute
-```
-```bash
-ruff check .
-```
-it will help to lint, format and types your code by following rules at pyproject.toml
 
 ## Find a bug? 
 
-If you found an issue or would like to submit an improvement to this project, please submit an issue using the issues tab above. If you would like to submit a PR with fix, reference the issue you created!
+If you found an issue or would like to submit an improvement to this project, please submit it using the issues tab above.
