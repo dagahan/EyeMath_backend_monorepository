@@ -1,34 +1,22 @@
 # eye.math
 eye.math is a cutting-edge platform that allows users to solve handwritten mathematical problems at lightning speed.
 using advanced computer vision and machine learning algorithms, the platform analyzes images and converts them into mathematical equations, which are then solved in a step-by-step process.
-
+<p>
+    <img src="./assets/eye_math.png" alt="Eye Math Diagram" width="450"/>
+</p>
 
 ## eye.math showcase
 
 video-content here.
 
-
-### Diagram
-
-<p>
-    <img src="./assets/eye_math.png" alt="Eye Math Diagram" width="250"/>
-</p>
-
 ## Architecture
-
-### Diagram
-
 <p>
-    <img src="./assets/architecture.png" alt="Architecture Diagram" width="800"/>
+    <img src="./assets/architecture.png" alt="Architecture Diagram" width="700"/>
 </p>
-
 
 ## Tech Stack
-
-### Diagram
-
 <p>
-    <img src="./assets/tech_stack.png" alt="Tech Stack Diagram" width="550"/>
+    <img src="./assets/tech_stack.png" alt="Tech Stack Diagram" width="450"/>
 </p>
 
 * Python 3.13.x with UV, Ruff, and TY for high-performance execution;
