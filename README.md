@@ -1,12 +1,11 @@
 # eye.math backend monorepository
-## This is backend monorepo of eye.math project. 
-EyeMath is a mobile app that helps users solve math equations. Instead of entering all the text manually to solve an equation, users can point their smartphone's camera at an example and EyeMath will recognize it automatically. After recontition, application make gRPC request to the backend External Api Gateway for getting answer of equation from SERVICE_MATH_SOLVE.
+EyeMath is a web service that provides solving math equations from the image features. 
+Instead of entering all the text manually to solve an equation, users can point their smartphone's camera at handsrited math expression and solve it!
 
 EyeMath backend use:
 * Python 3.13 with UV (package manager), Ruff (lint and format tool) and TY (static typing tool)
 * PostgreSQL
 * Nginx
-* PgAdmin
 * Docker
 * gRPC
 * GraphQL
