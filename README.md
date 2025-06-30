@@ -11,7 +11,7 @@ video-content here.
 ### Diagram
 
 <p>
-    <img src="./assets/eye_math.png" alt="Eye Math Diagram" width="900"/>
+    <img src="./assets/eye_math.png" alt="Eye Math Diagram" width="250"/>
 </p>
 
 ## Architecture
@@ -19,7 +19,7 @@ video-content here.
 ### Diagram
 
 <p>
-    <img src="./assets/architecture.png" alt="Architecture Diagram" width="900"/>
+    <img src="./assets/architecture.png" alt="Architecture Diagram" width="800"/>
 </p>
 
 
@@ -28,7 +28,7 @@ video-content here.
 ### Diagram
 
 <p>
-    <img src="./assets/tech_stack.png" alt="Tech Stack Diagram" width="900"/>
+    <img src="./assets/tech_stack.png" alt="Tech Stack Diagram" width="550"/>
 </p>
 
 * Python 3.13.x with UV, Ruff, and TY for high-performance execution;
