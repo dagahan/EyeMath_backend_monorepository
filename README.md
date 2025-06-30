@@ -7,9 +7,8 @@ using advanced computer vision and machine learning algorithms, the platform ana
 
 ## eye.math showcase
 
-<p>
-    <img src="./assets/showcase.gif" alt="Show case" width="650"/>
-</p>
+![eyemath (2)](https://github.com/user-attachments/assets/d1f8fabb-d71f-4393-8bd9-560e79f3aea4)
+
 
 ## Architecture
 <p>
