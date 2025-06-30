@@ -5,7 +5,7 @@ using advanced computer vision and machine learning algorithms, the platform ana
     <img src="./assets/eye_math.png" alt="Eye Math Logo" width="250"/>
 </p>
 
-## eye.math showcase
+## Showcase
 
 ![eyemath (2)](https://github.com/user-attachments/assets/d1f8fabb-d71f-4393-8bd9-560e79f3aea4)
 
