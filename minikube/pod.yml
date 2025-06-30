@@ -7,9 +7,10 @@ metadata:
 spec:
   containers:
     - name: nginx-container
-      image: nginx:latest
+      image: nginx
+      imagePullPolicy: Never
       ports:
-        - containerPort: 9999
+        - containerPort: 80
       resources:
         limits:
           memory: "256Mi"
@@ -28,7 +29,8 @@ metadata:
 spec:
   containers:
     - name: gateway
-      image: gateway:latest
+      image: gateway
+      imagePullPolicy: Never
       ports:
         - containerPort: 8080
         - containerPort: 8081
