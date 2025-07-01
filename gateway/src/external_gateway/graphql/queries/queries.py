@@ -39,7 +39,7 @@ class Query:
     token: str,
     image: str,
     normalize_for_sympy: bool = True,
-    ) -> MathSolveGraphQLResponse:
+    ) -> MathRecognizeGraphQLResponse:
         
         if not TokenValidator.validate_token_grpc(token):
             raise "Invalid or expired token"

@@ -35,6 +35,14 @@ message authorize_response {
   string token = 2;
 }
 
+message unauthorize_request {
+  string token = 1;
+}
+
+message unauthorize_response {
+  bool result = 1;
+}
+
 
 message validate_jwt_request {
   string token = 1;
@@ -49,5 +57,6 @@ service GRPCAuthorizer {
     rpc meta_data_authorizer (meta_data_authorizer_request) returns (meta_data_authorizer_response);
     rpc register (register_request) returns (register_response);
     rpc authorize (authorize_request) returns (authorize_response);
+    rpc unauthorize (unauthorize_request) returns (unauthorize_response);
     rpc validate_jwt (validate_jwt_request) returns (validate_jwt_response);
 }

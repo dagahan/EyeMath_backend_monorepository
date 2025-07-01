@@ -52,6 +52,7 @@ class RegistryGrpcMethods:
                 "meta_data_authorizer": authorizer_pb.meta_data_authorizer_request,
                 "register": authorizer_pb.register_request,
                 "authorize": authorizer_pb.authorize_request,
+                "unauthorize": authorizer_pb.unauthorize_request,
                 "validate_jwt": authorizer_pb.validate_jwt_request,
             }
         

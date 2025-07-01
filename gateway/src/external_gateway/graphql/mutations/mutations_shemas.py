@@ -12,3 +12,8 @@ class RegisterUserGraphQLResponse:
 class AuthorizeUserGraphQLResponse:
     result: bool
     token: str
+
+
+@strawberry.type
+class UnAuthorizeUserGraphQLResponse:
+    result: bool

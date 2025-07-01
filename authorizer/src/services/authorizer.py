@@ -11,6 +11,8 @@ from src.services.jwt_parser import JwtParser
 from src.core.utils import EnvTools
 from typing import Any, Dict
 
+from datatime import datetime
+
 
 class Authorizer:
     def __init__(self) -> None:
@@ -95,11 +97,11 @@ class Authorizer:
                 
                 cursor.execute(
                     sql.SQL("""
-                        INSERT INTO users (username, email, password_hash, created_at)
-                        VALUES (%s, %s, %s, NOW())
+                        INSERT INTO users (username, email, password, subscription, created_at)
+                        VALUES (%s, %s, %s, %s, NOW())
                         RETURNING id
                     """), 
-                    (username, email, hashed_password)
+                    (username, email, hashed_password, "Free")
                 )
                 
                 user_id = cursor.fetchone()[0]
@@ -129,46 +131,90 @@ class Authorizer:
 
     def authorize_user(self, username: str, password: str) -> Dict[str, Any]:
         try:
-            with self.db_connection.cursor() as cursor:
-                cursor.execute(
-                    sql.SQL("""
-                        SELECT id, username, password_hash 
+            with self.db_connection:
+                with self.db_connection.cursor() as cursor:
+                    # Поиск пользователя
+                    cursor.execute("""
+                        SELECT id, username, password 
                         FROM users 
                         WHERE username = %s
-                    """), 
-                    (username,)
-                )
-                user = cursor.fetchone()
-                
-                if not user:
-                    logger.warning(f"Пользователь не найден: {username}")
+                    """, (username,))
+                    user = cursor.fetchone()
+                    
+                    if not user:
+                        logger.warning(f"Пользователь не найден: {username}")
+                        return {
+                            "result": False,
+                            "description": "Неверное имя пользователя или пароль"
+                        }
+                    
+                    # Проверка пароля
+                    if not self._verify_password(password, user["password"]):
+                        logger.warning(f"Неверный пароль для пользователя: {username}")
+                        return {
+                            "result": False,
+                            "description": "Неверное имя пользователя или пароль"
+                        }
+                    
+                    # Проверяем существование активного токена
+                    cursor.execute("""
+                        SELECT token 
+                        FROM tokens 
+                        WHERE user_id = %s 
+                        LIMIT 1
+                    """, (user["id"],))
+                    existing_token = cursor.fetchone()
+                    
+                    if existing_token:
+                        # Используем существующий токен
+                        token = existing_token["token"]
+                        logger.info(f"Используется существующий токен для пользователя: {username}")
+                    else:
+                        # Генерация нового токена
+                        token = self._generate_jwt_token(user["id"], user["username"])
+
+                        # Сохранение токена в БД
+                        cursor.execute("""
+                            INSERT INTO tokens (user_id, token)
+                            VALUES (%s, %s)
+                        """, (user["id"], token))
+                        logger.info(f"Создан новый токен для пользователя: {username}")
+                    
                     return {
-                        "result": False,
-                        "description": "Неверное имя пользователя или пароль"
+                        "result": True,
+                        "token": token,
                     }
-                
-                if not self._verify_password(password, user["password_hash"]):
-                    logger.warning(f"Неверный пароль для пользователя: {username}")
-                    return {
-                        "result": False,
-                        "description": "Неверное имя пользователя или пароль"
-                    }
-                
-                token = self._generate_jwt_token(user["id"], user["username"])
-                
-                logger.info(f"Успешная аутентификация: {username}")
-                return {
-                    "result": True,
-                    "token": token,
-                }
         
         except psycopg2.Error as e:
             logger.error(f"Ошибка БД при аутентификации: {e}")
-            return {"result": False, "token": f"None"}
+            return {"result": False, "token": None}
         
         except Exception as e:
             logger.critical(f"Ошибка аутентификации: {e}")
-            return {"result": False, "token": "None"}
+            return {"result": False, "token": None}
+        
+
+    def unauthorize_user(self, token: str) -> Dict:
+        try:
+            with self.db_connection:
+                with self.db_connection.cursor() as cursor:
+                    cursor.execute("""
+                        DELETE FROM tokens 
+                        WHERE token = %s
+                    """, (token,))
+                    
+                    if cursor.rowcount == 0:
+                        logger.info(f"Токен уже удален или не существует: {token}")
+                    
+            return {"result": True}
+        
+        except psycopg2.Error as e:
+            logger.error(f"Ошибка при удалении токена: {e}")
+            return {"result": False}
+        
+        except Exception as e:
+            logger.error(f"Неизвестная ошибка при удалении токена: {e}")
+            return {"result": False}
     
 
     def _verify_password(self, plain_password: str, hashed_password: str) -> bool:
@@ -192,25 +238,34 @@ class Authorizer:
             verification = self.jwt_parser.verify_jwt(token)
             
             if not verification["result"]:
-                logger.debug(f"jwt validation unsuccess. reason: {verification["reason"]}")
-                return {
-                    "result": False,
-                }
+                logger.debug(f"JWT validation failed. Reason: {verification['reason']}")
+                return {"result": False}
             
             user_id = verification["user_id"]
             
             with self.db_connection.cursor() as cursor:
-                cursor.execute(
-                    sql.SQL("SELECT id, username FROM users WHERE id = %s"),
-                    (user_id,)
-                )
+                cursor.execute("""
+                    SELECT 1 
+                    FROM tokens 
+                    WHERE token = %s AND user_id = %s
+                """, (token, user_id))
+                token_exists = cursor.fetchone()
+                
+                if not token_exists:
+                    logger.debug(f"Токен не найден в БД или истек: {token}")
+                    return {"result": False}
+                
+                # Дополнительная проверка пользователя
+                cursor.execute("""
+                    SELECT id 
+                    FROM users 
+                    WHERE id = %s
+                """, (user_id,))
                 user = cursor.fetchone()
                 
                 if not user:
-                    logger.debug(f"jwt validation unsuccess. reason: {verification["reason"]}")
-                    return {
-                        "result": False,
-                    }
+                    logger.debug(f"Пользователь не найден для токена: {token}")
+                    return {"result": False}
             
             return {
                 "result": True,
@@ -219,6 +274,4 @@ class Authorizer:
         
         except Exception as e:
             logger.error(f"Token validation error: {e}")
-            return {
-                "result": False,
-            }
+            return {"result": False}

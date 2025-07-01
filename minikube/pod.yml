@@ -10,7 +10,7 @@ spec:
       image: nginx
       imagePullPolicy: Never
       ports:
-        - containerPort: 80
+        - containerPort: 9999
       resources:
         limits:
           memory: "256Mi"

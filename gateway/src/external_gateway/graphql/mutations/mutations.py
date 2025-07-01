@@ -33,3 +33,14 @@ class Mutation:
             token=response.token,
         )
     
+
+    @strawberry.mutation(description="Unauthorize eye.math account for user.")
+    def unauthorize(
+    self,
+    token: str,
+    ) -> UnAuthorizeUserGraphQLResponse:
+        response = GrpcRequests.unauthorize(token)
+        return UnAuthorizeUserGraphQLResponse(
+            result=response.result,
+        )
+    

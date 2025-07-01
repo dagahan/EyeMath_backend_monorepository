@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e
 
-echo "Running initialization script..."
-/init-scripts/init-db.sh
+envsubst < /init-scripts/init-template.sql > /docker-entrypoint-initdb.d/init.sql
 
 exec docker-entrypoint.sh postgres "$@"

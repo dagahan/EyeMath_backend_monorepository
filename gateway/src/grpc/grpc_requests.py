@@ -69,6 +69,19 @@ class GrpcRequests:
 
 
     @staticmethod
+    def unauthorize(token: str) -> List:
+        try:
+            response = GRPCClientFactory.rpc_call(
+                service_name="authorizer",
+                method_name="unauthorize",
+                token=token,
+            )
+            return response
+        except Exception as ex:
+            logger.critical(f"Cannot unauthorize user: {ex}")
+
+
+    @staticmethod
     def validate_jwt(token: str,
                      ) -> List:
         try:

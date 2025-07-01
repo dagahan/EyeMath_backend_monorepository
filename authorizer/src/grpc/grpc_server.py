@@ -102,6 +102,31 @@ class GRPCAuthorizer(authorizer_rpc.GRPCAuthorizer):
             logger.error(f"Authorize user error: {error}")
             return authorizer_pb.authorize_response()
         
+    
+    @logger.catch
+    def unauthorize(self, request: authorizer_pb.unauthorize_request, context) -> authorizer_pb.unauthorize_response:
+        '''
+        This endpoint unauthorize through with credits.
+        Look at service's protobuf file to get more info.
+        '''
+        self.log_api._logrequest(request, context)
+
+        try:
+            authorizer_response = self.authorizer.unauthorize_user(
+                request.token,
+                )
+            
+            response = authorizer_pb.unauthorize_response(
+                result=authorizer_response['result'],
+            )
+
+            self.log_api._logresponse(response, context)
+            return response
+
+        except Exception as error:
+            logger.error(f"Authorize user error: {error}")
+            return authorizer_pb.unauthorize_response()
+        
 
     @logger.catch
     def validate_jwt(self, request: authorizer_pb.validate_jwt_request, context) -> authorizer_pb.validate_jwt_response:
