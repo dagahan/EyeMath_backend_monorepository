@@ -11,8 +11,6 @@ from src.services.jwt_parser import JwtParser
 from src.core.utils import EnvTools
 from typing import Any, Dict
 
-from datatime import datetime
-
 
 class Authorizer:
     def __init__(self) -> None:

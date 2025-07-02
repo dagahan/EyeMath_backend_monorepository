@@ -1,8 +1,21 @@
 # eye.math
 eye.math is a cutting-edge platform that allows users to solve handwritten mathematical problems at lightning speed.
 using advanced computer vision and machine learning algorithms, the platform analyzes images and converts them into mathematical equations, which are then solved in a step-by-step process.
+
+
+# Definition of problem
+The modern scientific and technological landscape is rapidly evolving, and at its heart are complex mathematical problems that form the foundation of engineering and computational sciences. Today, the need for fast and accurate solutions to nonlinear equations is becoming a fundamental requirement for students, educators, and engineers alike.
+
+Today's services either accurately recognize printed text or simply provide the result without explaining the steps leading to the answer. Most platforms focus on printed formulas and have low recognition accuracy for handwritten input, ranging from 65% to 85%. There is no comprehensive solution cycle available, from recognition to step-by-step problem-solving and LaTeX visualization.
+
+
+# Project goals
+The goal of the project is to create a highly efficient distributed platform that automates the process of recognizing handwritten mathematical problems and produces a ready-to-use visualization of the step-by-step solution in LaTeX format.
+This system addresses the main aspects of working with mathematical expressions, including: recognition of handwritten formulas using convolutional neural networks (CV models), algorithmic solution of equations step by step (using algorithms written in Python), and visualization in LaTeX.
+
+
 <p>
-    <img src="./assets/eye_math.png" alt="Eye Math Logo" width="250"/>
+    <img src="./.github/assets/eye_math.png" alt="Eye Math Logo" width="250"/>
 </p>
 
 ## Showcase
@@ -12,12 +25,12 @@ using advanced computer vision and machine learning algorithms, the platform ana
 
 ## Architecture
 <p>
-    <img src="./assets/architecture.png" alt="Architecture Diagram" width="900"/>
+    <img src="./.github/assets/architecture.png" alt="Architecture Diagram" width="900"/>
 </p>
 
 ## Tech Stack
 <p>
-    <img src="./assets/tech_stack.png" alt="Tech Stack" width="600"/>
+    <img src="./.github/assets/tech_stack.png" alt="Tech Stack" width="600"/>
 </p>
 
 * Python 3.13.x with UV, Ruff, and TY for high-performance execution;
