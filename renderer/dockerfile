@@ -32,6 +32,9 @@ RUN chown -R appuser:appuser /app
 RUN chmod -R a+rx /usr/local/bin
 
 
+RUN uv sync
+
+
 EXPOSE ${PORT}
 USER appuser
 CMD ["sh", "-c", "uv sync && uv run setup.py"]

@@ -34,23 +34,23 @@ services:
     restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  authorizer:
-    build: 
-      context: ./authorizer
-      dockerfile: dockerfile
-    image: authorizer
-    container_name: authorizer
-    env_file: .env
-    environment:
-      RUNNING_INSIDE_DOCKER: 1
-    ports:
-      - "${AUTHORIZER_APP_PORT}:${AUTHORIZER_APP_PORT}"
-    networks:
-      - eye_math_network
-    depends_on:
-      postgres:
-        condition: service_healthy
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # authorizer:
+  #   build: 
+  #     context: ./authorizer
+  #     dockerfile: dockerfile
+  #   image: authorizer
+  #   container_name: authorizer
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - "${AUTHORIZER_APP_PORT}:${AUTHORIZER_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
 
 # TODO: Recognizer is takes just too long time to download python dependensies, so it must be downloaded on image building stage in own dockerfile.
@@ -70,59 +70,59 @@ services:
   #   restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  renderer:
-    build: 
-      context: ./renderer
-      dockerfile: dockerfile
-    image: renderer
-    container_name: renderer
-    env_file: .env
-    environment:
-      RUNNING_INSIDE_DOCKER: 1
-    ports:
-      - "${RENDERER_APP_PORT}:${RENDERER_APP_PORT}"
-    networks:
-      - eye_math_network
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # renderer:
+  #   build: 
+  #     context: ./renderer
+  #     dockerfile: dockerfile
+  #   image: renderer
+  #   container_name: renderer
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - "${RENDERER_APP_PORT}:${RENDERER_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
 
-  solver:
-    build:
-      context: ./solver
-      dockerfile: dockerfile
-    image: solver
-    container_name: solver
-    env_file: .env
-    environment:
-      RUNNING_INSIDE_DOCKER: 1
-    ports:
-      - "${SOLVER_APP_PORT}:${SOLVER_APP_PORT}"
-    networks:
-      - eye_math_network
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # solver:
+  #   build:
+  #     context: ./solver
+  #     dockerfile: dockerfile
+  #   image: solver
+  #   container_name: solver
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - "${SOLVER_APP_PORT}:${SOLVER_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
   
-  postgres:
-    build:
-      context: ./postgres
-      dockerfile: dockerfile
-    image: postgres
-    container_name: postgres
-    env_file: .env
-    environment:
-      RUNNING_INSIDE_DOCKER: 1
-    ports:
-      - "${POSTGRES_APP_PORT}:${POSTGRES_APP_PORT}"
-    networks:
-      - eye_math_network
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    volumes:
-      - ./postgres-data:/var/lib/postgresql/data
-    restart: ${DOCKER_CONTAINERS_RESTART}
+  # postgres:
+  #   build:
+  #     context: ./postgres
+  #     dockerfile: dockerfile
+  #   image: postgres
+  #   container_name: postgres
+  #   env_file: .env
+  #   environment:
+  #     RUNNING_INSIDE_DOCKER: 1
+  #   ports:
+  #     - "${POSTGRES_APP_PORT}:${POSTGRES_APP_PORT}"
+  #   networks:
+  #     - eye_math_network
+  #   healthcheck:
+  #     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+  #     interval: 5s
+  #     timeout: 5s
+  #     retries: 10
+  #   volumes:
+  #     - ./postgres-data:/var/lib/postgresql/data
+  #   restart: ${DOCKER_CONTAINERS_RESTART}
 
 
   # prometheus:

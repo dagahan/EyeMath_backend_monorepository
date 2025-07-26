@@ -3,7 +3,6 @@ FROM python:3.13.5-alpine3.21
 
 RUN apk update && \
     apk add --no-cache \
-    build-base \
     git \
     curl \
     rm -rf /var/cache/apk/*
@@ -31,6 +30,9 @@ WORKDIR /app
 
 RUN chown -R appuser:appuser /app
 RUN chmod -R a+rx /usr/local/bin
+
+
+RUN uv sync
 
 
 EXPOSE ${PORT}
