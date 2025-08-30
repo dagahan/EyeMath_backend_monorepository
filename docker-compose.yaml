@@ -16,6 +16,10 @@ services:
     networks:
       - eye_math_network
     restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./nginx
 
 
   gateway:
@@ -32,6 +36,10 @@ services:
     networks:
       - eye_math_network
     restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./gateway
 
 
   # authorizer:
@@ -51,6 +59,10 @@ services:
   #     postgres:
   #       condition: service_healthy
   #   restart: ${DOCKER_CONTAINERS_RESTART}
+      # develop:
+      #   watch:
+      #   - action: rebuild
+      #     path: ./
 
 
 # TODO: Recognizer is takes just too long time to download python dependensies, so it must be downloaded on image building stage in own dockerfile.
@@ -68,6 +80,10 @@ services:
   #   networks:
   #     - eye_math_network
   #   restart: ${DOCKER_CONTAINERS_RESTART}
+      # develop:
+      #   watch:
+      #   - action: rebuild
+      #     path: ./
 
 
   # renderer:
@@ -84,6 +100,10 @@ services:
   #   networks:
   #     - eye_math_network
   #   restart: ${DOCKER_CONTAINERS_RESTART}
+      # develop:
+      #   watch:
+      #   - action: rebuild
+      #     path: ./
 
 
   # solver:
@@ -100,6 +120,10 @@ services:
   #   networks:
   #     - eye_math_network
   #   restart: ${DOCKER_CONTAINERS_RESTART}
+      # develop:
+      #   watch:
+      #   - action: rebuild
+      #     path: ./
 
   
   # postgres:
@@ -123,6 +147,10 @@ services:
   #   volumes:
   #     - ./postgres-data:/var/lib/postgresql/data
   #   restart: ${DOCKER_CONTAINERS_RESTART}
+      # develop:
+      #   watch:
+      #   - action: rebuild
+      #     path: ./
 
 
   # prometheus:
@@ -144,6 +172,10 @@ services:
   #   command:
   #     - --config.file=/etc/prometheus/prometheus.yml
   #   restart: ${DOCKER_CONTAINERS_RESTART}
+      # develop:
+      #   watch:
+      #   - action: rebuild
+      #     path: ./
 
 
   # grafana:
@@ -162,6 +194,10 @@ services:
   #   volumes:
   #     - ./grafana-data:/var/lib/grafana
   #   restart: ${DOCKER_CONTAINERS_RESTART}
+      # develop:
+      #   watch:
+      #   - action: rebuild
+      #     path: ./
     
 
 volumes:
