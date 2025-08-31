@@ -1,16 +1,4 @@
-FROM postgres:14
+FROM postgres:17.5-alpine3.22
 
 
-RUN apt-get update && apt-get install -y gettext-base && apt-get clean
-
-RUN mkdir -p /init-scripts && chown postgres:postgres /init-scripts && chmod 777 /init-scripts
-
-COPY init-scripts/ /init-scripts/
-
-RUN chown postgres:postgres /init-scripts/* && \
-    chmod +x /init-scripts/init-db.sh
-
-
-COPY /init-scripts/entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["entrypoint.sh"]
+RUN apk update && apk add --no-cache bash curl

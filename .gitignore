@@ -98,12 +98,13 @@ ipython_config.py
 #   Similar to Pipfile.lock, it is generally recommended to include uv.lock in version control.
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
 #   commonly ignored for libraries.
-#uv.lock
+uv.lock
 
 # poetry
 #   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.
 #   This is especially recommended for binary packages to ensure reproducibility, and is more
 #   commonly ignored for libraries.
+
 #   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control
 #poetry.lock
 
@@ -188,6 +189,7 @@ cython_debug/
 
 # volumes
 **postgres-data/
+**valkey-data/
 **prometheus-data/
 **grafana-data/
 
@@ -199,8 +201,17 @@ cython_debug/
 **/*.env
 **/uv.lock
 **/.ruff_cache
+**/.mypy_cache
 **/recived_images
 **/rendered_images
+
+
+# private_keys
+**/*.pem
+
+
+# db_migrations
+**/migrations/versions
 
 
 # IDE files
