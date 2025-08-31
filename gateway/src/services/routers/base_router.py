@@ -86,8 +86,8 @@ class BaseRouter:
         client_ip: Optional[str],
     ) -> dict[str, str]:
         """
-        Удаляем hop-by-hop заголовки (включая из Connection), Host;
-        добавляем/апдейтим X-Forwarded-For.
+        Remove hop-by-hop headers (including from Connection), Host;
+        add/update X-Forwarded-For.
         """
         headers: dict[str, str] = dict(incoming_headers)
 

@@ -5,12 +5,12 @@ export default function Solve(){
   el.className = "grid";
   el.innerHTML = `
     <div style="text-align: center; margin-bottom: 32px;">
-      <div class="h1">🧮 Решение математических выражений</div>
-      <p class="muted">Введите математическое выражение в LaTeX и получите пошаговое решение</p>
+      <div class="h1">🧮 Mathematical Expression Solving</div>
+      <p class="muted">Enter a mathematical expression in LaTeX and get step-by-step solution</p>
     </div>
     
     <div class="card">
-      <h3 style="margin: 0 0 20px; color: var(--text);">Введите выражение</h3>
+      <h3 style="margin: 0 0 20px; color: var(--text);">Enter Expression</h3>
       
       <div class="toolbar">
         <button class="toolbar-btn" data-insert="x^2">x²</button>
@@ -34,30 +34,30 @@ export default function Solve(){
           class="math-editor" 
           name="latex_expression" 
           id="latexInput"
-          placeholder="Введите математическое выражение в LaTeX формате, например: x^2 - 5x + 6 = 0"
+          placeholder="Enter mathematical expression in LaTeX format, e.g.: x^2 - 5x + 6 = 0"
           required
         ></textarea>
         
         <div style="margin: 20px 0; display: flex; gap: 16px; flex-wrap: wrap;">
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="checkbox" name="show_solving_steps" checked />
-            <span>Показать шаги решения</span>
+            <span>Show solving steps</span>
           </label>
           <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="checkbox" name="render_latex_expressions" checked />
-            <span>Рендерить LaTeX выражения</span>
+            <span>Render LaTeX expressions</span>
           </label>
         </div>
         
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
           <button class="btn" type="submit" id="solveBtn">
-            <span id="solveText">🧮 Решить</span>
+            <span id="solveText">🧮 Solve</span>
           </button>
           <button class="btn secondary" type="button" id="clearBtn">
-            🗑️ Очистить
+            🗑️ Clear
           </button>
           <button class="btn secondary" type="button" id="exampleBtn">
-            📝 Примеры
+            📝 Examples
           </button>
         </div>
       </form>
@@ -67,17 +67,17 @@ export default function Solve(){
 
     <div id="resultsContainer" style="display: none;">
       <div class="card" id="resultsCard">
-        <h3 style="margin: 0 0 16px; color: var(--text);">Результаты</h3>
+        <h3 style="margin: 0 0 16px; color: var(--text);">Results</h3>
         <div id="results" style="display: flex; flex-wrap: wrap; gap: 8px;"></div>
       </div>
       
       <div class="card" id="stepsCard" style="display: none;">
-        <h3 style="margin: 0 0 16px; color: var(--text);">Шаги решения</h3>
+        <h3 style="margin: 0 0 16px; color: var(--text);">Solving Steps</h3>
         <div id="steps"></div>
       </div>
       
       <div class="card" id="rendersCard" style="display: none;">
-        <h3 style="margin: 0 0 16px; color: var(--text);">Визуализация</h3>
+        <h3 style="margin: 0 0 16px; color: var(--text);">Visualization</h3>
         <div id="renders" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;"></div>
       </div>
     </div>
@@ -116,11 +116,11 @@ export default function Solve(){
   
   // Examples
   const examples = [
-    { name: "Квадратное уравнение", expr: "x^2 - 5x + 6 = 0" },
-    { name: "Интеграл", expr: "\\int_0^1 x^2 dx" },
-    { name: "Производная", expr: "\\frac{d}{dx}(x^3 + 2x^2 - 5x + 1)" },
-    { name: "Лимит", expr: "\\lim_{x \\to 0} \\frac{\\sin(x)}{x}" },
-    { name: "Система уравнений", expr: "\\begin{cases} x + y = 5 \\\\ 2x - y = 1 \\end{cases}" }
+    { name: "Quadratic equation", expr: "x^2 - 5x + 6 = 0" },
+    { name: "Integral", expr: "\\int_0^1 x^2 dx" },
+    { name: "Derivative", expr: "\\frac{d}{dx}(x^3 + 2x^2 - 5x + 1)" },
+    { name: "Limit", expr: "\\lim_{x \\to 0} \\frac{\\sin(x)}{x}" },
+    { name: "System of equations", expr: "\\begin{cases} x + y = 5 \\\\ 2x - y = 1 \\end{cases}" }
   ];
   
   exampleBtn.addEventListener('click', () => {
@@ -145,7 +145,7 @@ export default function Solve(){
     rendersCard.style.display = 'none';
     
     solveBtn.classList.add('loading');
-    solveText.textContent = 'Решение...';
+    solveText.textContent = 'Solving...';
     
     const data = Object.fromEntries(new FormData(form).entries());
     const payload = {
@@ -171,7 +171,7 @@ export default function Solve(){
       if (r.solving_steps?.length) {
         steps.innerHTML = r.solving_steps.map((step, i) => 
           `<div class="step-item">
-            <strong>Шаг ${i + 1}:</strong> ${step}
+            <strong>Step ${i + 1}:</strong> ${step}
           </div>`
         ).join('');
         stepsCard.style.display = 'block';
@@ -188,11 +188,11 @@ export default function Solve(){
       }
       
     } catch (ex) {
-      err.textContent = ex.message || "Ошибка решения";
+      err.textContent = ex.message || "Solving error";
       err.style.display = 'block';
     } finally {
       solveBtn.classList.remove('loading');
-      solveText.textContent = '🧮 Решить';
+      solveText.textContent = '🧮 Solve';
     }
   });
   

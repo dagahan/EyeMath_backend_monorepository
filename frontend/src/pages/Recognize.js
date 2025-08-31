@@ -5,38 +5,38 @@ export default function Recognize(){
   el.className = "grid";
   el.innerHTML = `
     <div style="text-align: center; margin-bottom: 32px;">
-      <div class="h1">📷 Распознавание математики</div>
-      <p class="muted">Загрузите изображение с математическим выражением и получите LaTeX код</p>
+      <div class="h1">📷 Math Recognition</div>
+      <p class="muted">Upload an image with a mathematical expression and get LaTeX code</p>
     </div>
     
     <div class="card" style="padding: 0; overflow: hidden;">
       <div class="drop-zone" id="dropZone">
         <div style="font-size: 48px; margin-bottom: 16px;">📁</div>
-        <h3 style="margin: 0 0 8px; color: var(--text);">Перетащите изображение сюда</h3>
-        <p style="margin: 0 0 16px; color: var(--muted);">или нажмите для выбора файла</p>
+        <h3 style="margin: 0 0 8px; color: var(--text);">Drag image here</h3>
+        <p style="margin: 0 0 16px; color: var(--muted);">or click to select file</p>
         <input type="file" id="fileInput" accept="image/*" style="display: none;" />
         <button class="btn secondary" type="button" onclick="document.getElementById('fileInput').click()">
-          Выбрать файл
+          Select File
         </button>
         <p style="margin: 16px 0 0; font-size: 12px; color: var(--muted);">
-          Поддерживаемые форматы: JPG, PNG, GIF, WebP
+          Supported formats: JPG, PNG, GIF, WebP
         </p>
       </div>
       
       <div id="imagePreview" style="display: none; padding: 20px; text-align: center;">
-        <img id="previewImg" class="image-preview" alt="Предпросмотр" />
+        <img id="previewImg" class="image-preview" alt="Preview" />
         <div id="progressContainer" style="display: none; margin: 16px 0;">
           <div style="background: var(--border); border-radius: 8px; height: 8px; overflow: hidden;">
             <div id="progressBar" style="background: linear-gradient(90deg, var(--primary), var(--accent)); height: 100%; width: 0%; transition: width 0.3s ease;"></div>
           </div>
-          <div id="progressText" style="margin-top: 8px; font-size: 14px; color: var(--muted);">Обработка...</div>
+          <div id="progressText" style="margin-top: 8px; font-size: 14px; color: var(--muted);">Processing...</div>
         </div>
         <div style="margin-top: 16px;">
           <button class="btn" id="recognizeBtn" type="button">
-            <span id="recognizeText">Распознать</span>
+            <span id="recognizeText">Recognize</span>
           </button>
           <button class="btn secondary" type="button" onclick="document.getElementById('fileInput').click()" style="margin-left: 8px;">
-            Выбрать другой файл
+            Select Another File
           </button>
         </div>
       </div>
@@ -45,37 +45,37 @@ export default function Recognize(){
     <div class="notice error" id="err" style="display:none"></div>
     
     <div class="card" id="resultCard" style="display:none">
-      <h3 style="margin: 0 0 16px; color: var(--text);">Результат распознавания</h3>
+      <h3 style="margin: 0 0 16px; color: var(--text);">Recognition Result</h3>
       
       <div class="result-card">
-        <h4 style="margin: 0 0 12px; color: var(--text);">Исходный LaTeX:</h4>
+        <h4 style="margin: 0 0 12px; color: var(--text);">Original LaTeX:</h4>
         <div style="background: var(--elevated); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-break: break-all;" id="latex"></div>
         <button class="btn secondary" id="copyLatexBtn" type="button" style="margin-top: 12px;">
-          📋 Копировать LaTeX
+          📋 Copy LaTeX
         </button>
       </div>
       
       <div class="result-card">
-        <h4 style="margin: 0 0 12px; color: var(--text);">Нормализованный LaTeX (SymPy):</h4>
+        <h4 style="margin: 0 0 12px; color: var(--text);">Normalized LaTeX (SymPy):</h4>
         <div style="background: var(--elevated); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'Courier New', monospace; font-size: 14px; line-height: 1.5; white-space: pre-wrap; word-break: break-all; min-height: 60px; display: flex; align-items: center; justify-content: center; color: var(--muted);" id="norm">
-          Нажмите "Нормализовать" для получения SymPy-LaTeX
+          Click "Normalize" to get SymPy-LaTeX
         </div>
         <div style="margin-top: 12px;">
           <button class="btn secondary" id="normalizeBtn" type="button">
-            🔄 Нормализовать
+            🔄 Normalize
           </button>
           <button class="btn secondary" id="copyNormBtn" type="button" style="margin-left: 8px; display: none;">
-            📋 Копировать нормализованный
+            📋 Copy Normalized
           </button>
         </div>
       </div>
       
       <div style="margin-top: 24px; text-align: center;">
         <button class="btn" onclick="location.hash='#/solve'" style="margin-right: 8px;">
-          🧮 Решить это выражение
+          🧮 Solve This Expression
         </button>
         <button class="btn secondary" onclick="location.hash='#/render'">
-          🎨 Рендерить в изображение
+          🎨 Render to Image
         </button>
       </div>
     </div>
@@ -131,7 +131,7 @@ export default function Recognize(){
   
   function handleFile(file) {
     if (!file.type.startsWith('image/')) {
-      showError('Пожалуйста, выберите изображение');
+      showError('Please select an image');
       return;
     }
     
@@ -153,18 +153,18 @@ export default function Recognize(){
     if (recognizeBtn.classList.contains('loading')) return;
     
     recognizeBtn.classList.add('loading');
-    recognizeText.textContent = 'Распознавание...';
+    recognizeText.textContent = 'Recognizing...';
     err.style.display = 'none';
     resultCard.style.display = 'none';
     
     try {
       // Show progress
       progressContainer.style.display = 'block';
-      updateProgress(10, 'Оптимизация изображения...');
+      updateProgress(10, 'Optimizing image...');
       
       // Optimize image before sending
       const optimizedFile = await optimizeImage(currentFile);
-      updateProgress(30, 'Отправка на сервер...');
+      updateProgress(30, 'Sending to server...');
       
       const fd = new FormData();
       fd.append('file', optimizedFile);
@@ -173,21 +173,21 @@ export default function Recognize(){
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
       
-      updateProgress(50, 'Распознавание...');
+      updateProgress(50, 'Recognizing...');
       const res = await authForm("/recognizer/image", fd, controller.signal);
       clearTimeout(timeoutId);
       
-      updateProgress(90, 'Обработка результата...');
+      updateProgress(90, 'Processing result...');
       
       latexEl.textContent = res.latex || "";
       resultCard.style.display = 'block';
       
       // Reset normalize section
-      normEl.textContent = 'Нажмите "Нормализовать" для получения SymPy-LaTeX';
+      normEl.textContent = 'Click "Normalize" to get SymPy-LaTeX';
       normEl.style.color = 'var(--muted)';
       copyNormBtn.style.display = 'none';
       
-      updateProgress(100, 'Готово!');
+      updateProgress(100, 'Done!');
       setTimeout(() => {
         progressContainer.style.display = 'none';
       }, 1000);
@@ -195,13 +195,13 @@ export default function Recognize(){
     } catch (ex) {
       progressContainer.style.display = 'none';
       if (ex.name === 'AbortError') {
-        showError('Превышено время ожидания. Попробуйте еще раз.');
+        showError('Timeout exceeded. Please try again.');
       } else {
-        showError(ex.message || "Ошибка распознавания");
+        showError(ex.message || "Recognition error");
       }
     } finally {
       recognizeBtn.classList.remove('loading');
-      recognizeText.textContent = 'Распознать';
+      recognizeText.textContent = 'Recognize';
     }
   });
   
@@ -210,7 +210,7 @@ export default function Recognize(){
     if (!latex) return;
     
     normalizeBtn.classList.add('loading');
-    normalizeBtn.textContent = '🔄 Нормализация...';
+    normalizeBtn.textContent = '🔄 Normalizing...';
     
     try {
       const res = await authJson("POST", "/recognizer/normalize", { expression: latex });
@@ -218,27 +218,27 @@ export default function Recognize(){
       normEl.style.color = 'var(--text)';
       copyNormBtn.style.display = 'inline-block';
     } catch (ex) {
-      normEl.textContent = "Ошибка нормализации: " + (ex.message || "");
+      normEl.textContent = "Normalization error: " + (ex.message || "");
       normEl.style.color = '#ef4444';
     } finally {
       normalizeBtn.classList.remove('loading');
-      normalizeBtn.textContent = '🔄 Нормализовать';
+      normalizeBtn.textContent = '🔄 Normalize';
     }
   });
   
   copyLatexBtn.addEventListener('click', () => {
     navigator.clipboard.writeText(latexEl.textContent);
-    copyLatexBtn.textContent = '✅ Скопировано!';
+    copyLatexBtn.textContent = '✅ Copied!';
     setTimeout(() => {
-      copyLatexBtn.textContent = '📋 Копировать LaTeX';
+      copyLatexBtn.textContent = '📋 Copy LaTeX';
     }, 2000);
   });
   
   copyNormBtn.addEventListener('click', () => {
     navigator.clipboard.writeText(normEl.textContent);
-    copyNormBtn.textContent = '✅ Скопировано!';
+    copyNormBtn.textContent = '✅ Copied!';
     setTimeout(() => {
-      copyNormBtn.textContent = '📋 Копировать нормализованный';
+      copyNormBtn.textContent = '📋 Copy Normalized';
     }, 2000);
   });
   

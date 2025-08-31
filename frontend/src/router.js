@@ -27,7 +27,7 @@ export function startRouter(mount) {
 
     mount.replaceChildren(make(new URLSearchParams(query || "")));
 
-    // показать/скрыть элементы меню по авторизации
+    // show/hide menu elements by authorization
     const authed =
       !!localStorage.getItem("em_access") || !!localStorage.getItem("em_refresh");
     document.querySelectorAll(".auth-only").forEach((el) => {
