@@ -3,9 +3,16 @@ FROM python:3.13.5-alpine3.21
 
 RUN apk update && \
     apk add --no-cache \
+    build-base \
+    bash \
     git \
     curl \
-    rm -rf /var/cache/apk/*
+    linux-headers \
+    musl-dev \
+    ca-certificates \
+    tzdata \
+  && update-ca-certificates \
+  && rm -rf /var/cache/apk/*
 
 
 RUN adduser -D appuser && \
@@ -32,9 +39,10 @@ RUN chown -R appuser:appuser /app
 RUN chmod -R a+rx /usr/local/bin
 
 
-RUN uv sync
+RUN uv sync && chown -R appuser:appuser /app
 
 
 EXPOSE ${PORT}
 USER appuser
-CMD ["sh", "-c", "uv sync && uv run setup.py"]
+ENTRYPOINT ["./entrypoint.sh"]
+

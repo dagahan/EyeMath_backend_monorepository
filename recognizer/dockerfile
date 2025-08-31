@@ -1,21 +1,21 @@
 FROM python:3.13.5-slim
+# Here we using ubuntu because alpine is not supported by pytorch
+# wheels only for manylinux_2_28_x86_64 / aarch64 / mac / win
 
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-      protobuf-compiler \
-      git \
-      curl \
-      ca-certificates \
-      libgl1 \
-      libglib2.0-0 \
-      libsm6 \
-      libxrender1 \
-      libxext6 && \
-    rm -rf /var/lib/apt/lists/*
+    build-essential \
+    bash \
+    git \
+    curl \
+    ca-certificates \
+    tzdata \
+  && update-ca-certificates \
+  && rm -rf /var/lib/apt/lists/*
 
 
-RUN useradd -m appuser && \
+RUN adduser --disabled-password --gecos "" appuser && \
     mkdir -p /app/gen && \
     chown -R appuser:appuser /app
 
@@ -23,6 +23,7 @@ RUN useradd -m appuser && \
 RUN curl -fsSL https://astral.sh/uv/install.sh -o /tmp/uv-installer.sh
 RUN sh /tmp/uv-installer.sh ~/.local/bin \
     && rm /tmp/uv-installer.sh
+
 
 RUN mv /root/.local/bin/uv /usr/local/bin/uv \
     && mv /root/.local/bin/uvx /usr/local/bin/uvx \
@@ -38,9 +39,11 @@ RUN chown -R appuser:appuser /app
 RUN chmod -R a+rx /usr/local/bin
 
 
-RUN uv sync
+RUN uv sync && chown -R appuser:appuser /app
 
 
 EXPOSE ${PORT}
 USER appuser
-CMD ["sh", "-c", "uv sync && uv run setup.py"]
+ENTRYPOINT ["./entrypoint.sh"]
+
+

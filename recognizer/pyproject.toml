@@ -1,31 +1,89 @@
 [project]
 name = "recognizer"
-version = "0.0.1"
+version = "0.1.0"
 requires-python = "==3.13.5"
 dependencies = [
     "loguru==0.7.3",
-    "grpcio-tools==1.72.1",
-    "grpcio-reflection==1.72.1",
     "colorama==0.4.6",
-    "tabulate==0.9.0",
-    "chardet==5.2.0",
-    "python-dotenv==1.1.0",
+    "fastapi==0.116.0",
+    "uvicorn==0.35.0",
+    "chardet==5.2.0",    
+    "Authlib==0.14.3",
+    "itsdangerous==1.1.0",
+    "passlib==1.7.2",
+    "pydantic==2.11.7",
+    "bcrypt==4.3.0",
+    "valkey==6.1.0",
+    "redis==6.4.0",
+    "SQLAlchemy==2.0.41",
+    "psycopg[binary]==3.2.9",
+    "asyncpg==0.30.0",
+    "python-jose[cryptography]==3.3.0",
+    "cryptography==42.0.8",
+    "dotenv==0.9.9",
+    "aiobotocore==2.24.1",
     "pix2tex==0.1.4",
     "opencv-python-headless==4.11.0.86",
-    "eyemath-protos @ git+https://github.com/dagahan/EyeMath_protos.git",
+    "python-multipart==0.0.20",
+    "eyemath-models @ git+https://github.com/dagahan/eyemath_models.git",
+    ]
+
+
+[project.optional-dependencies]
+dev = [
+    "ruff==0.12.10",
+    "mypy>=1.17.1",
 ]
-show_params_on_run = true
-# debug_mode parameter is declaring in .env file!
 
 
-# [tool.ruff]
-# line-length = 88
-
+[tool.ruff]
+target-version = "py313"
+line-length = 100
 
 [tool.ruff.lint]
-extend-select = ["W", "N", "R", "I"]
-# Letters means included rules classes from PEP8
-ignore = ["W293"]
+select = ["E", "F", "B", "UP", "I", "W", "N", "ANN", "TCH"]
+ignore = ["ANN401", "W293", "F403", "F405"]
+unfixable = ["ANN"]
+
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unused_configs = true
+show_error_codes = true
+pretty = true
+
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_calls = true
+no_implicit_optional = true
+warn_return_any = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+check_untyped_defs = true
+
+plugins = [
+  "pydantic.mypy",
+  "sqlalchemy.ext.mypy.plugin", 
+]
+
+[mypy-aiobotocore]
+ignore_missing_imports = true
+[mypy-botocore]
+ignore_missing_imports = true
+[mypy-loguru]
+ignore_missing_imports = true
+[mypy-starlette]
+ignore_missing_imports = true
+[mypy-fastapi]
+ignore_missing_imports = true
+
+
+
+[db]
+echo = false
+pool_size = 5
+max_overflow = 10
 
 
 [recognizer]
@@ -34,11 +92,3 @@ recieved_img_dir = "recived_images"
 preprocess_imgs = true
 
 
-[grpc_server]
-max_workers = 15
-reload = true
-log_requests = true
-log_responses = false
-log_huge_reqs_and_resps = false
-replace_huge_logs_by_small_msgs = true
-count_of_chars_in_huge_logs = 200

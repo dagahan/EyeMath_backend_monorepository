@@ -1,17 +1,4 @@
 FROM postgres:17.5-alpine3.22
 
 
-RUN apk update && apk add --no-cache gettext bash && rm -rf /var/cache/apk/*
-
-RUN mkdir -p /init-scripts && \
-    chown postgres:postgres /init-scripts && \
-    chmod 755 /init-scripts
-
-COPY init-scripts/ /init-scripts/
-
-RUN chown postgres:postgres /init-scripts/* && \
-    chmod +x /init-scripts/entrypoint.sh
-
-RUN mv /init-scripts/entrypoint.sh /usr/local/bin/
-
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+RUN apk update && apk add --no-cache bash curl

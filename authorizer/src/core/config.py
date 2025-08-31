@@ -1,18 +1,20 @@
-import tomllib
-from typing import Any
+from __future__ import annotations
 
-import colorama
+import tomllib
+from typing import Any, ClassVar
+
+import colorama# type: ignore[import-untyped]
 from loguru import logger
 
 from src.core.utils import EnvTools, MethodTools
 
 
 class ConfigLoader:
-    __instance = None
-    __config = None
+    __instance: ClassVar[ConfigLoader | None] = None
+    __config: ClassVar[dict[str, Any]] = {}
 
 
-    def __new__(cls) -> None:
+    def __new__(cls) -> ConfigLoader:
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
             cls._load()
@@ -25,9 +27,8 @@ class ConfigLoader:
             with open("pyproject.toml", "rb") as f:
                 cls.__config = tomllib.load(f)
             EnvTools.set_env_var("CONFIG_LOADED", "1")
-
-        except Exception as ex:
-            logger.critical(f"Config load failed: {ex}")
+        except Exception as error:
+            logger.critical("Config load failed: {error}", error=error)
             raise
 
 
@@ -46,4 +47,4 @@ class ConfigLoader:
 
 
     def __getitem__(self, section: str) -> Any:
-        return self.get(section)
+        return type(self).get(section)

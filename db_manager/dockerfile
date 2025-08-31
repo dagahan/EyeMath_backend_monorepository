@@ -1,0 +1,46 @@
+FROM python:3.13.5-alpine3.21
+
+
+RUN apk update && \
+    apk add --no-cache \
+    build-base \
+    git \
+    curl \
+    linux-headers \
+    musl-dev \
+    ca-certificates \
+    tzdata \
+  && update-ca-certificates \
+  && rm -rf /var/cache/apk/*
+
+
+RUN adduser -D appuser && \
+    mkdir -p /app/gen && \
+    chown -R appuser:appuser /app
+
+
+RUN curl -fsSL https://astral.sh/uv/install.sh -o /tmp/uv-installer.sh
+RUN sh /tmp/uv-installer.sh ~/.local/bin \
+    && rm /tmp/uv-installer.sh
+
+
+RUN mv /root/.local/bin/uv /usr/local/bin/uv \
+    && mv /root/.local/bin/uvx /usr/local/bin/uvx \
+    && chmod +x /usr/local/bin/uv /usr/local/bin/uvx
+ENV PATH="/usr/local/bin:${PATH}"
+
+
+COPY . /app
+WORKDIR /app
+
+
+RUN chown -R appuser:appuser /app
+RUN chmod -R a+rx /usr/local/bin
+
+
+RUN uv sync
+
+
+EXPOSE ${PORT}
+USER appuser
+CMD ["sh", "-c", "uv sync && uv run main.py"]
