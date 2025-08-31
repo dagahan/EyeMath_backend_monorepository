@@ -1,0 +1,90 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>eye.math - lightning speen math solver</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+
+    <script type="module" src="/src/main.js"></script>
+  </head>
+
+  <body>
+    <div class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a class="corner-logo" href="/" aria-label="eye.math">
+          <div style="display: flex; align-items: center; justify-content: center; color: var(--text); font-weight: 700; font-size: 24px; padding: 8px 16px;">
+            <span style="background: linear-gradient(135deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-weight: 800; text-align: center;">
+              eye.math
+            </span>
+          </div>
+        </a>
+
+        <a class="nav-link" href="#/">Home</a>
+        <a class="nav-link" href="#/recognize">Recognition</a>
+        <a class="nav-link" href="#/solve">Solving</a>
+        <a class="nav-link" href="#/render">Rendering</a>
+        <span class="spacer"></span>
+        <a class="nav-link auth-only" data-auth="out" href="#/login">Sign In</a>
+        <a class="nav-link auth-only" data-auth="out" href="#/register">Register</a>
+        <button id="logoutBtn" class="nav-link auth-only" data-auth="in" type="button">Sign Out</button>
+
+        <div class="theme-switcher">
+          <button
+            id="themeBtn"
+            class="theme-trigger"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="themeMenu"
+            title="Choose theme"
+          >
+            Theme
+          </button>
+
+          <ul id="themeMenu" class="theme-menu" role="menu" hidden>
+            <li role="none">
+              <button
+                class="theme-item"
+                role="menuitemradio"
+                data-theme="system"
+                aria-checked="true"
+                tabindex="-1"
+              >
+                System
+              </button>
+            </li>
+
+            <li role="none">
+              <button
+                class="theme-item"
+                role="menuitemradio"
+                data-theme="light"
+                aria-checked="false"
+                tabindex="-1"
+              >
+                Light
+              </button>
+            </li>
+
+            <li role="none">
+              <button
+                class="theme-item"
+                role="menuitemradio"
+                data-theme="dark"
+                aria-checked="false"
+                tabindex="-1"
+              >
+                Dark
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <main class="container" id="app">
+      <!-- App content will be loaded here -->
+    </main>
+  </body>
+</html>

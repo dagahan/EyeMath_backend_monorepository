@@ -1,0 +1,27 @@
+{
+  "name": "eye-math-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for eye.math - Open Source AI-powered mathematical problem solver",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "serve": "serve -s dist -l 4173"
+  },
+  "dependencies": {
+    "serve": "^14.2.1"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "keywords": [
+    "mathematics",
+    "ai",
+    "latex",
+    "recognition",
+    "open-source"
+  ],
+  "author": "eye.math team",
+  "license": "MIT"
+}

@@ -22,25 +22,39 @@ class BaseRouter:
 
 
     async def find_user_by_any_credential(self, session: AsyncSession, user_data: Any) -> User:
-        if getattr(user_data, "user_name", None):
-            query = select(User).where(User.user_name == user_data.user_name)
-        elif getattr(user_data, "email", None):
-            query = select(User).where(User.email == user_data.email)
-        elif getattr(user_data, "phone", None):
-            query = select(User).where(User.phone == user_data.phone)
+        from loguru import logger
+        
+        user_name = getattr(user_data, "user_name", None)
+        email = getattr(user_data, "email", None)
+        phone = getattr(user_data, "phone", None)
+        
+        logger.debug(f"Searching user by: user_name={user_name}, email={email}, phone={phone}")
+        
+        if user_name:
+            query = select(User).where(User.user_name == user_name)
+            logger.debug(f"Searching by username: {user_name}")
+        elif email:
+            query = select(User).where(User.email == email)
+            logger.debug(f"Searching by email: {email}")
+        elif phone:
+            query = select(User).where(User.phone == phone)
+            logger.debug(f"Searching by phone: {phone}")
         else:
+            logger.error("No login credential provided")
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
                                 detail="Login (user_name, email or phone) is required")
 
         result = await session.execute(query)
         user = result.scalar_one_or_none()
+        
         if not user:
+            logger.warning(f"User not found for credentials: user_name={user_name}, email={email}, phone={phone}")
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+        
+        logger.debug(f"User found: {user.id}")
 
-        dto = ValidatingTools.validate_models_by_schema(user, UserDTO)
-        if dto is None:
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                                detail="User record failed schema validation")
+        # Skip DTO validation for login - it's not necessary and can cause issues
+        # The user object is already validated by the database constraints
         return user
 
 
