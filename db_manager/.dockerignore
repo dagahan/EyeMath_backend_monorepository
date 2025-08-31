@@ -1,0 +1,7 @@
+proto/
+debug/
+**/__pycache__
+**/.venv
+**/*.pyc
+**/uv.lock
+**/.ruff_cache

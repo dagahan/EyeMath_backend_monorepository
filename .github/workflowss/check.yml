@@ -14,15 +14,15 @@ jobs:
       RUNNING_INSIDE_DOCKER: 1
       DOCKER_CONTAINERS_RESTART: ${{ secrets.DOCKER_CONTAINERS_RESTART }}
       GATEWAY_HOST: ${{ secrets.GATEWAY_HOST }}
-      GATEWAY_APP_PORT: ${{ secrets.GATEWAY_APP_PORT }}
+      GATEWAY_PORT: ${{ secrets.GATEWAY_PORT }}
       GATEWAY_GRPC_HOST: ${{ secrets.GATEWAY_GRPC_HOST }}
-      GATEWAY_GRPC_APP_PORT: ${{ secrets.GATEWAY_GRPC_APP_PORT }}
+      GATEWAY_GRPC_PORT: ${{ secrets.GATEWAY_GRPC_PORT }}
       RECOGNIZER_HOST: ${{ secrets.RECOGNIZER_HOST }}
-      RECOGNIZER_APP_PORT: ${{ secrets.RECOGNIZER_APP_PORT }}
+      RECOGNIZER_PORT: ${{ secrets.RECOGNIZER_PORT }}
       RENDERER_HOST: ${{ secrets.RENDERER_HOST }}
-      RENDERER_APP_PORT: ${{ secrets.RENDERER_APP_PORT }}
+      RENDERER_PORT: ${{ secrets.RENDERER_PORT }}
       SOLVER_HOST: ${{ secrets.SOLVER_HOST }}
-      SOLVER_APP_PORT: ${{ secrets.SOLVER_APP_PORT }}
+      SOLVER_PORT: ${{ secrets.SOLVER_PORT }}
 
     steps:
     - name: Checkout code

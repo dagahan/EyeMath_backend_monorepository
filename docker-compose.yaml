@@ -6,113 +6,163 @@ services:
     build:
       context: ./nginx
       dockerfile: dockerfile
-    image: nginx
-    container_name: nginx
+    image: nginx-${COMPOSE_PROJECT_NAME}
+    container_name: nginx-${COMPOSE_PROJECT_NAME}
     env_file: .env
     environment:
       RUNNING_INSIDE_DOCKER: 1
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     ports:
-      - "${NGINX_APP_PORT}:${NGINX_APP_PORT}"
+      - "${NGINX_PORT}:${NGINX_PORT}"
     networks:
       - eye_math_network
     restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./nginx
 
 
   gateway:
     build:
       context: ./gateway
       dockerfile: dockerfile
-    image: gateway
-    container_name: gateway
+    image: gateway-${COMPOSE_PROJECT_NAME}
+    container_name: gateway-${COMPOSE_PROJECT_NAME}
     env_file: .env
     environment:
       RUNNING_INSIDE_DOCKER: 1
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     ports:
-      - "${GATEWAY_APP_PORT}:${GATEWAY_APP_PORT}"
+      - "${GATEWAY_PORT}:${GATEWAY_PORT}"
     networks:
       - eye_math_network
     restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./gateway
 
 
   authorizer:
-    build: 
+    build:
       context: ./authorizer
       dockerfile: dockerfile
-    image: authorizer
-    container_name: authorizer
+    image: authorizer-${COMPOSE_PROJECT_NAME}
+    container_name: authorizer-${COMPOSE_PROJECT_NAME}
     env_file: .env
     environment:
       RUNNING_INSIDE_DOCKER: 1
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     ports:
-      - "${AUTHORIZER_APP_PORT}:${AUTHORIZER_APP_PORT}"
+      - "${AUTHORIZER_PORT}:${AUTHORIZER_PORT}"
     networks:
       - eye_math_network
-    depends_on:
-      postgres:
-        condition: service_healthy
     restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./
 
 
-# TODO: Recognizer is takes just too long time to download python dependensies, so it must be downloaded on image building stage in own dockerfile.
-  # recognizer:
-  #   build: 
-  #     context: ./recognizer
-  #     dockerfile: dockerfile
-  #   image: recognizer
-  #   container_name: recognizer
-  #   env_file: .env
-  #   environment:
-  #     RUNNING_INSIDE_DOCKER: 1
-  #   ports:
-  #     - "${RECOGNIZER_APP_PORT}:${RECOGNIZER_APP_PORT}"
-  #   networks:
-  #     - eye_math_network
-  #   restart: ${DOCKER_CONTAINERS_RESTART}
+  recognizer:
+    build: 
+      context: ./recognizer
+      dockerfile: dockerfile
+    image: recognizer-${COMPOSE_PROJECT_NAME}
+    container_name: recognizer-${COMPOSE_PROJECT_NAME}
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    ports:
+      - "${RECOGNIZER_PORT}:${RECOGNIZER_PORT}"
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+      - action: rebuild
+        path: ./
 
 
   renderer:
     build: 
       context: ./renderer
       dockerfile: dockerfile
-    image: renderer
-    container_name: renderer
+    image: renderer-${COMPOSE_PROJECT_NAME}
+    container_name: renderer-${COMPOSE_PROJECT_NAME}
     env_file: .env
     environment:
       RUNNING_INSIDE_DOCKER: 1
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     ports:
-      - "${RENDERER_APP_PORT}:${RENDERER_APP_PORT}"
+      - "${RENDERER_PORT}:${RENDERER_PORT}"
     networks:
       - eye_math_network
     restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+      - action: rebuild
+        path: ./
 
 
   solver:
     build:
       context: ./solver
       dockerfile: dockerfile
-    image: solver
-    container_name: solver
+    image: solver-${COMPOSE_PROJECT_NAME}
+    container_name: solver-${COMPOSE_PROJECT_NAME}
     env_file: .env
     environment:
       RUNNING_INSIDE_DOCKER: 1
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     ports:
-      - "${SOLVER_APP_PORT}:${SOLVER_APP_PORT}"
+      - "${SOLVER_PORT}:${SOLVER_PORT}"
     networks:
       - eye_math_network
     restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+      - action: rebuild
+        path: ./
+
+
+  valkey:
+    build:
+      context: ./valkey
+      dockerfile: dockerfile
+    image: valkey-${COMPOSE_PROJECT_NAME}
+    container_name: valkey-${COMPOSE_PROJECT_NAME}
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+    ports:
+      - "${VALKEY_PORT}:${VALKEY_PORT}"
+    networks:
+      - eye_math_network
+    volumes:
+      - ./valkey-data:/var/lib/valkey/data
+    restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./
 
   
   postgres:
     build:
       context: ./postgres
       dockerfile: dockerfile
-    image: postgres
-    container_name: postgres
+    image: postgres-${COMPOSE_PROJECT_NAME}
+    container_name: postgres-${COMPOSE_PROJECT_NAME}
     env_file: .env
     environment:
       RUNNING_INSIDE_DOCKER: 1
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     ports:
-      - "${POSTGRES_APP_PORT}:${POSTGRES_APP_PORT}"
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     networks:
       - eye_math_network
     healthcheck:
@@ -123,6 +173,10 @@ services:
     volumes:
       - ./postgres-data:/var/lib/postgresql/data
     restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./
 
 
   # prometheus:
@@ -135,7 +189,7 @@ services:
   #   environment:
   #     RUNNING_INSIDE_DOCKER: 1
   #   ports:
-  #     - "${PROMETHEUS_APP_PORT}:${PROMETHEUS_APP_PORT}"
+  #     - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
   #   networks:
   #     - eye_math_network
   #   volumes:
@@ -144,6 +198,10 @@ services:
   #   command:
   #     - --config.file=/etc/prometheus/prometheus.yml
   #   restart: ${DOCKER_CONTAINERS_RESTART}
+      # develop:
+      #   watch:
+      #   - action: rebuild
+      #     path: ./
 
 
   # grafana:
@@ -156,12 +214,16 @@ services:
   #   environment:
   #     RUNNING_INSIDE_DOCKER: 1
   #   ports:
-  #     - "${GRAFANA_APP_PORT}:${GRAFANA_APP_PORT}"
+  #     - "${GRAFANA_PORT}:${GRAFANA_PORT}"
   #   networks:
   #     - eye_math_network
   #   volumes:
   #     - ./grafana-data:/var/lib/grafana
   #   restart: ${DOCKER_CONTAINERS_RESTART}
+      # develop:
+      #   watch:
+      #   - action: rebuild
+      #     path: ./
     
 
 volumes:

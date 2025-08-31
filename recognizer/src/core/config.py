@@ -1,18 +1,20 @@
-import tomllib
-from typing import Any
+from __future__ import annotations
 
-import colorama
+import tomllib
+from typing import Any, ClassVar
+
+import colorama# type: ignore[import-untyped]
 from loguru import logger
 
 from src.core.utils import EnvTools, MethodTools
 
 
 class ConfigLoader:
-    __instance = None
-    __config = None
+    __instance: ClassVar[ConfigLoader | None] = None
+    __config: ClassVar[dict[str, Any]] = {}
 
 
-    def __new__(cls) -> None:
+    def __new__(cls) -> ConfigLoader:
         if cls.__instance is None:
             cls.__instance = super().__new__(cls)
             cls._load()
@@ -45,4 +47,4 @@ class ConfigLoader:
 
 
     def __getitem__(self, section: str) -> Any:
-        return self.get(section)
+        return type(self).get(section)
