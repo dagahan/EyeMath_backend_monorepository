@@ -8,20 +8,20 @@
 
 ## 🚀 Features
 
-- **95% Recognition Accuracy** - Advanced computer vision models for handwritten math
-- **Lightning Fast Processing** - Sub-2 second response times
-- **Step-by-Step Solutions** - Detailed mathematical explanations
-- **LaTeX Visualization** - Professional-quality mathematical rendering
-- **Open Source** - MIT licensed, contributions welcome
-- **Modern Architecture** - Microservices with Docker & Kubernetes support
+- **95% Recognition Accuracy** - Advanced computer vision models for handwritten math;
+- **Lightning Fast Processing** - Sub-2 second response times;
+- **Step-by-Step Solutions** - Detailed mathematical explanations;
+- **LaTeX Visualization** - Professional-quality mathematical rendering;
+- **Open Source** - MIT licensed, contributions welcome;
+- **Modern Architecture** - Microservices with Docker & Kubernetes support.
 
 ## 🎯 Problem Solved
 
 Most mathematical recognition services either:
-- Only handle printed text accurately
-- Provide results without explanations
-- Have low accuracy (65-85%) for handwritten input
-- Lack comprehensive solution workflows
+- Only handle printed text accurately;
+- Provide results without explanations;
+- Have low accuracy (65-85%) for handwritten input;
+- Lack comprehensive solution workflows.
 
 **eye.math** bridges this gap with a complete pipeline from handwritten recognition to LaTeX visualization.
 
@@ -45,24 +45,23 @@ Most mathematical recognition services either:
 </p>
 
 ### Backend
-- **Python 3.13.x** with UV, Ruff for high-performance execution
-- **PyTorch** with CUDA acceleration for computer vision models
-- **OpenCV** for advanced image preprocessing pipelines
-- **FastAPI** for modern REST API development
-- **PostgreSQL** for reliable data storage
-- **Redis** for caching and session management
+- **Python 3.13.x** with UV, Ruff for high-performance execution;
+- **PyTorch** with CUDA acceleration for computer vision models;
+- **OpenCV** for advanced image preprocessing pipelines;
+- **FastAPI** for modern REST API development;
+- **PostgreSQL** for reliable data storage;
+- **Valkey** for caching and session management.
 
 ### Frontend
-- **Vanilla JavaScript** with modern ES6+ features
-- **CSS3** with advanced animations and responsive design
-- **Vite** for fast development and building
+- **Vanilla JavaScript** with modern ES6+ features;
+- **CSS3** with advanced animations and responsive design;
+- **Vite** for fast development and building.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Docker & Docker Compose
-- Git
-
+- Docker & Docker Compose;
+- Git.
 ### Installation
 
 1. **Clone the repository**
@@ -112,16 +111,16 @@ npm run dev
 We welcome contributions! This is an open source project under MIT license.
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`);
+3. Commit your changes (`git commit -m 'Add amazing feature'`);
+4. Push to the branch (`git push origin feature/amazing-feature`);
+5. Open a Pull Request.
 
 ## 📞 Contact
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/dagahan/EyeMath_backend_monorepository/issues)
-- **Telegram**: [@dagahan](https://t.me/dagahan)
-- **Email**: your.email@example.com
+- **GitHub Issues**: [Report bugs or request features](https://github.com/dagahan/EyeMath_backend_monorepository/issues);
+- **Telegram**: [@dagahan](https://t.me/dagahan);
+- **Email**: dagahanwork@gmail.com.
 
 ## 📄 License
 
@@ -130,5 +129,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 <p align="center">
-  Made with ❤️ by the eye.math team
+  Made with ❤️ for math by Usov Nikita.
 </p>
