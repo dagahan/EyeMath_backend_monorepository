@@ -57,7 +57,7 @@ def get_user_router(db: DataBase) -> APIRouter:
         if data.email and not await base_router.is_attribute_unique(session, User.email, data.email):
             raise base_router.http_ex_attribute_is_not_unique(User.email, "User")
         
-        if data.phone and not await base_router.is_attribute_unique(session, User.phone, data.phone):
+        if data.phone and data.phone != "0000000000" and not await base_router.is_attribute_unique(session, User.phone, data.phone):
             raise base_router.http_ex_attribute_is_not_unique(User.phone, "User")
 
         if data.user_name and not await base_router.is_attribute_unique(session, User.user_name, data.user_name):
@@ -71,7 +71,7 @@ def get_user_router(db: DataBase) -> APIRouter:
                 last_name=data.last_name.capitalize(),
                 middle_name=data.middle_name.capitalize(),
                 email=data.email,
-                phone=data.phone,
+                phone=data.phone or "0000000000",  # Default phone if not provided
                 role=data.role,
             )
 
@@ -135,6 +135,7 @@ def get_user_router(db: DataBase) -> APIRouter:
         ) -> LoginResponse:
 
         try:
+            logger.debug(f"Login attempt with data: user_name={getattr(data, 'user_name', None)}, email={getattr(data, 'email', None)}, phone={getattr(data, 'phone', None)}")
             user: User = await base_router.find_user_by_any_credential(session, data)
 
             if not user.verify_password(data.password.get_secret_value()):

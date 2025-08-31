@@ -40,6 +40,16 @@ class BaseRouter:
         self.ALLOWED_ORIGINS: set[str] = {
             "http://127.0.0.1:5500",
             "http://localhost:5500",
+            "http://127.0.0.1:5501",
+            "http://localhost:5501",
+            "http://127.0.0.1:5173",
+            "http://localhost:5173",
+            "http://127.0.0.1:4173",
+            "http://localhost:4173",
+            f"http://{EnvTools.required_load_env_var("FRONTEND_NGINX_DEV_HOST")}:{EnvTools.required_load_env_var("FRONTEND_NGINX_DEV_PORT")}",
+            f"http://{EnvTools.required_load_env_var("FRONTEND_NGINX_HOST")}:{EnvTools.required_load_env_var("FRONTEND_NGINX_PORT")}",
+            f"http://127.0.0.1:{EnvTools.required_load_env_var("FRONTEND_NGINX_DEV_PORT")}",
+            f"http://127.0.0.1:{EnvTools.required_load_env_var("FRONTEND_NGINX_PORT")}"
         }
 
 
@@ -76,8 +86,8 @@ class BaseRouter:
         client_ip: Optional[str],
     ) -> dict[str, str]:
         """
-        Удаляем hop-by-hop заголовки (включая из Connection), Host;
-        добавляем/апдейтим X-Forwarded-For.
+        Remove hop-by-hop headers (including from Connection), Host;
+        add/update X-Forwarded-For.
         """
         headers: dict[str, str] = dict(incoming_headers)
 
