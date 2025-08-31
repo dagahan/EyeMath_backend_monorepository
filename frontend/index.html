@@ -1,0 +1,124 @@
+<!doctype html>
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>usov.nikita</title>
+    <link rel="stylesheet" href="/src/styles/main.css" />
+
+    <script src="/src/theme.js" defer></script>
+    <script src="/src/logo.js" defer></script>
+  </head>
+
+  <body>
+    <div class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a class="corner-logo" href="/" aria-label="usov.nikita">
+          <canvas id="cornerLogo"></canvas>
+        </a>
+
+        <div class="theme-switcher">
+          <button
+            id="themeBtn"
+            class="theme-trigger"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            aria-controls="themeMenu"
+            title="Выбрать тему"
+          >
+            🌓 Тема
+          </button>
+
+          <ul id="themeMenu" class="theme-menu" role="menu" hidden>
+            <li role="none">
+              <button
+                class="theme-item"
+                role="menuitemradio"
+                data-theme="system"
+                aria-checked="true"
+                tabindex="-1"
+              >
+                Системная
+              </button>
+            </li>
+
+            <li role="none">
+              <button
+                class="theme-item"
+                role="menuitemradio"
+                data-theme="light"
+                aria-checked="false"
+                tabindex="-1"
+              >
+                Светлая
+              </button>
+            </li>
+
+            <li role="none">
+              <button
+                class="theme-item"
+                role="menuitemradio"
+                data-theme="dark"
+                aria-checked="false"
+                tabindex="-1"
+              >
+                Тёмная
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <main class="container">
+      <h1>Обо мне</h1>
+
+      <section class="contacts">
+        <h3>Связаться</h3>
+
+        <nav class="social-links" aria-label="Соцсети">
+          <a
+            class="icon-btn"
+            href="https://t.me/usov_nikita"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Telegram"
+          >
+            <span class="icon" style="--icon: url(&quot;./src/icons/telegram.svg&quot;)"></span>
+          </a>
+
+          <a
+            class="icon-btn"
+            href="https://www.instagram.com/usov_nm?igsh=MXMxMnZnc3Z4Y3h3eg%3D%3D"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Instagram"
+          >
+            <span class="icon" style="--icon: url(&quot;./src/icons/instagram.svg&quot;)"></span>
+          </a>
+
+          <a
+            class="icon-btn"
+            href="https://github.com/dagahan"
+            target="_blank"
+            rel="noopener"
+            aria-label="GitHub"
+          >
+            <span class="icon" style="--icon: url(&quot;./src/icons/github.svg&quot;)"></span>
+          </a>
+
+          <a
+            class="icon-btn"
+            href="mailto:dagahanwork@gmail.com?subject=%D0%9F%D1%80%D0%B8%D0%B2%D0%B5%D1%82&body=%D0%9D%D0%B0%D0%BF%D0%B8%D1%88%D0%B8%20%D0%BC%D0%BD%D0%B5%20%D0%BE%D1%82%D0%B2%D0%B5%D1%82%20%E2%9C%8C%EF%B8%8F"
+            target="_self"
+            rel="noopener"
+            aria-label="Email"
+          >
+            <span class="icon" style="--icon: url(&quot;./src/icons/email.svg&quot;)"></span>
+          </a>
+        </nav>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,340 @@
+@import url("https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@100..900&display=swap");
+
+:root {
+  --topbar-height: 96px;
+  --topbar-gap: 16px;
+  --bg-light: #fff;
+  --text-light: #0f1115;
+  --muted-light: #6b7280;
+  --border-light: #e5e7eb;
+  --primary-light: #2563eb;
+  --primary-contrast-light: #fff;
+  --accent-light: #10b981;
+  --surface-light: #f8fafc;
+  --elevated-light: #fff;
+  --bg-dark: #0b0e14;
+  --text-dark: #e5e7eb;
+  --muted-dark: #9ca3af;
+  --border-dark: #1f2937;
+  --primary-dark: #60a5fa;
+  --primary-contrast-dark: #0b0e14;
+  --accent-dark: #34d399;
+  --surface-dark: #0f141c;
+  --elevated-dark: #111827;
+
+  /* we setting here light theme as default one */
+  --bg: var(--bg-light);
+  --text: var(--text-light);
+  --muted: var(--muted-light);
+  --border: var(--border-light);
+  --primary: var(--primary-light);
+  --primary-contrast: var(--primary-contrast-light);
+  --accent: var(--accent-light);
+  --surface: var(--surface-light);
+  --elevated: var(--elevated-light);
+
+  color-scheme: light;
+}
+
+
+@media (prefers-color-scheme: dark) {
+  /* setting up dark theme if system theme is dark */
+  :root:not([data-theme]) {
+    --bg: var(--bg-dark);
+    --text: var(--text-dark);
+    --muted: var(--muted-dark);
+    --border: var(--border-dark);
+    --primary: var(--primary-dark);
+    --primary-contrast: var(--primary-contrast-dark);
+    --accent: var(--accent-dark);
+    --surface: var(--surface-dark);
+    --elevated: var(--elevated-dark);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="light"] {
+  /* user can change theme using sessings */
+  --bg: var(--bg-light);
+  --text: var(--text-light);
+  --muted: var(--muted-light);
+  --border: var(--border-light);
+  --primary: var(--primary-light);
+  --primary-contrast: var(--primary-contrast-light);
+  --accent: var(--accent-light);
+  --surface: var(--surface-light);
+  --elevated: var(--elevated-light);
+
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  /* user can change theme using sessings */
+  --bg: var(--bg-dark);
+  --text: var(--text-dark);
+  --muted: var(--muted-dark);
+  --border: var(--border-dark);
+  --primary: var(--primary-dark);
+  --primary-contrast: var(--primary-contrast-dark);
+  --accent: var(--accent-dark);
+  --surface: var(--surface-dark);
+  --elevated: var(--elevated-dark);
+
+  color-scheme: dark;
+}
+
+
+html {
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+
+html,
+body {
+  height: 150vh;
+}
+
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font:
+    16px/1.5 "Kumbh Sans",
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Ubuntu,
+    Cantarell,
+    "Noto Sans",
+    "Helvetica Neue",
+    Arial,
+    "Apple Color Emoji",
+    "Segoe UI Emoji";
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+}
+
+
+.topbar {
+  align-items: flex-start;
+  display: flex;
+  height: calc(var(--topbar-height) + 2 * 12px);
+  justify-content: center;
+  left: 0;
+  pointer-events: none;
+  position: sticky;
+  right: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+
+.topbar-inner {
+  align-items: center;
+  backdrop-filter: saturate(120%) blur(6px);
+  background: rgb(255 255 255 / 3%);
+  border-radius: 14px;
+  box-shadow:
+    inset 0 0 0 1px rgb(255 255 255 / 6%),
+    0 6px 20px rgb(0 0 0 / 35%);
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 8px 10px 8px 8px;
+  pointer-events: auto;
+  width: min(1100px, calc(100% - 18px));
+}
+
+
+.corner-logo {
+  border-radius: 10px;
+  display: block;
+  height: 64px;
+  overflow: hidden;
+  width: 148px;
+}
+
+
+.corner-logo > canvas {
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+
+.theme-switcher {
+  margin-left: auto;
+  position: relative;
+}
+
+
+.theme-trigger {
+  padding: 8px 10px;
+}
+
+
+a {
+  color: var(--primary);
+}
+
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+
+.container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin: 80px auto;
+  margin-top: calc(var(--topbar-height) + var(--topbar-gap));
+  max-width: 800px;
+  padding: 24px;
+}
+
+
+.btn {
+  align-items: center;
+  background: var(--primary);
+  border: 1px solid transparent;
+  border-radius: 10px;
+  color: var(--primary-contrast);
+  cursor: pointer;
+  display: inline-flex;
+  gap: 0.5rem;
+  padding: 10px 14px;
+  user-select: none;
+}
+
+
+.theme-menu {
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgb(0 0 0 / 15%);
+  list-style: none;
+  margin-top: 8px;
+  min-width: 220px;
+  padding: 6px;
+  position: absolute;
+  right: 0;
+}
+
+
+.theme-menu[hidden] {
+  display: none;
+}
+
+
+.theme-item {
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: var(--text);
+  cursor: pointer;
+  padding: 10px 12px;
+  text-align: left;
+  width: 100%;
+}
+
+
+.theme-item[aria-checked="true"] {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+
+.theme-item:hover {
+  background: var(--surface);
+}
+
+
+.social-links {
+  display: flex;
+  gap: 10px;
+}
+
+
+.icon-btn {
+  align-items: center;
+  background: var(--surface);
+  block-size: 45px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  display: inline-flex;
+  inline-size: 52px;
+  justify-content: center;
+  text-decoration: none;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s,
+    color 0.2s;
+}
+
+
+.icon-btn:hover,
+.icon-btn:focus-visible {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--primary-contrast);
+  outline: none;
+}
+
+
+.icon-btn:active {
+  transform: translateY(1px);
+}
+
+
+.icon {
+  background-color: currentcolor;
+  block-size: 34px;
+  display: inline-block;
+  inline-size: 34px;
+  mask-image: var(--icon);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+
+.social-links a {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  padding: 8px 14px;
+  text-decoration: none;
+  transition:
+    background-color 0.2s ease-in,
+    color 0.2s ease-in,
+    border-color 0.2s ease-in;
+}
+
+
+.social-links a:hover,
+.social-links a:focus-visible {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--primary-contrast);
+  outline: none;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
