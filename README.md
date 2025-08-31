@@ -27,7 +27,11 @@ Most mathematical recognition services either:
 
 ## 🎬 Showcase
 
-![eyemath (2)](https://github.com/user-attachments/assets/d1f8fabb-d71f-4393-8bd9-560e79f3aea4)
+![Screenshot 1](./.github/assets/showcase/0.png)
+![Screenshot 2](./.github/assets/showcase/1.png)
+![Screenshot 3](./.github/assets/showcase/2.png)
+![Screenshot 4](./.github/assets/showcase/3.png)
+![Screenshot 5](./.github/assets/showcase/4.png)
 
 ## 🏗️ Architecture
 <p>
