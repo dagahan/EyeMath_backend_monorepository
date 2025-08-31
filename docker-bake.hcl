@@ -1,12 +1,11 @@
 variable "REGISTRY" { default = "ghcr.io/your-org" }
 variable "PROJECT"  { default = "eye-math" }
-variable "VERSION"  { default = "0.1.0" }
+variable "VERSION"  { default = "1.0.0" }
 variable "SHA"      { default = "dev" }
 
 variable "PLATFORMS" { default = ["linux/amd64","linux/arm64"] }
 
-group "dev"     { targets = ["nginx","gateway","authorizer","recognizer","renderer","valkey","postgres"] }
-group "release" { targets = ["nginx","gateway","authorizer","recognizer","renderer","valkey","postgres"] }
+group "default" { targets = ["nginx","gateway","authorizer","recognizer","solver","renderer","frontend","valkey","postgres"] }
 
 
 target "common" {
@@ -64,6 +63,20 @@ target "valkey" {
   tags       = ["${REGISTRY}/${PROJECT}/valkey:${VERSION}", "${REGISTRY}/${PROJECT}/valkey:${SHA}"]
 }
 
+
+target "solver" {
+  inherits   = ["common"]
+  context    = "./solver"
+  dockerfile = "dockerfile"
+  tags       = ["${REGISTRY}/${PROJECT}/solver:${VERSION}", "${REGISTRY}/${PROJECT}/solver:${SHA}"]
+}
+
+target "frontend" {
+  inherits   = ["common"]
+  context    = "./frontend"
+  dockerfile = "dockerfile"
+  tags       = ["${REGISTRY}/${PROJECT}/frontend:${VERSION}", "${REGISTRY}/${PROJECT}/frontend:${SHA}"]
+}
 
 target "postgres" {
   inherits   = ["common"]

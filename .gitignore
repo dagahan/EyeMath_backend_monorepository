@@ -187,33 +187,66 @@ cython_debug/
 *.app
 
 
-# volumes
-**postgres-data/
-**valkey-data/
-**prometheus-data/
-**grafana-data/
+# Docker volumes
+**/postgres-data/
+**/valkey-data/
+**/prometheus-data/
+**/grafana-data/
 
-# directories
-**debug/
-**tmp/
-**/uv.lock
+# Temporary directories
+**/debug/
+**/tmp/
+**/temp/
+
+# Logs
 **/*.log
+**/logs/
+
+# Environment files
 **/*.env
-**/uv.lock
-**/.ruff_cache
-**/.mypy_cache
-**/recived_images
-**/rendered_images
+**/.env.local
+**/.env.development
+**/.env.production
 
+# Cache directories
+**/.ruff_cache/
+**/.mypy_cache/
+**/__pycache__/
 
-# private_keys
+# Generated images
+**/received_images/
+**/rendered_images/
+**/output/
+
+# Private keys and certificates
 **/*.pem
+**/*.key
+**/*.crt
+**/*.p12
 
-
-# db_migrations
-**/migrations/versions
-
+# Database migrations (keep structure, ignore versions)
+**/migrations/versions/
 
 # IDE files
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Frontend build artifacts
+frontend/dist/
+frontend/node_modules/
+frontend/.vite/
+frontend/coverage/
+
+# Model files (too large for git)
+**/*.pth
+**/*.pt
+**/*.h5
+**/*.onnx
+**/*.tflite

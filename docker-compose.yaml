@@ -13,7 +13,7 @@ services:
       RUNNING_INSIDE_DOCKER: 1
       COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
     ports:
-      - "${NGINX_PORT}:${NGINX_PORT}"
+      - "${BACKEND_NGINX_PORT}:${BACKEND_NGINX_PORT}"
     networks:
       - eye_math_network
     restart: ${DOCKER_CONTAINERS_RESTART}
@@ -151,6 +151,28 @@ services:
           path: ./
 
   
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    image: frontend-${COMPOSE_PROJECT_NAME}
+    container_name: frontend-${COMPOSE_PROJECT_NAME}
+    env_file: .env
+    environment:
+      RUNNING_INSIDE_DOCKER: 1
+      COMPOSE_PROJECT_NAME: ${COMPOSE_PROJECT_NAME}
+      NODE_ENV: production
+    ports:
+      - "${FRONTEND_NGINX_PORT}:${FRONTEND_NGINX_PORT}"
+    networks:
+      - eye_math_network
+    restart: ${DOCKER_CONTAINERS_RESTART}
+    develop:
+      watch:
+        - action: rebuild
+          path: ./frontend
+
+
   postgres:
     build:
       context: ./postgres

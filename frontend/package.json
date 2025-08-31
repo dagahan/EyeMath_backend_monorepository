@@ -1,41 +1,27 @@
 {
-  "name": "html",
+  "name": "eye-math-frontend",
   "version": "1.0.0",
-  "description": "hey this is my test html",
-  "main": "index.js",
+  "description": "Frontend for eye.math - Open Source AI-powered mathematical problem solver",
+  "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .js,.cjs,.mjs,.ts,.tsx,.jsx,.html",
-    "lint:css": "stylelint \"**/*.{css,scss,html}\"",
-    "format": "prettier . --write && npm run enforce:html-blank-lines",
-    "format:check": "prettier . --check",
-    "prepare": "husky install",
-    "enforce:html-blank-lines": "node scripts/enforce-html-blank-lines.mjs"
+    "serve": "serve -s dist -l 4173"
   },
-  "lint-staged": {
-    "*.{html,css,scss,js,jsx,mjs,cjs}": [
-      "prettier --write --config config/prettier.json",
-      "stylelint --fix --allow-empty-input --config config/stylelint.cjs",
-      "eslint --fix --config config/eslint.mjs",
-      "node scripts/enforce-html-blank-lines.mjs"
-    ]
+  "dependencies": {
+    "serve": "^14.2.1"
   },
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
-    "eslint": "^9.34.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-html": "^8.1.3",
-    "eslint-plugin-prettier": "^5.5.4",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.1.5",
-    "postcss-html": "^1.8.0",
-    "prettier": "^3.6.2",
-    "stylelint": "^16.23.1",
-    "stylelint-config-standard": "^39.0.0",
-    "stylelint-order": "^7.0.0",
-    "vite": "^7.1.3"
-  }
+    "vite": "^5.0.0"
+  },
+  "keywords": [
+    "mathematics",
+    "ai",
+    "latex",
+    "recognition",
+    "open-source"
+  ],
+  "author": "eye.math team",
+  "license": "MIT"
 }

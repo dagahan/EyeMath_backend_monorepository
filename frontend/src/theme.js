@@ -1,119 +1,79 @@
-const STORAGE_KEY = "theme";
-const root = document.documentElement;
-const mediaDark = window.matchMedia("(prefers-color-scheme: dark)");
-const btn = document.getElementById("themeBtn");
-const menu = document.getElementById("themeMenu");
+import { THEMES, STORAGE_KEYS } from './core/constants.js';
 
+let currentTheme = localStorage.getItem(STORAGE_KEYS.THEME) || THEMES.SYSTEM;
 
-function setColorSchemeHint(mode) {
-  if (mode === "system") {
-    root.style.colorScheme = mediaDark.matches ? "dark" : "light";
+export function initTheme() {
+  applyTheme(currentTheme);
+  setupThemeSwitcher();
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  
+  if (theme === THEMES.SYSTEM) {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    root.setAttribute('data-theme', prefersDark ? THEMES.DARK : THEMES.LIGHT);
   } else {
-    root.style.colorScheme = mode;
+    root.setAttribute('data-theme', theme);
   }
+  
+  currentTheme = theme;
+  localStorage.setItem(STORAGE_KEYS.THEME, theme);
 }
 
-
-function applyTheme(mode) {
-  if (mode === "system") {
-    root.removeAttribute("data-theme");
-  } else {
-    root.setAttribute("data-theme", mode);
+function setupThemeSwitcher() {
+  const themeBtn = document.getElementById('themeBtn');
+  const themeMenu = document.getElementById('themeMenu');
+  const themeItems = document.querySelectorAll('.theme-item');
+  
+  console.log('Theme elements found:', { themeBtn, themeMenu, themeItems: themeItems.length });
+  
+  if (!themeBtn || !themeMenu) {
+    console.warn('Theme button or menu not found');
+    return;
   }
-
-  localStorage.setItem(STORAGE_KEY, mode);
-  setColorSchemeHint(mode);
-
-  menu.querySelectorAll(".theme-item").forEach((el) => {
-    el.setAttribute("aria-checked", String(el.dataset.theme === mode));
+  
+  themeBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isHidden = themeMenu.hasAttribute('hidden');
+    
+    if (isHidden) {
+      themeMenu.removeAttribute('hidden');
+      themeBtn.setAttribute('aria-expanded', 'true');
+    } else {
+      themeMenu.setAttribute('hidden', '');
+      themeBtn.setAttribute('aria-expanded', 'false');
+    }
   });
-}
-
-
-function currentMode() {
-  return localStorage.getItem(STORAGE_KEY) || "system";
-}
-
-
-function openMenu() {
-  menu.hidden = false;
-  btn.setAttribute("aria-expanded", "true");
-
-  const current = menu.querySelector('.theme-item[aria-checked="true"]');
-  (current || menu.querySelector(".theme-item"))?.focus();
-}
-
-
-function closeMenu() {
-  menu.hidden = true;
-  btn.setAttribute("aria-expanded", "false");
-  btn.focus();
-}
-
-
-function toggleMenu() {
-  if (menu.hidden) openMenu();
-  else closeMenu();
-}
-
-
-function handleOutsideClick(e) {
-  if (!menu.contains(e.target) && e.target !== btn) closeMenu();
-}
-
-
-function handleMenuClick(e) {
-  const item = e.target.closest(".theme-item");
-  if (!item) return;
-  applyTheme(item.dataset.theme);
-  closeMenu();
-}
-
-
-function handleMenuKeydown(e) {
-  const items = Array.from(menu.querySelectorAll(".theme-item"));
-  const idx = items.indexOf(document.activeElement);
-
-  switch (e.key) {
-    case "ArrowDown":
-      e.preventDefault();
-      items[(idx + 1) % items.length]?.focus();
-      break;
-    case "ArrowUp":
-      e.preventDefault();
-      items[(idx - 1 + items.length) % items.length]?.focus();
-      break;
-    case "Home":
-      e.preventDefault();
-      items[0]?.focus();
-      break;
-    case "End":
-      e.preventDefault();
-      items[items.length - 1]?.focus();
-      break;
-    case "Enter":
-    case " ":
-      e.preventDefault();
-      document.activeElement?.click();
-      break;
-    case "Escape":
-      e.preventDefault();
-      closeMenu();
-      break;
+  
+  document.addEventListener('click', (e) => {
+    if (!themeMenu.contains(e.target) && e.target !== themeBtn) {
+      themeMenu.setAttribute('hidden', '');
+      themeBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+  
+  themeItems.forEach(item => {
+    item.addEventListener('click', () => {
+      const theme = item.dataset.theme;
+      applyTheme(theme);
+      
+      themeItems.forEach(i => i.setAttribute('aria-checked', 'false'));
+      item.setAttribute('aria-checked', 'true');
+      
+      themeMenu.setAttribute('hidden', '');
+      themeBtn.setAttribute('aria-expanded', 'false');
+    });
+  });
+  
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (currentTheme === THEMES.SYSTEM) {
+      applyTheme(THEMES.SYSTEM);
+    }
+  });
+  
+  const currentItem = document.querySelector(`[data-theme="${currentTheme}"]`);
+  if (currentItem) {
+    currentItem.setAttribute('aria-checked', 'true');
   }
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  // Проставить aria-checked по сохранённому выбору
-  applyTheme(currentMode());
-
-  btn.addEventListener("click", toggleMenu);
-  document.addEventListener("click", handleOutsideClick);
-  menu.addEventListener("click", handleMenuClick);
-  menu.addEventListener("keydown", handleMenuKeydown);
-
-  // Реакция на смену системной темы в режиме "system"
-  mediaDark.addEventListener?.("change", () => {
-    if (currentMode() === "system") setColorSchemeHint("system");
-  });
-});
