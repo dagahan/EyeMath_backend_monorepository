@@ -50,7 +50,9 @@ Most mathematical recognition services either:
 - **OpenCV** for advanced image preprocessing pipelines;
 - **FastAPI** for modern REST API development;
 - **PostgreSQL** for reliable data storage;
-- **Valkey** for caching and session management.
+- **Valkey** for caching and session management;
+- **Visma** - Open source mathematical computation engine for symbolic math;
+- **Pix2Tex** - State-of-the-art handwritten math recognition model.
 
 ### Frontend
 - **Vanilla JavaScript** with modern ES6+ features;
@@ -105,6 +107,12 @@ npm run dev
 - **Processing Time**: <2 seconds
 - **Uptime**: 24/7 availability
 - **Scalability**: Kubernetes-ready microservices
+
+## 🙏 Acknowledgments
+
+This project is built on top of amazing open source technologies:
+- **[Visma](https://github.com/dagahan/visma)** - Powerful symbolic mathematics engine that powers our solving capabilities;
+- **[Pix2Tex](https://github.com/lukas-blecher/LaTeX-OCR)** - Advanced neural network for handwritten mathematical expression recognition.
 
 ## 🤝 Contributing
 
