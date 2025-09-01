@@ -1,4 +1,6 @@
 import math
+from typing import Any, Optional, List
+
 from visma.functions.structure import Function, Expression
 from visma.functions.variable import Variable
 from visma.functions.exponential import Exponential
@@ -19,7 +21,7 @@ class Constant(Function):
         Function
     """
 
-    def __init__(self, value=None, power=1, coefficient=1):
+    def __init__(self, value: Optional[Any] = None, power: int = 1, coefficient: int = 1) -> None:
         super().__init__()
         self.coefficient = coefficient
         self.power = power
@@ -30,23 +32,23 @@ class Constant(Function):
             self.coefficient = 1
             self.power = 1
 
-    def inverse(self, RHS):
+    def inverse(self, RHS: Any) -> None:
         pass
 
-    def differentiate(self):
+    def differentiate(self) -> None:
         super().differentiate()
         self.value = 0
 
-    def integrate(self, intwrt):
+    def integrate(self, intwrt: str) -> None:
         self.coefficient = self.value ** self.power
         self.__class__ = Variable
         self.power = [1]
         self.value = [intwrt]
 
-    def __radd__(self, other):
+    def __radd__(self, other: Any) -> Any:
         return self + other
 
-    def __add__(self, other):
+    def __add__(self, other: Any) -> Any:
         if isinstance(other, Constant):
             if self.before == '-':
                 result = Constant(self.calculate() - other.calculate(), self.power)
@@ -85,10 +87,10 @@ class Constant(Function):
         exprAdd = Expression([self, Plus(), other])     # Make an Expression and assign the Tokens attribute with the Constant and the Other Variable, Trig. function,...etc.
         return exprAdd
 
-    def __rsub__(self, other):
+    def __rsub__(self, other: Any) -> Any:
         return Constant(0) - self + other
 
-    def __sub__(self, other):
+    def __sub__(self, other: Any) -> Any:
         if isinstance(other, Constant):
             self = self + Constant(-1, 1, 1) * other
             return self
@@ -121,10 +123,10 @@ class Constant(Function):
         self = expression
         return expression
 
-    def __rmul__(self, other):
+    def __rmul__(self, other: Any) -> Any:
         return self * other
 
-    def __mul__(self, other):
+    def __mul__(self, other: Any) -> Any:
         if other.isZero():
             return other
         elif self.isZero():
@@ -157,10 +159,10 @@ class Constant(Function):
             other.coefficient = self.calculate() * other.coefficient
         return other
 
-    def __rtruediv__(self, other):
+    def __rtruediv__(self, other: Any) -> Any:
         return Constant(1) / self * other
 
-    def __truediv__(self, other):
+    def __truediv__(self, other: Any) -> Any:
         if other.value in ['+', '-', '*', '/']:
             return other
         elif self.isZero():
@@ -187,7 +189,7 @@ class Constant(Function):
             other.power = [-1 * eachPower for eachPower in other.power]
         return other
 
-    def __pow__(self, val):
+    def __pow__(self, val: Any) -> Any:
         if isinstance(val, int) or isinstance(val, float):
             if self.power == 0 and self.value == 0:
                 self.power = 1
@@ -208,13 +210,13 @@ class Constant(Function):
             constExponent.power = val
             return constExponent
 
-    def calculate(self):
+    def calculate(self) -> Any:
         return self.coefficient * (self ** self.power).value
 
-    def functionOf(self):
+    def functionOf(self) -> List[Any]:
         return []
 
-    def binary(self):
+    def binary(self) -> str:
         '''Returns a binary string of the given constant
         '''
         return bin(self.calculate())[2:]
@@ -222,34 +224,34 @@ class Constant(Function):
 
 class Zero(Constant):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.value = 0
 
 
 class One(Constant):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.value = 1
 
 
 class Pi(Constant):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.value = math.pi
 
 
 class Euler(Constant):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.value = math.e
 
 
 class Iota(Constant):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self.value = 1j

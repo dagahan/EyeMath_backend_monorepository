@@ -1,4 +1,5 @@
 import copy
+from typing import List, Tuple, Any
 
 from visma.functions.structure import Function, Expression
 from visma.functions.constant import Constant, Zero
@@ -14,7 +15,7 @@ from visma.io.parser import tokensToString
 ###################
 
 
-def differentiate(tokens, wrtVar):
+def differentiate(tokens: List[Any], wrtVar: str) -> Tuple[List[Any], List[str], str, List[List[Any]], List[List[str]]]:
     """Simplifies and then differentiates given tokens wrt given variable
 
     Arguments:
@@ -42,7 +43,7 @@ def differentiate(tokens, wrtVar):
     return tokens, availableOperations, token_string, animation, comments
 
 
-def differentiateTokens(funclist, wrtVar):
+def differentiateTokens(funclist: List[Any], wrtVar: str) -> Tuple[List[Any], List[Any], List[str]]:
     """Differentiates given tokens wrt given variable
 
     Arguments:
@@ -90,7 +91,7 @@ def differentiateTokens(funclist, wrtVar):
     return diffFunc, animNew, commentsNew
 
 
-def differentiationProductRule(tokens, wrtVar):
+def differentiationProductRule(tokens: List[Any], wrtVar: str) -> List[Any]:
     resultTokens = []
     for i in range(0, len(tokens), 2):
         currentDiff = Expression()

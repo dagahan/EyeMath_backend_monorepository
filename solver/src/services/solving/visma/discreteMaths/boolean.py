@@ -1,3 +1,5 @@
+from typing import List, Tuple, Any
+
 from visma.simplify.simplify import simplify
 from visma.functions.constant import Constant
 from visma.io.tokenize import tokenizer
@@ -6,7 +8,7 @@ from visma.io.tokenize import tokenizer
 # TODO: Implement GUI/CLI.
 
 
-def logicalAND(token1, token2):
+def logicalAND(token1: List[Any], token2: List[Any]) -> Tuple[str, List[List[Any]], List[List[str]]]:
     """Implements Bitwise AND
     Arguments:
         token1 -- {list} -- List of tokens of a constant number
@@ -42,7 +44,7 @@ def logicalAND(token1, token2):
         return '', [], []
 
 
-def logicalOR(token1, token2):
+def logicalOR(token1: List[Any], token2: List[Any]) -> Tuple[str, List[List[Any]], List[List[str]]]:
     """Implements Bitwise OR
     Arguments:
         token1 -- {list} -- List of tokens of a constant number
@@ -78,7 +80,7 @@ def logicalOR(token1, token2):
         return '', [], []
 
 
-def logicalNOT(token1):
+def logicalNOT(token1: List[Any]) -> Tuple[str, List[List[Any]], List[List[str]]]:
     """Implements Bitwise NOT
     Arguments:
         token1 -- {list} -- List of tokens of a constant number

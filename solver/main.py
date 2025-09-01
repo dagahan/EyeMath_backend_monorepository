@@ -39,7 +39,7 @@ class Service:
             logger.info(f"{colorama.Fore.YELLOW}Service stop requested")
         
         finally:
-            if hasattr(self.fastapi_server, 'server') and self.gateway.server:
+            if hasattr(self.fastapi_server, 'server') and self.fastapi_server.server:
                 logger.info(f"{colorama.Fore.YELLOW}Stopping FastAPI server gracefully...")
                 await self.fastapi_server.stop()
                 

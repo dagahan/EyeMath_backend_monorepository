@@ -1,4 +1,6 @@
 import copy
+from typing import List, Tuple, Any
+
 from visma.functions.constant import Constant
 from visma.functions.variable import Variable
 from visma.functions.operator import Operator, Binary
@@ -12,7 +14,7 @@ from visma.io.parser import tokensToString
 ###############
 
 
-def integrate(tokens, wrtVar):
+def integrate(tokens: List[Any], wrtVar: str) -> Tuple[List[Any], List[str], str, List[List[Any]], List[List[str]]]:
     """Simplifies and then integrates given tokens wrt given variable
 
     Arguments:
@@ -39,7 +41,7 @@ def integrate(tokens, wrtVar):
     return tokens, availableOperations, token_string, animation, comments
 
 
-def integrateTokens(funclist, wrtVar):
+def integrateTokens(funclist: List[Any], wrtVar: str) -> Tuple[List[Any], List[Any], List[str]]:
     """Integrates given tokens wrt given variable
 
     Arguments:
@@ -92,7 +94,7 @@ def integrateTokens(funclist, wrtVar):
     return intFunc, animNew, commentsNew
 
 
-def integrationByParts(tokens, wrtVar):
+def integrationByParts(tokens: List[Any], wrtVar: str) -> List[Any]:
     if (isinstance(tokens[1], Binary) and tokens[1].value == '*'):
         u = tokens[0]
         v = tokens[2]

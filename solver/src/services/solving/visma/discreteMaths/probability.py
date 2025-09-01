@@ -1,7 +1,9 @@
+from typing import List, Tuple, Any, Optional
+
 from visma.io.tokenize import tokenizer
 
 
-def simpleProbability(sampleSpace, requiredEvent=None):
+def simpleProbability(sampleSpace: Any, requiredEvent: Optional[Any] = None) -> Tuple[str, List[List[Any]], List[List[str]]]:
     """Implements simple probability
 
     Arguments:

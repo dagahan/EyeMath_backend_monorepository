@@ -3,13 +3,15 @@
 Note: Please try to maintain proper documentation
 '''
 
+from typing import List, Tuple, Any
+
 from visma.io.tokenize import tokenizer
 from visma.simplify.simplify import simplify
 from visma.io.parser import tokensToString
 from visma.functions.constant import Constant
 
 
-def factorial(tokens):
+def factorial(tokens: List[Any]) -> Tuple[List[Any], List[str], str, List[List[Any]], List[List[str]]]:
     '''Used to get factorial of tokens provided
 
     Argument:
@@ -46,7 +48,7 @@ def factorial(tokens):
     return result, [], token_string, animation, comments
 
 
-def permutation(nTokens, rTokens):
+def permutation(nTokens: List[Any], rTokens: List[Any]) -> Tuple[List[Any], List[str], str, List[List[Any]], List[List[str]]]:
     '''Used to get Permutation (nPr)
 
     Argument:
@@ -87,7 +89,7 @@ def permutation(nTokens, rTokens):
     return result, [], token_string, animation, comments
 
 
-def combination(nTokens, rTokens):
+def combination(nTokens: List[Any], rTokens: List[Any]) -> Tuple[List[Any], List[str], str, List[List[Any]], List[List[str]]]:
     '''Used to get Combination (nCr)
 
     Argument:

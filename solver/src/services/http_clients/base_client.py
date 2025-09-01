@@ -44,7 +44,7 @@ class BaseHttpClient:
         return self
 
 
-    async def __aexit__(self, exc_type, exc, tb) -> None:
+    async def __aexit__(self, exc_type: Any, exc: Any, tb: Any) -> None:
         await self.aclose()
 
 

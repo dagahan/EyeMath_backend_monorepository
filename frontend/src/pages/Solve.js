@@ -1,4 +1,5 @@
 import { authJson } from "../api/client.js";
+import { exampleCategories, getRandomExample, getCategories, getExamplesForCategory } from "../examples.js";
 
 export default function Solve(){
   const el = document.createElement("div");
@@ -49,16 +50,26 @@ export default function Solve(){
           </label>
         </div>
         
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
           <button class="btn" type="submit" id="solveBtn">
             <span id="solveText">🧮 Solve</span>
           </button>
           <button class="btn secondary" type="button" id="clearBtn">
             🗑️ Clear
           </button>
-          <button class="btn secondary" type="button" id="exampleBtn">
-            📝 Examples
-          </button>
+          
+          <!-- Examples Dropdown -->
+          <div class="examples-dropdown" style="position: relative; display: inline-block;">
+            <button class="btn secondary" type="button" id="examplesDropdownBtn">
+              📝 Examples ▼
+            </button>
+            <div class="examples-menu" id="examplesMenu" style="display: none; position: absolute; top: 100%; left: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 400px; max-height: 600px; overflow-y: auto;">
+              <div style="padding: 12px; border-bottom: 1px solid var(--border);">
+                <input type="text" id="examplesSearch" placeholder="Search examples..." style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--elevated); color: var(--text); font-size: 14px;">
+              </div>
+              <div class="examples-categories" id="examplesCategories"></div>
+            </div>
+          </div>
         </div>
       </form>
       
@@ -88,7 +99,10 @@ export default function Solve(){
   const solveBtn = el.querySelector("#solveBtn");
   const solveText = el.querySelector("#solveText");
   const clearBtn = el.querySelector("#clearBtn");
-  const exampleBtn = el.querySelector("#exampleBtn");
+  const examplesDropdownBtn = el.querySelector("#examplesDropdownBtn");
+  const examplesMenu = el.querySelector("#examplesMenu");
+  const examplesCategories = el.querySelector("#examplesCategories");
+  const examplesSearch = el.querySelector("#examplesSearch");
   const err = el.querySelector("#err");
   const resultsContainer = el.querySelector("#resultsContainer");
   const resultsCard = el.querySelector("#resultsCard");
@@ -114,20 +128,124 @@ export default function Solve(){
     });
   });
   
-  // Examples
-  const examples = [
-    { name: "Quadratic equation", expr: "x^2 - 5x + 6 = 0" },
-    { name: "Integral", expr: "\\int_0^1 x^2 dx" },
-    { name: "Derivative", expr: "\\frac{d}{dx}(x^3 + 2x^2 - 5x + 1)" },
-    { name: "Limit", expr: "\\lim_{x \\to 0} \\frac{\\sin(x)}{x}" },
-    { name: "System of equations", expr: "\\begin{cases} x + y = 5 \\\\ 2x - y = 1 \\end{cases}" }
-  ];
+  // Initialize examples dropdown
+  function initializeExamplesDropdown() {
+    const categories = getCategories();
+    examplesCategories.innerHTML = '';
+    
+    categories.forEach(category => {
+      const categoryDiv = document.createElement('div');
+      categoryDiv.className = 'examples-category';
+      categoryDiv.dataset.category = category;
+      
+      const categoryHeader = document.createElement('div');
+      categoryHeader.className = 'examples-category-header';
+      categoryHeader.style.cssText = 'padding: 12px 16px; background: var(--elevated); border-bottom: 1px solid var(--border); cursor: pointer; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; align-items: center;';
+      categoryHeader.innerHTML = `${category} <span style="font-size: 12px;">▼</span>`;
+      
+      const examplesList = document.createElement('div');
+      examplesList.className = 'examples-list';
+      examplesList.style.cssText = 'display: none; max-height: 300px; overflow-y: auto;';
+      
+      const examples = getExamplesForCategory(category);
+      examples.forEach(example => {
+        const exampleItem = document.createElement('div');
+        exampleItem.className = 'examples-item';
+        exampleItem.dataset.name = example.name.toLowerCase();
+        exampleItem.dataset.expr = example.expr.toLowerCase();
+        exampleItem.style.cssText = 'padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background-color 0.2s;';
+
+        exampleItem.innerHTML = `
+          <div style="font-weight: 500; color: var(--text); margin-bottom: 4px;">${example.name}</div>
+          <div style="font-size: 12px; color: var(--muted); font-family: monospace; background: var(--surface); padding: 4px 8px; border-radius: 4px; overflow-x: auto;">${example.expr}</div>
+        `;
+        
+        exampleItem.addEventListener('click', () => {
+          latexInput.value = example.expr;
+          examplesMenu.style.display = 'none';
+          examplesSearch.value = '';
+          latexInput.focus();
+        });
+        
+        exampleItem.addEventListener('mouseenter', () => {
+          exampleItem.style.background = 'var(--elevated)';
+        });
+        
+        exampleItem.addEventListener('mouseleave', () => {
+          exampleItem.style.background = 'transparent';
+        });
+        
+        examplesList.appendChild(exampleItem);
+      });
+      
+      categoryHeader.addEventListener('click', () => {
+        const isOpen = examplesList.style.display !== 'none';
+        examplesList.style.display = isOpen ? 'none' : 'block';
+        categoryHeader.querySelector('span').textContent = isOpen ? '▼' : '▲';
+      });
+      
+      categoryDiv.appendChild(categoryHeader);
+      categoryDiv.appendChild(examplesList);
+      examplesCategories.appendChild(categoryDiv);
+    });
+  }
   
-  exampleBtn.addEventListener('click', () => {
-    const example = examples[Math.floor(Math.random() * examples.length)];
-    latexInput.value = example.expr;
-    latexInput.focus();
+  // Examples dropdown functionality
+  examplesDropdownBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = examplesMenu.style.display !== 'none';
+    examplesMenu.style.display = isOpen ? 'none' : 'block';
+    examplesDropdownBtn.innerHTML = isOpen ? '📝 Examples ▼' : '📝 Examples ▲';
   });
+  
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.examples-dropdown')) {
+      examplesMenu.style.display = 'none';
+      examplesDropdownBtn.innerHTML = '📝 Examples ▼';
+    }
+  });
+  
+  // Search functionality
+  examplesSearch.addEventListener('input', (e) => {
+    const searchTerm = e.target.value.toLowerCase();
+    const categories = examplesCategories.querySelectorAll('.examples-category');
+    
+    categories.forEach(category => {
+      const categoryName = category.dataset.category.toLowerCase();
+      const examples = category.querySelectorAll('.examples-item');
+      let hasVisibleExamples = false;
+      
+      examples.forEach(example => {
+        const name = example.dataset.name;
+        const expr = example.dataset.expr;
+        
+        if (searchTerm === '' || name.includes(searchTerm) || expr.includes(searchTerm) || categoryName.includes(searchTerm)) {
+          example.style.display = 'block';
+          hasVisibleExamples = true;
+        } else {
+          example.style.display = 'none';
+        }
+      });
+      
+      // Show/hide category based on whether it has visible examples
+      if (hasVisibleExamples || searchTerm === '') {
+        category.style.display = 'block';
+        // Auto-expand categories when searching
+        if (searchTerm !== '') {
+          const examplesList = category.querySelector('.examples-list');
+          const categoryHeader = category.querySelector('.examples-category-header span');
+          examplesList.style.display = 'block';
+          categoryHeader.textContent = '▲';
+        }
+      } else {
+        category.style.display = 'none';
+      }
+    });
+  });
+
+  // Initialize the dropdown
+  initializeExamplesDropdown();
   
   clearBtn.addEventListener('click', () => {
     latexInput.value = '';

@@ -1,4 +1,6 @@
 from collections import Counter
+from typing import List, Tuple, Any
+
 from visma.io.tokenize import tokenizer
 from visma.simplify.simplify import simplify
 from visma.io.parser import tokensToString
@@ -13,13 +15,13 @@ class sampleSpace(object):
     values = []
     size = 0
 
-    def __init__(self, values):
+    def __init__(self, values: List[Any]) -> None:
         if values is not None:
             self.values = values
             self.size = len(values)
 
 
-def ArithemeticMean(sampleSpace):
+def ArithemeticMean(sampleSpace: Any) -> Tuple[str, List[List[Any]], List[List[str]]]:
     """Implements arithemetic mean
 
     Arguments:
@@ -53,7 +55,7 @@ def ArithemeticMean(sampleSpace):
         return '', [], []
 
 
-def Mode(sampleSpace):
+def Mode(sampleSpace: Any) -> Tuple[str, List[List[Any]], List[List[str]]]:
     """Implements Mode
 
     Arguments:
@@ -80,7 +82,7 @@ def Mode(sampleSpace):
         return '', [], []
 
 
-def Median(sampleSpace):
+def Median(sampleSpace: Any) -> Tuple[str, List[List[Any]], List[List[str]]]:
     """Implements Median
 
     Arguments:

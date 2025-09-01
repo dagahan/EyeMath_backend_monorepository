@@ -47,6 +47,9 @@ line-length = 100
 select = ["E", "F", "B", "UP", "I", "W", "N", "ANN", "TCH"]
 ignore = ["ANN401", "W293", "F403", "F405"]
 unfixable = ["ANN"]
+exclude = [
+    "src/services/solving/visma/**/*.py"
+]
 
 
 [tool.mypy]
@@ -70,6 +73,15 @@ plugins = [
   "sqlalchemy.ext.mypy.plugin", 
 ]
 
+[[tool.mypy.overrides]]
+module = [
+    "src.services.solving.visma.*",
+    "visma.*"
+]
+ignore_errors = true
+
+
+
 [mypy-aiobotocore]
 ignore_missing_imports = true
 [mypy-botocore]
@@ -80,6 +92,8 @@ ignore_missing_imports = true
 ignore_missing_imports = true
 [mypy-fastapi]
 ignore_missing_imports = true
+[mypy-colorama]
+ignore_missing_imports = true
 
 
 [db]
@@ -88,10 +102,7 @@ pool_size = 5
 max_overflow = 10
 
 
-[math]
-precision = 32
-default_precision = 64
-using_algorithms_solving = true
-use_visma = true
+[visma]
+timeout = 300.0
 
 

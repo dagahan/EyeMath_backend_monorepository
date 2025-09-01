@@ -18,7 +18,7 @@ class RendererHttpClient(BaseHttpClient):
         self,
         *,
         base_url: Optional[str] = None,
-        client=None,
+        client: Any = None,
         endpoint: str = "/renderer/render",
     ) -> None:
 
@@ -35,6 +35,6 @@ class RendererHttpClient(BaseHttpClient):
         )
 
         url = data.get("image_url") or data.get("images_urls")
-        return url
+        return str(url) if url is not None else ""
 
 

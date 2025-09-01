@@ -51,9 +51,9 @@ def get_solver_router(db: "DataBase") -> APIRouter:
                 access_token=access_token
             )
 
-            results = cast("list[str]", raw.get("results", []))
-            images_urls = cast("list[str]", raw.get("images_urls", []))
-            steps   = cast("list[str]", raw.get("solving_steps", []))
+            results = raw.get("results", [])
+            images_urls = raw.get("images_urls", [])
+            steps = raw.get("solving_steps", [])
 
             return SolveResponse(
                 results=results,
