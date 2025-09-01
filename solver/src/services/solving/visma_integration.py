@@ -1,23 +1,14 @@
-"""
-Visma Integration for EyeMath Solver
-
-This module provides integration with the original Visma mathematical engine,
-converting LaTeX input to Visma format, solving, and returning LaTeX output.
-"""
-
 import asyncio
 import sys
 import os
 from typing import Dict, List, Any, Optional, Union, Tuple
 from loguru import logger
 
-# Add the visma module to the path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 visma_path = current_dir  # The visma directory is in the same directory as this file
 if visma_path not in sys.path:
     sys.path.insert(0, visma_path)
 
-# Import original Visma modules
 from visma.io.tokenize import tokenizer, getLHSandRHS  # type: ignore[import-not-found]
 from visma.io.parser import tokensToString, tokensToLatex  # type: ignore[import-not-found]
 from visma.simplify.simplify import simplify, simplifyEquation  # type: ignore[import-not-found]
@@ -29,7 +20,6 @@ from visma.calculus.integration import integrate  # type: ignore[import-not-foun
 from visma.io.checks import checkTypes, isEquation  # type: ignore[import-not-found]
 
 
-# Type aliases for better readability
 VismaResult = Dict[str, Any]
 VismaTokens = List[Any]
 VismaComments = List[str]
@@ -51,6 +41,7 @@ class VismaIntegration:
         ]
         self.timeout: float = timeout
     
+
     async def solve_expression(
         self,
         latex_expression: str,
@@ -71,15 +62,12 @@ class VismaIntegration:
             Dictionary containing results and metadata
         """
         try:
-            # Convert LaTeX to Visma format
             visma_expression = self._latex_to_visma(latex_expression)
             
-            # Execute operation using original Visma with proper timeout handling
             result = await self._execute_visma_operation_with_timeout(
                 visma_expression, operation, variable, show_steps
             )
             
-            # Convert results back to LaTeX
             latex_results = []
             for visma_result in result['results']:
                 latex_result = self._visma_to_latex(str(visma_result))
@@ -118,6 +106,7 @@ class VismaIntegration:
                 'error': str(e)
             }
     
+
     async def _execute_visma_operation_with_timeout(
         self,
         expression: str,
@@ -127,17 +116,14 @@ class VismaIntegration:
     ) -> Dict[str, Any]:
         """Execute operation using original Visma functionality with proper timeout handling."""
         try:
-            # Create a task that will be cancelled if timeout occurs
             task = asyncio.create_task(
                 self._execute_visma_operation_async(expression, operation, variable, show_steps)
             )
             
-            # Wait for the task with timeout
             result = await asyncio.wait_for(task, timeout=self.timeout)
             return result
             
         except asyncio.TimeoutError:
-            # Cancel the task if it's still running
             if not task.done():
                 task.cancel()
                 try:
@@ -145,6 +131,7 @@ class VismaIntegration:
                 except asyncio.CancelledError:
                     pass
             raise
+
 
     async def _execute_visma_operation_async(
         self,
@@ -161,6 +148,7 @@ class VismaIntegration:
             expression, operation, variable, show_steps
         )
     
+
     def _execute_visma_operation(
         self,
         expression: str,
@@ -170,10 +158,8 @@ class VismaIntegration:
     ) -> Dict[str, Any]:
         """Execute operation using original Visma functionality."""
         
-        # Tokenize the expression
         tokens = tokenizer(expression)
         
-        # Check if it's an equation
         is_eq = '=' in expression
         lhs, rhs = getLHSandRHS(tokens) if is_eq else ([], [])
         
@@ -192,7 +178,6 @@ class VismaIntegration:
                 if not is_eq:
                     raise ValueError("Solve operation requires an equation")
                 if not variable:
-                    # Try to detect variable
                     variable = self._detect_variable(tokens)
                 l_tokens, r_tokens, _, _, equation_tokens, comments = solveFor(lhs, rhs, variable)
                 
@@ -213,17 +198,13 @@ class VismaIntegration:
                 if not variable:
                     variable = self._detect_variable(tokens)
                 try:
-                    # Check if it's a definite integral
                     if '∫' in expression and '_' in expression and '^' in expression:
-                        # Handle definite integral
                         result = self._handle_definite_integral(expression, variable)
                         return result
                     else:
-                        # Handle indefinite integral
                         l_tokens, _, _, equation_tokens, comments = integrate(lhs, variable)
                 except Exception as e:
                     logger.warning(f"Integration failed with error: {e}")
-                    # Try with a simpler approach or return a helpful message
                     return {
                         'results': [f"∫ {expression} d{variable} (complex integration - may require numerical methods)"],
                         'solving_steps': [f"Integration of {expression} with respect to {variable} is complex and may require advanced techniques"],
@@ -233,14 +214,12 @@ class VismaIntegration:
                     }
                 
             elif operation == 'limit':
-                # Handle limit operations
                 result = self._handle_limit_operation(expression)
                 return result
                 
             else:
                 raise ValueError(f"Unsupported operation: {operation}")
             
-            # Generate results
             if equation_tokens:
                 results = []
                 solving_steps: List[str] = []
@@ -253,12 +232,9 @@ class VismaIntegration:
                         step_comment = comments[i] if comments[i] else [f"Step {i+1}"]
                         solving_steps.extend(step_comment)
                 
-                # Process final result based on operation type
                 final_result = results[-1] if results else expression
                 
-                # Post-process results for better formatting
                 if operation == 'find-roots':
-                    # Use raw output for better root extraction
                     raw_output = '\n'.join(results)
                     final_result = self._extract_roots_from_result(final_result, variable or 'x', expression, raw_output)
                 elif operation == 'solve':
@@ -288,11 +264,11 @@ class VismaIntegration:
                 'error': str(e)
             }
     
+
     def _handle_limit_operation(self, expression: str) -> Dict[str, Any]:
         """Handle limit operations for known limit patterns."""
         import re
         
-        # Known limit patterns and their results
         known_limits = {
             r'sin\(([^)]+)\)/([^)]+)': ('1', 'lim(sin(x)/x) = 1 (standard limit)'),
             r'\(1-cos\(([^)]+)\)\)/([^)]+)': ('0', 'lim((1-cos(x))/x) = 0 (standard limit)'),
@@ -309,7 +285,6 @@ class VismaIntegration:
                     'success': True
                 }
         
-        # If no known pattern matches, return error
         return {
             'results': [expression],
             'solving_steps': ['Error: Unknown limit pattern'],
@@ -318,22 +293,21 @@ class VismaIntegration:
             'error': 'Unknown limit pattern'
         }
 
+
     def _detect_variable(self, tokens: VismaTokens) -> str:
         """Detect the main variable in the expression."""
-        # Look for variables in tokens
         for token in tokens:
             if hasattr(token, 'value') and isinstance(token.value, str):
                 if token.value.isalpha() and len(token.value) == 1:
                     return token.value
         return 'x'  # Default variable
     
+
     def _extract_roots_from_result(self, result: str, variable: str, original_expression: str = "", raw_output: str = "") -> str:
         """Extract individual roots from Visma's result."""
         import re
         
-        # First, try to extract roots from raw output if available
         if raw_output:
-            # First, check for difference of squares pattern like (x + 2.0) * (x - 2.0) = 0
             diff_squares_pattern = rf'\(({variable})\s*\+\s*([0-9.-]+)\)\s*\*\s*\(({variable})\s*-\s*([0-9.-]+)\)\s*=\s*0'
             diff_match = re.search(diff_squares_pattern, raw_output)
             
@@ -342,7 +316,6 @@ class VismaIntegration:
                     pos_value = float(diff_match.group(2))
                     neg_value = float(diff_match.group(4))
                     
-                    # Check if they're the same (difference of squares)
                     if abs(pos_value - neg_value) < 1e-10:
                         if pos_value.is_integer():
                             return f"{variable} = ±{int(pos_value)}"
@@ -351,7 +324,6 @@ class VismaIntegration:
                 except ValueError:
                     pass
             
-            # Then look for patterns like (x - 2.0) * (x - 3.0) = 0 in raw output
             root_pattern = rf'\(({variable})\s*-\s*([0-9.-]+)\)'
             matches = re.findall(root_pattern, raw_output)
             
@@ -359,7 +331,6 @@ class VismaIntegration:
                 roots = []
                 for var, value in matches:
                     try:
-                        # Convert to float and back to clean format
                         num_value = float(value)
                         if num_value.is_integer():
                             roots.append(f"{variable} = {int(num_value)}")
@@ -373,7 +344,6 @@ class VismaIntegration:
                 elif len(roots) == 1:
                     return roots[0]
         
-        # Fallback to original result processing
         root_pattern = rf'\(({variable})\s*-\s*([0-9.-]+)\)'
         matches = re.findall(root_pattern, result)
         
@@ -381,7 +351,6 @@ class VismaIntegration:
             roots = []
             for var, value in matches:
                 try:
-                    # Convert to float and back to clean format
                     num_value = float(value)
                     if num_value.is_integer():
                         roots.append(f"{variable} = {int(num_value)}")
@@ -395,8 +364,6 @@ class VismaIntegration:
             elif len(roots) == 1:
                 return roots[0]
         
-        # Look for patterns like (x + 3.0)^(2) = 0
-        # Extract the root: x = -3
         perfect_square_pattern = rf'\(({variable})\s*\+\s*([0-9.-]+)\)\^\(2\)\s*=\s*0'
         perfect_square_match = re.search(perfect_square_pattern, result)
         
@@ -410,7 +377,6 @@ class VismaIntegration:
             except ValueError:
                 pass
         
-        # Look for patterns like (x - 3.0)^(2) = 0
         perfect_square_pattern2 = rf'\(({variable})\s*-\s*([0-9.-]+)\)\^\(2\)\s*=\s*0'
         perfect_square_match2 = re.search(perfect_square_pattern2, result)
         
@@ -424,10 +390,7 @@ class VismaIntegration:
             except ValueError:
                 pass
         
-        # Handle cases like x^2 - 4 = 0 which should give x = ±2
-        # This is a special case that needs to be handled differently
         if 'x^2' in result and '= 0' in result:
-            # Try to extract the constant term
             const_pattern = r'x\^2\s*-\s*([0-9.-]+)\s*=\s*0'
             const_match = re.search(const_pattern, result)
             if const_match:
@@ -441,10 +404,7 @@ class VismaIntegration:
                 except ValueError:
                     pass
         
-        # Handle cases where Visma returns only one root but we know there should be two
-        # Check if the original expression was a difference of squares
         if len(result.split(',')) == 1 and original_expression:
-            # Check if original expression was x^2 - c = 0 (difference of squares)
             diff_squares_pattern = rf'{variable}\^2\s*-\s*([0-9.-]+)\s*=\s*0'
             diff_match = re.search(diff_squares_pattern, original_expression)
             
@@ -453,7 +413,6 @@ class VismaIntegration:
                     const_value = float(diff_match.group(1))
                     sqrt_value = const_value ** 0.5
                     
-                    # Check if the result matches the positive root
                     single_root_pattern = rf'{variable}\s*=\s*([0-9.-]+)'
                     single_match = re.search(single_root_pattern, result)
                     
@@ -467,9 +426,9 @@ class VismaIntegration:
                 except ValueError:
                     pass
         
-        # If no roots found, return original result
         return result
     
+
     def _simplify_solution(self, result: str) -> str:
         """Simplify solution expressions."""
         import re
@@ -492,13 +451,12 @@ class VismaIntegration:
             except ValueError:
                 pass
         
-        # Handle other simplification cases
-        # Remove unnecessary parentheses and simplify expressions
         result = re.sub(r'\(([0-9.-]+)\)', r'\1', result)
         result = re.sub(r'([0-9.-]+)\.0+', r'\1', result)
         
         return result
-    
+
+
     def _latex_to_visma(self, latex_expr: str) -> str:
         """Convert LaTeX expression to Visma format."""
         if not latex_expr:
@@ -506,10 +464,8 @@ class VismaIntegration:
         
         visma_expr = latex_expr
         
-        # Handle limits first - convert to known limits
         import re
         
-        # Handle common limit patterns
         limit_patterns = {
             r'\\lim_\{([^}]+)\s*\\to\s*0\}\s*\\frac\{\\sin\(([^)]+)\)\}\{([^}]+)\}': r'sin(\2)/\3',  # sin(x)/x limit
             r'\\lim_\{([^}]+)\s*\\to\s*0\}\s*\\frac\{1\s*-\s*\\cos\(([^)]+)\)\}\{([^}]+)\}': r'(1-cos(\2))/\3',  # (1-cos(x))/x limit
@@ -517,14 +473,12 @@ class VismaIntegration:
             r'\\lim_\{([^}]+)\s*\\to\s*0\}\s*\\frac\{\\ln\(1\s*\+\s*([^)]+)\)\}\{([^}]+)\}': r'ln(1+\2)/\3',  # ln(1+x)/x limit
         }
         
-        # Check if this is a known limit
         for pattern, replacement in limit_patterns.items():
             if re.search(pattern, visma_expr):
                 visma_expr = re.sub(pattern, replacement, visma_expr)
                 logger.debug(f"Detected known limit pattern, converted to: {visma_expr}")
                 break
-        
-        # Handle common LaTeX to Visma conversions
+
         conversions = {
             r'\\times': '*',
             r'\\cdot': '*',
@@ -546,15 +500,14 @@ class VismaIntegration:
         for latex_pattern, visma_replacement in conversions.items():
             visma_expr = re.sub(latex_pattern, visma_replacement, visma_expr)
         
-        # Clean up braces
         visma_expr = visma_expr.replace('{', '(').replace('}', ')')
         
-        # Remove extra spaces
         visma_expr = re.sub(r'\s+', ' ', visma_expr).strip()
         
         logger.debug(f"Converted LaTeX '{latex_expr}' to Visma format '{visma_expr}'")
         return visma_expr
     
+
     def _visma_to_latex(self, visma_expr: str) -> str:
         """Convert Visma expression to LaTeX format."""
         if not visma_expr:
@@ -562,7 +515,6 @@ class VismaIntegration:
         
         latex_expr = visma_expr
         
-        # Handle common Visma to LaTeX conversions
         conversions = {
             r'\*': r'\\cdot',
             r'sqrt\(([^)]+)\)': r'\\sqrt{\1}',
@@ -580,54 +532,25 @@ class VismaIntegration:
         for visma_pattern, latex_replacement in conversions.items():
             latex_expr = re.sub(visma_pattern, latex_replacement, latex_expr)
         
-        # Handle fractions
         frac_pattern = r'\(([^)]+)\)/\(([^)]+)\)'
         latex_expr = re.sub(frac_pattern, r'\\frac{\1}{\2}', latex_expr)
         
-        # Clean up formatting
         latex_expr = re.sub(r'\s*([+\-*/=<>!])\s*', r' \1 ', latex_expr)
         latex_expr = re.sub(r'\s+', ' ', latex_expr).strip()
         
         logger.debug(f"Converted Visma '{visma_expr}' to LaTeX '{latex_expr}'")
         return latex_expr
     
-    async def is_available(self) -> bool:
-        """Check if the Visma engine is available."""
-        try:
-            # Test basic functionality with timeout
-            test_task = asyncio.create_task(
-                self._test_visma_availability()
-            )
-            
-            result = await asyncio.wait_for(test_task, timeout=5.0)
-            return result
-            
-        except asyncio.TimeoutError:
-            logger.error("Visma engine test timed out")
-            if not test_task.done():
-                test_task.cancel()
-                try:
-                    await test_task
-                except asyncio.CancelledError:
-                    pass
-            return False
-        except Exception as e:
-            logger.error(f"Visma engine not available: {e}")
-            return False
 
     def _handle_definite_integral(self, expression: str, variable: str) -> Dict[str, Any]:
         """Handle definite integral operations with better error handling."""
         try:
-            # Parse the definite integral
-            # Format: ∫_a^b f(x) dx
             import re
-            
-            # Extract limits and integrand
+
             pattern = r'∫_\{([^}]+)\}\^\{([^}]+)\}\s*([^d]+)\s*d' + variable
             match = re.search(pattern, expression)
             
             if not match:
-                # Try alternative format
                 pattern = r'∫_([^_]+)\^([^_]+)\s*([^d]+)\s*d' + variable
                 match = re.search(pattern, expression)
             
@@ -636,25 +559,18 @@ class VismaIntegration:
                 upper_limit = match.group(2).strip()
                 integrand = match.group(3).strip()
                 
-                # Convert limits to numbers if possible
                 try:
                     lower_val = float(lower_limit)
                     upper_val = float(upper_limit)
                 except ValueError:
-                    # Keep as symbolic
                     lower_val = lower_limit
                     upper_val = upper_limit
                 
-                # Try to solve the indefinite integral first
                 tokens = tokenizer(integrand)
                 l_tokens, _, _, equation_tokens, comments = integrate(tokens, variable)
                 
                 if equation_tokens:
-                    # Get the indefinite integral result
                     indefinite_result = tokensToString(equation_tokens[-1])
-                    
-                    # Apply fundamental theorem of calculus
-                    # F(b) - F(a)
                     steps = [
                         f"Step 1: Find indefinite integral ∫ {integrand} d{variable}",
                         f"Step 2: Indefinite integral = {indefinite_result}",
@@ -662,8 +578,6 @@ class VismaIntegration:
                         f"Step 4: Substitute limits into indefinite integral"
                     ]
                     
-                    # For now, return the indefinite integral with limits
-                    # In a full implementation, you would substitute the limits
                     result = f"[{indefinite_result}]_{{{lower_limit}}}^{{{upper_limit}}}"
                     
                     return {
@@ -687,15 +601,10 @@ class VismaIntegration:
                 'error': f"Definite integral error: {str(e)}"
             }
 
-    async def _test_visma_availability(self) -> bool:
-        """Test Visma engine availability in executor."""
-        loop = asyncio.get_event_loop()
-        test_tokens = await loop.run_in_executor(
-            None, 
-            lambda: tokenizer("x^2 + 2*x + 1")
-        )
-        return len(test_tokens) > 0
-    
+
     def get_supported_operations(self) -> List[str]:
         """Get list of supported operations."""
         return self.supported_operations.copy()
+
+
+

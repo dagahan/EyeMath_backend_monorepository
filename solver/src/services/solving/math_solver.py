@@ -67,13 +67,6 @@ class MathSolver:
             Dictionary containing results, steps, and image URLs
         """
         try:
-            if not await self.visma_engine.is_available():
-                logger.error("Visma engine is not available")
-                return {
-                    "results": [expression],
-                    "images_urls": ["None"],
-                    "solving_steps": ["Error: Visma engine not available"]
-                }
             
             operation = self._determine_operation(expression)
             
