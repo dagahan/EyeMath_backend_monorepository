@@ -111,7 +111,7 @@ npm run dev
 ## 🙏 Acknowledgments
 
 This project is built on top of amazing open source technologies:
-- **[Visma](https://github.com/dagahan/visma)** - Powerful symbolic mathematics engine that powers our solving capabilities;
+- **[Visma](https://github.com/aerospaceresearch/visma)** - Powerful symbolic mathematics engine that powers our solving capabilities;
 - **[Pix2Tex](https://github.com/lukas-blecher/LaTeX-OCR)** - Advanced neural network for handwritten mathematical expression recognition.
 
 ## 🤝 Contributing
