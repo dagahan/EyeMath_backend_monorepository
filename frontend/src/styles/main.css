@@ -228,7 +228,7 @@ body::after {
   position: sticky;
   right: 0;
   top: 0;
-  z-index: 1000;
+  z-index: 100000;
 }
 
 .topbar-inner {
@@ -249,7 +249,7 @@ body::after {
   width: min(1200px, calc(100% - 32px));
   animation: topbarFloat 42s ease-in-out infinite;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .topbar-inner::before {
@@ -351,7 +351,7 @@ body::after {
 .theme-switcher {
   margin-left: auto;
   position: relative;
-  z-index: 1000;
+  z-index: 99999;
 }
 
 
@@ -383,7 +383,7 @@ hr {
   backdrop-filter: blur(10px);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   animation: containerFloat 12s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -485,7 +485,7 @@ hr {
   position: absolute;
   right: 0;
   top: 100%;
-  z-index: 10001;
+  z-index: 99999;
   overflow: visible;
   backdrop-filter: blur(20px);
   background: rgba(255, 255, 255, 0.95);
@@ -707,7 +707,7 @@ hr {
   padding: 16px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .card::before {
@@ -1282,6 +1282,7 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
 .examples-dropdown {
   position: relative;
   display: inline-block;
+  z-index: 99999;
 }
 
 .examples-menu {
@@ -1292,7 +1293,7 @@ hr{border:0;border-top:1px solid var(--border);margin:16px 0}
   border: 1px solid var(--border);
   border-radius: 12px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  z-index: 1000;
+  z-index: 99999;
   min-width: 300px;
   max-height: 500px;
   overflow-y: auto;

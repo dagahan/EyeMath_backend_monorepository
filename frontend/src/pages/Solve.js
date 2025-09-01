@@ -63,7 +63,7 @@ export default function Solve(){
             <button class="btn secondary" type="button" id="examplesDropdownBtn">
               📝 Examples ▼
             </button>
-            <div class="examples-menu" id="examplesMenu" style="display: none; position: absolute; top: 100%; left: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; min-width: 400px; max-height: 600px; overflow-y: auto;">
+            <div class="examples-menu" id="examplesMenu" style="display: none;">
               <div style="padding: 12px; border-bottom: 1px solid var(--border);">
                 <input type="text" id="examplesSearch" placeholder="Search examples..." style="width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; background: var(--elevated); color: var(--text); font-size: 14px;">
               </div>
