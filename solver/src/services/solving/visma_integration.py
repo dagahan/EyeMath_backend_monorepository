@@ -168,8 +168,16 @@ class VismaIntegration:
                         step_comment = comments[i] if comments[i] else [f"Step {i+1}"]
                         solving_steps.extend(step_comment)
                 
-                # Final result
+                # Process final result based on operation type
                 final_result = results[-1] if results else expression
+                
+                # Post-process results for better formatting
+                if operation == 'find-roots':
+                    # Use raw output for better root extraction
+                    raw_output = '\n'.join(results)
+                    final_result = self._extract_roots_from_result(final_result, variable or 'x', expression, raw_output)
+                elif operation == 'solve':
+                    final_result = self._simplify_solution(final_result)
                 
                 return {
                     'results': [final_result],
@@ -203,6 +211,178 @@ class VismaIntegration:
                 if token.value.isalpha() and len(token.value) == 1:
                     return token.value
         return 'x'  # Default variable
+    
+    def _extract_roots_from_result(self, result: str, variable: str, original_expression: str = "", raw_output: str = "") -> str:
+        """Extract individual roots from Visma's result."""
+        import re
+        
+        # First, try to extract roots from raw output if available
+        if raw_output:
+            # First, check for difference of squares pattern like (x + 2.0) * (x - 2.0) = 0
+            diff_squares_pattern = rf'\(({variable})\s*\+\s*([0-9.-]+)\)\s*\*\s*\(({variable})\s*-\s*([0-9.-]+)\)\s*=\s*0'
+            diff_match = re.search(diff_squares_pattern, raw_output)
+            
+            if diff_match:
+                try:
+                    pos_value = float(diff_match.group(2))
+                    neg_value = float(diff_match.group(4))
+                    
+                    # Check if they're the same (difference of squares)
+                    if abs(pos_value - neg_value) < 1e-10:
+                        if pos_value.is_integer():
+                            return f"{variable} = ±{int(pos_value)}"
+                        else:
+                            return f"{variable} = ±{pos_value}"
+                except ValueError:
+                    pass
+            
+            # Then look for patterns like (x - 2.0) * (x - 3.0) = 0 in raw output
+            root_pattern = rf'\(({variable})\s*-\s*([0-9.-]+)\)'
+            matches = re.findall(root_pattern, raw_output)
+            
+            if matches:
+                roots = []
+                for var, value in matches:
+                    try:
+                        # Convert to float and back to clean format
+                        num_value = float(value)
+                        if num_value.is_integer():
+                            roots.append(f"{variable} = {int(num_value)}")
+                        else:
+                            roots.append(f"{variable} = {num_value}")
+                    except ValueError:
+                        roots.append(f"{variable} = {value}")
+                
+                if len(roots) > 1:
+                    return ", ".join(roots)
+                elif len(roots) == 1:
+                    return roots[0]
+        
+        # Fallback to original result processing
+        root_pattern = rf'\(({variable})\s*-\s*([0-9.-]+)\)'
+        matches = re.findall(root_pattern, result)
+        
+        if matches:
+            roots = []
+            for var, value in matches:
+                try:
+                    # Convert to float and back to clean format
+                    num_value = float(value)
+                    if num_value.is_integer():
+                        roots.append(f"{variable} = {int(num_value)}")
+                    else:
+                        roots.append(f"{variable} = {num_value}")
+                except ValueError:
+                    roots.append(f"{variable} = {value}")
+            
+            if len(roots) > 1:
+                return ", ".join(roots)
+            elif len(roots) == 1:
+                return roots[0]
+        
+        # Look for patterns like (x + 3.0)^(2) = 0
+        # Extract the root: x = -3
+        perfect_square_pattern = rf'\(({variable})\s*\+\s*([0-9.-]+)\)\^\(2\)\s*=\s*0'
+        perfect_square_match = re.search(perfect_square_pattern, result)
+        
+        if perfect_square_match:
+            try:
+                value = float(perfect_square_match.group(2))
+                if value.is_integer():
+                    return f"{variable} = {-int(value)}"
+                else:
+                    return f"{variable} = {-value}"
+            except ValueError:
+                pass
+        
+        # Look for patterns like (x - 3.0)^(2) = 0
+        perfect_square_pattern2 = rf'\(({variable})\s*-\s*([0-9.-]+)\)\^\(2\)\s*=\s*0'
+        perfect_square_match2 = re.search(perfect_square_pattern2, result)
+        
+        if perfect_square_match2:
+            try:
+                value = float(perfect_square_match2.group(2))
+                if value.is_integer():
+                    return f"{variable} = {int(value)}"
+                else:
+                    return f"{variable} = {value}"
+            except ValueError:
+                pass
+        
+        # Handle cases like x^2 - 4 = 0 which should give x = ±2
+        # This is a special case that needs to be handled differently
+        if 'x^2' in result and '= 0' in result:
+            # Try to extract the constant term
+            const_pattern = r'x\^2\s*-\s*([0-9.-]+)\s*=\s*0'
+            const_match = re.search(const_pattern, result)
+            if const_match:
+                try:
+                    const_value = float(const_match.group(1))
+                    sqrt_value = const_value ** 0.5
+                    if sqrt_value.is_integer():
+                        return f"{variable} = ±{int(sqrt_value)}"
+                    else:
+                        return f"{variable} = ±{sqrt_value}"
+                except ValueError:
+                    pass
+        
+        # Handle cases where Visma returns only one root but we know there should be two
+        # Check if the original expression was a difference of squares
+        if len(result.split(',')) == 1 and original_expression:
+            # Check if original expression was x^2 - c = 0 (difference of squares)
+            diff_squares_pattern = rf'{variable}\^2\s*-\s*([0-9.-]+)\s*=\s*0'
+            diff_match = re.search(diff_squares_pattern, original_expression)
+            
+            if diff_match:
+                try:
+                    const_value = float(diff_match.group(1))
+                    sqrt_value = const_value ** 0.5
+                    
+                    # Check if the result matches the positive root
+                    single_root_pattern = rf'{variable}\s*=\s*([0-9.-]+)'
+                    single_match = re.search(single_root_pattern, result)
+                    
+                    if single_match:
+                        result_value = float(single_match.group(1))
+                        if abs(result_value - sqrt_value) < 1e-10:  # They match
+                            if sqrt_value.is_integer():
+                                return f"{variable} = ±{int(sqrt_value)}"
+                            else:
+                                return f"{variable} = ±{sqrt_value}"
+                except ValueError:
+                    pass
+        
+        # If no roots found, return original result
+        return result
+    
+    def _simplify_solution(self, result: str) -> str:
+        """Simplify solution expressions."""
+        import re
+        
+        # Handle cases like x = 0.08333333333333333*(12.0)
+        # Convert to x = 1
+        pattern = r'x\s*=\s*([0-9.-]+)\*\(([0-9.-]+)\)'
+        match = re.search(pattern, result)
+        
+        if match:
+            try:
+                coeff = float(match.group(1))
+                const = float(match.group(2))
+                result_value = coeff * const
+                
+                if result_value.is_integer():
+                    return f"x = {int(result_value)}"
+                else:
+                    return f"x = {result_value}"
+            except ValueError:
+                pass
+        
+        # Handle other simplification cases
+        # Remove unnecessary parentheses and simplify expressions
+        result = re.sub(r'\(([0-9.-]+)\)', r'\1', result)
+        result = re.sub(r'([0-9.-]+)\.0+', r'\1', result)
+        
+        return result
     
     def _latex_to_visma(self, latex_expr: str) -> str:
         """Convert LaTeX expression to Visma format."""
