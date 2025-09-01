@@ -25,6 +25,8 @@ dependencies = [
     "mpmath==1.3.0",
     "sympy==1.14.0",
     "antlr4-python3-runtime==4.11.1",
+    "numpy>=1.12",
+    "matplotlib>=2.0.0",
     "httpx[http2]==0.28.1",
     "eyemath-models @ git+https://github.com/dagahan/eyemath_models.git",
 ]
@@ -90,5 +92,6 @@ max_overflow = 10
 precision = 32
 default_precision = 64
 using_algorithms_solving = true
+use_visma = true
 
 
